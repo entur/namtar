@@ -1,0 +1,121 @@
+/*
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ *   https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
+package org.entur.namtar.netex;
+
+import org.entur.namtar.App;
+import org.entur.namtar.model.DatedServiceJourney;
+import org.entur.namtar.model.ServiceJourney;
+import org.entur.namtar.repository.DatedServiceJourneyService;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static junit.framework.TestCase.*;
+
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.MOCK, classes = App.class)
+public class TestIdMappingService {
+
+    @Autowired
+    DatedServiceJourneyService service;
+    private LocalDateTime publicationTimestamp;
+
+    @Before
+    public void init() {
+        publicationTimestamp = LocalDateTime.now();
+    }
+
+    @Test
+    public void testUpdateExistingServiceJourney() {
+
+        String privateCode = "812";
+        String lineRef = "NSB:Line:L1";
+        String departureDate = "2018-01-01";
+        String departureTime = "12:00";
+
+        ServiceJourney serviceJourney = new ServiceJourney("NSB:ServiceJourney:1", "0", privateCode, lineRef, departureDate, departureTime);
+        service.save(serviceJourney, publicationTimestamp);
+
+        // Add ServiceJourney that matches, but with different serviceJourneyId
+        ServiceJourney serviceJourney2 = new ServiceJourney("NSB:ServiceJourney:444444", "0", privateCode, lineRef, departureDate, departureTime);
+        service.save(serviceJourney2, publicationTimestamp);
+
+        List<DatedServiceJourney> matches = service.findDatedServiceJourneys("NSB:ServiceJourney:1", departureDate);
+        List<DatedServiceJourney> matches_2 = service.findDatedServiceJourneys("NSB:ServiceJourney:444444", departureDate);
+
+        assertEquals("Should have gotten the same id.", matches, matches_2);
+    }
+
+    @Test
+    public void testAddNewServiceJourney() {
+
+        ServiceJourney serviceJourney = new ServiceJourney("NSB:ServiceJourney:2", "0",  "812", "NSB:Line:L1", "2018-01-01", "12:00");
+        service.save(serviceJourney, publicationTimestamp);
+
+        // Add ServiceJourney with same serviceJourneyId, that should not match
+        ServiceJourney serviceJourney2 = new ServiceJourney("NSB:ServiceJourney:2", "0", "812", "NSB:Line:L1", "2018-01-02", "12:00");
+        service.save(serviceJourney2, publicationTimestamp);
+
+
+        List<DatedServiceJourney> matches = service.findDatedServiceJourneys("NSB:ServiceJourney:2", "2018-01-01");
+        List<DatedServiceJourney> matches_2 = service.findDatedServiceJourneys("NSB:ServiceJourney:2", "2018-01-02");
+
+        assertNotNull(matches);
+        assertNotNull(matches_2);
+        assertTrue(matches.size() == 1);
+        assertTrue(matches_2.size() == 1);
+        assertNotNull(matches.get(0));
+        assertNotNull(matches_2.get(0));
+
+        assertFalse("Should have gotten different ids from different versions", matches.get(0).equals(matches_2.get(0)));
+    }
+
+    @Test
+    public void testAddNewServiceJourneyVersion() {
+
+
+        LocalDateTime publicationTimestamp = this.publicationTimestamp.minusDays(1);
+        service.save(new ServiceJourney("NSB:ServiceJourney:2", "0",  "812", "NSB:Line:L1", "2018-01-01", "12:00"), publicationTimestamp);
+        service.save(new ServiceJourney("NSB:ServiceJourney:2", "0",  "812", "NSB:Line:L1", "2018-01-02", "12:00"), publicationTimestamp);
+
+        List<DatedServiceJourney> expectedOldMatch = service.findDatedServiceJourneys("NSB:ServiceJourney:2", "2018-01-02");
+
+
+        // Add ServiceJourney with same serviceJourneyId, that should not match
+        service.save(new ServiceJourney("NSB:ServiceJourney:2", "1", "812", "NSB:Line:L1", "2018-01-02", "12:00"), this.publicationTimestamp);
+
+
+        List<DatedServiceJourney> matches = service.findDatedServiceJourneys("NSB:ServiceJourney:2", "2018-01-01");
+        List<DatedServiceJourney> matches_2 = service.findDatedServiceJourneys("NSB:ServiceJourney:2", "2018-01-02");
+
+        assertFalse("Should have gotten different ids from different versions", matches.equals(matches_2));
+        assertTrue(expectedOldMatch.size() == 1);
+        assertTrue(matches.size() == 1);
+        assertTrue(matches_2.size() == 2);
+
+        // Previous version should also be returned
+        assertFalse(matches_2.contains(matches.get(0)));
+        assertTrue(matches_2.contains(expectedOldMatch.get(0)));
+    }
+
+}
