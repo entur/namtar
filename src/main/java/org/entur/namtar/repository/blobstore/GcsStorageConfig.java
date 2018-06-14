@@ -13,25 +13,29 @@
  * limitations under the Licence.
  */
 
-package org.entur.namtar.routes;
+package org.entur.namtar.repository.blobstore;
 
-import org.apache.camel.builder.RouteBuilder;
+import com.google.cloud.storage.Storage;
+import org.rutebanken.helper.gcp.BlobStoreHelper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
-public class RestRouteBuilder extends RouteBuilder {
+@Configuration
+@Profile("gcs-blobstore")
+public class GcsStorageConfig {
 
+    @Value("${blobstore.gcs.credential.path}")
+    private String credentialPath;
 
-    @Value("${namtar.incoming.port}")
-    String incomingPort;
+    @Value("${blobstore.gcs.project.id}")
+    private String projectId;
 
-    @Override
-    public void configure() throws Exception {
-        restConfiguration("jetty")
-                .port(incomingPort)
-                .apiContextPath("/api-doc")
-                    .apiProperty("api.title", "User API").apiProperty("api.version", "1.2.3")
-                    // and enable CORS
-                    .apiProperty("cors", "true")
-        ;
+    @Bean
+    public Storage storage() {
+        return BlobStoreHelper.getStorage(credentialPath, projectId);
     }
+
+
 }

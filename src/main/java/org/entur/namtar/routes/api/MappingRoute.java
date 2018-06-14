@@ -50,6 +50,7 @@ public class MappingRoute extends RestRouteBuilder {
 
         from("direct:lookup.servicejourney.date")
                 .bean(repository, "findDatedServiceJourneys(${header.serviceJourneyId}, ${header.date})")
+//                .marshal().json(JsonLibrary.Jackson, true)
                 .bean(mapper, "writeValueAsString(${body})")
         ;
     }

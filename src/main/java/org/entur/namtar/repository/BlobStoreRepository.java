@@ -13,25 +13,25 @@
  * limitations under the Licence.
  */
 
-package org.entur.namtar.routes;
+package org.entur.namtar.repository;
 
-import org.apache.camel.builder.RouteBuilder;
-import org.springframework.beans.factory.annotation.Value;
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.Storage;
 
-public class RestRouteBuilder extends RouteBuilder {
+import java.io.InputStream;
+import java.util.Iterator;
+
+public interface BlobStoreRepository {
+
+//    boolean delete(BlobId blobId);
+
+    Iterator<Blob> listBlobs(String prefix);
+
+    InputStream getBlob(String objectName);
+
+    void setStorage(Storage storage);
+
+    void setContainerName(String containerName);
 
 
-    @Value("${namtar.incoming.port}")
-    String incomingPort;
-
-    @Override
-    public void configure() throws Exception {
-        restConfiguration("jetty")
-                .port(incomingPort)
-                .apiContextPath("/api-doc")
-                    .apiProperty("api.title", "User API").apiProperty("api.version", "1.2.3")
-                    // and enable CORS
-                    .apiProperty("cors", "true")
-        ;
-    }
 }

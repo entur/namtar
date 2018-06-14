@@ -15,14 +15,17 @@
 
 package org.entur.namtar.netex;
 
-import org.entur.namtar.model.DatedServiceJourney;
+import com.google.cloud.storage.Blob;
 import org.entur.namtar.model.ServiceJourney;
+import org.entur.namtar.repository.BlobStoreRepository;
 import org.entur.namtar.repository.DatedServiceJourneyService;
-import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.DayType;
+import org.rutebanken.netex.model.DayTypeAssignment;
+import org.rutebanken.netex.model.DayTypeRefStructure;
+import org.rutebanken.netex.model.DayTypeRefs_RelStructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.JAXBElement;
@@ -30,10 +33,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 @Service
 public class NetexLoader {
@@ -41,95 +44,71 @@ public class NetexLoader {
     protected static Logger log = LoggerFactory.getLogger(NetexLoader.class);
 
     private final DatedServiceJourneyService datedServiceJourneyService;
+    private final BlobStoreRepository repository;
 
-    public NetexLoader(@Autowired DatedServiceJourneyService datedServiceJourneyServicey) {
+    public NetexLoader(@Autowired DatedServiceJourneyService datedServiceJourneyServicey, @Autowired BlobStoreRepository repository) {
         this.datedServiceJourneyService = datedServiceJourneyServicey;
+        this.repository = repository;
     }
 
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm");
 
-    @Value("${namtar.default.netex.download.url}")
-    private String defaultUrl;
+    private static final Set<String> alreadyProcessedBlobName = new HashSet<>();
 
-    public void loadNetexFromUrl(String url) {
-
-
-        try {
-            String pathname = downloadFile(url);
-
-            File file = new File(pathname);
-            NetexProcessor processor = new NetexProcessor(file);
-
-            long t1 = System.currentTimeMillis();
-            processor.loadFiles();
-            log.info("Loading file {} took {} ms", pathname, (System.currentTimeMillis()-t1));
-
-            t1 = System.currentTimeMillis();
-            int diffCounter = 0;
-            List<DatedServiceJourney> changes = new ArrayList<>();
-            for (org.rutebanken.netex.model.ServiceJourney serviceJourney : processor.serviceJourneyByPatternId.values()) {
-
-                String serviceJourneyId = serviceJourney.getId();
-
-                String version = serviceJourney.getVersion();
-
-                JourneyPattern journeyPattern =  processor.journeyPatternsById.get(serviceJourney.getJourneyPatternRef().getValue().getRef());
-                List<PointInLinkSequence_VersionedChildStructure> pointInJourneyPattern = journeyPattern.getPointsInSequence().getPointInJourneyPatternOrStopPointInJourneyPatternOrTimingPointInJourneyPattern();
-                PointInLinkSequence_VersionedChildStructure firstScheduledStopPoint = pointInJourneyPattern.get(0);
-
-                String scheduledStopPointRef = ((StopPointInJourneyPattern) firstScheduledStopPoint).getScheduledStopPointRef().getValue().getRef();
-
-//                String firstQuay = processor.quayIdByStopPointRef.get(scheduledStopPointRef);
-
-                String lineRef = serviceJourney.getLineRef().getValue().getRef();
-
-                String departureTime = serviceJourney.getPassingTimes().getTimetabledPassingTime().get(0).getDepartureTime().format(timeFormatter);
-
-                DayTypeRefs_RelStructure dayTypes = serviceJourney.getDayTypes();
-                for (JAXBElement<? extends DayTypeRefStructure> dayTypeRef : dayTypes.getDayTypeRef()) {
-
-                    DayType dayType = processor.dayTypeById.get(dayTypeRef.getValue().getRef());
-
-                    DayTypeAssignment dayTypeAssignment = processor.dayTypeAssignmentByDayTypeId.get(dayType.getId());
-
-                    String departureDate = dayTypeAssignment.getDate().format(dateFormatter);
-
-                    String privateCode = serviceJourney.getPrivateCode().getValue();
-
-                    ServiceJourney currentServiceJourney = new ServiceJourney(serviceJourneyId, version, privateCode, lineRef, departureDate, departureTime);
-
-//                    DatedServiceJourney current = serviceJourneyRepository.findByServiceJourneyIdAndDepartureDateAndVersion(serviceJourneyId, departureDate, version);
-//                    if (current == null) {
-
-
-                    boolean saved = datedServiceJourneyService.save(currentServiceJourney, processor.publicationTimestamp);
-
-                    if (saved) {
-                        diffCounter++;
-                    }
-                }
+    public void loadNetexFromBlobStore(Iterator<Blob> blobIterator) throws IOException {
+        while (blobIterator.hasNext()) {
+            Blob next = blobIterator.next();
+            String name = next.getName();
+            if (!alreadyProcessedBlobName.contains(name)) {
+                alreadyProcessedBlobName.add(name);
+                log.info("Loading netex-file {}", name);
+                String absolutePath = getFileFromInputStream(repository.getBlob(name));
+                processNetexFile(absolutePath);
             }
-            log.info("Added {} rows in {} ms", diffCounter, (System.currentTimeMillis()-t1));
-            log.info(datedServiceJourneyService.toString());
-            
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-
-
     }
 
-    private String downloadFile(String url) throws IOException {
-        if (url == null || url.isEmpty()) {
-            log.info("Url not provided - using default");
-            url = defaultUrl;
+    private void processNetexFile(String pathname) throws IOException {
+        File file = new File(pathname);
+        if (file.length() == 0) {
+            return;
         }
-        log.info("Downloading file from [{}]", url);
-        long t1 = System.currentTimeMillis();
-        // opens input stream from the HTTP connection
-        InputStream inputStream = new URL(url).openStream();
+        NetexProcessor processor = new NetexProcessor(file);
 
+        long t1 = System.currentTimeMillis();
+        processor.loadFiles();
+        log.info("Loading file {} took {} ms", pathname, (System.currentTimeMillis()-t1));
+
+        t1 = System.currentTimeMillis();
+        int diffCounter = 0;
+        for (org.rutebanken.netex.model.ServiceJourney serviceJourney : processor.serviceJourneyByPatternId.values()) {
+
+            String serviceJourneyId = serviceJourney.getId();
+            String version = serviceJourney.getVersion();
+            String lineRef = serviceJourney.getLineRef().getValue().getRef();
+            String departureTime = serviceJourney.getPassingTimes().getTimetabledPassingTime().get(0).getDepartureTime().format(timeFormatter);
+
+            DayTypeRefs_RelStructure dayTypes = serviceJourney.getDayTypes();
+            for (JAXBElement<? extends DayTypeRefStructure> dayTypeRef : dayTypes.getDayTypeRef()) {
+
+                DayType dayType = processor.dayTypeById.get(dayTypeRef.getValue().getRef());
+                DayTypeAssignment dayTypeAssignment = processor.dayTypeAssignmentByDayTypeId.get(dayType.getId());
+                String departureDate = dayTypeAssignment.getDate().format(dateFormatter);
+                String privateCode = serviceJourney.getPrivateCode().getValue();
+
+                ServiceJourney currentServiceJourney = new ServiceJourney(serviceJourneyId, version, privateCode, lineRef, departureDate, departureTime);
+
+                if (datedServiceJourneyService.save(currentServiceJourney, processor.publicationTimestamp)) {
+                    diffCounter++;
+                }
+            }
+        }
+        log.info("Added {} rows in {} ms", diffCounter, (System.currentTimeMillis()-t1));
+        log.info(datedServiceJourneyService.toString());
+    }
+
+    private String getFileFromInputStream(InputStream inputStream) throws IOException {
         File f = File.createTempFile("netex", ".zip");
 
         // opens an output stream to save into file
@@ -143,8 +122,6 @@ public class NetexLoader {
 
         outputStream.close();
         inputStream.close();
-        String absolutePath = f.getAbsolutePath();
-        log.info("Downloading finished, saved to [{}] after {} ms", absolutePath, (System.currentTimeMillis()-t1));
-        return absolutePath;
+        return f.getAbsolutePath();
     }
 }
