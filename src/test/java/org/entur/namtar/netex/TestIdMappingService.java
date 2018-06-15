@@ -54,11 +54,11 @@ public class TestIdMappingService {
         String departureTime = "12:00";
 
         ServiceJourney serviceJourney = new ServiceJourney("NSB:ServiceJourney:1", "0", privateCode, lineRef, departureDate, departureTime);
-        service.save(serviceJourney, publicationTimestamp);
+        service.save(serviceJourney, publicationTimestamp, null);
 
         // Add ServiceJourney that matches, but with different serviceJourneyId
         ServiceJourney serviceJourney2 = new ServiceJourney("NSB:ServiceJourney:444444", "0", privateCode, lineRef, departureDate, departureTime);
-        service.save(serviceJourney2, publicationTimestamp);
+        service.save(serviceJourney2, publicationTimestamp, null);
 
         List<DatedServiceJourney> matches = service.findDatedServiceJourneys("NSB:ServiceJourney:1", departureDate);
         List<DatedServiceJourney> matches_2 = service.findDatedServiceJourneys("NSB:ServiceJourney:444444", departureDate);
@@ -70,11 +70,11 @@ public class TestIdMappingService {
     public void testAddNewServiceJourney() {
 
         ServiceJourney serviceJourney = new ServiceJourney("NSB:ServiceJourney:2", "0",  "812", "NSB:Line:L1", "2018-01-01", "12:00");
-        service.save(serviceJourney, publicationTimestamp);
+        service.save(serviceJourney, publicationTimestamp, null);
 
         // Add ServiceJourney with same serviceJourneyId, that should not match
         ServiceJourney serviceJourney2 = new ServiceJourney("NSB:ServiceJourney:2", "0", "812", "NSB:Line:L1", "2018-01-02", "12:00");
-        service.save(serviceJourney2, publicationTimestamp);
+        service.save(serviceJourney2, publicationTimestamp, null);
 
 
         List<DatedServiceJourney> matches = service.findDatedServiceJourneys("NSB:ServiceJourney:2", "2018-01-01");
@@ -95,14 +95,14 @@ public class TestIdMappingService {
 
 
         LocalDateTime publicationTimestamp = this.publicationTimestamp.minusDays(1);
-        service.save(new ServiceJourney("NSB:ServiceJourney:2", "0",  "812", "NSB:Line:L1", "2018-01-01", "12:00"), publicationTimestamp);
-        service.save(new ServiceJourney("NSB:ServiceJourney:2", "0",  "812", "NSB:Line:L1", "2018-01-02", "12:00"), publicationTimestamp);
+        service.save(new ServiceJourney("NSB:ServiceJourney:2", "0",  "812", "NSB:Line:L1", "2018-01-01", "12:00"), publicationTimestamp, null);
+        service.save(new ServiceJourney("NSB:ServiceJourney:2", "0",  "812", "NSB:Line:L1", "2018-01-02", "12:00"), publicationTimestamp, null);
 
         List<DatedServiceJourney> expectedOldMatch = service.findDatedServiceJourneys("NSB:ServiceJourney:2", "2018-01-02");
 
 
         // Add ServiceJourney with same serviceJourneyId, that should not match
-        service.save(new ServiceJourney("NSB:ServiceJourney:2", "1", "812", "NSB:Line:L1", "2018-01-02", "12:00"), this.publicationTimestamp);
+        service.save(new ServiceJourney("NSB:ServiceJourney:2", "1", "812", "NSB:Line:L1", "2018-01-02", "12:00"), this.publicationTimestamp, null);
 
 
         List<DatedServiceJourney> matches = service.findDatedServiceJourneys("NSB:ServiceJourney:2", "2018-01-01");

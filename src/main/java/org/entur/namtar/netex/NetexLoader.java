@@ -64,12 +64,12 @@ public class NetexLoader {
                 alreadyProcessedBlobName.add(name);
                 log.info("Loading netex-file {}", name);
                 String absolutePath = getFileFromInputStream(repository.getBlob(name));
-                processNetexFile(absolutePath);
+                processNetexFile(absolutePath, name);
             }
         }
     }
 
-    private void processNetexFile(String pathname) throws IOException {
+    private void processNetexFile(String pathname, String sourceFileName) throws IOException {
         File file = new File(pathname);
         if (file.length() == 0) {
             return;
@@ -99,7 +99,7 @@ public class NetexLoader {
 
                 ServiceJourney currentServiceJourney = new ServiceJourney(serviceJourneyId, version, privateCode, lineRef, departureDate, departureTime);
 
-                if (datedServiceJourneyService.save(currentServiceJourney, processor.publicationTimestamp)) {
+                if (datedServiceJourneyService.save(currentServiceJourney, processor.publicationTimestamp, sourceFileName)) {
                     diffCounter++;
                 }
             }

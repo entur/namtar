@@ -28,6 +28,8 @@ public class DatedServiceJourney {
 
     private LocalDateTime publicationTimestamp;
 
+    private String sourceFileName;
+
     private int hashcode;
 
     public DatedServiceJourney() {
@@ -46,6 +48,13 @@ public class DatedServiceJourney {
         this.datedServiceJourneyId = datedServiceJourneyId;
     }
 
+    public String getSourceFileName() {
+        return sourceFileName;
+    }
+
+    public void setSourceFileName(String sourceFileName) {
+        this.sourceFileName = sourceFileName;
+    }
 
     public void setPublicationTimestamp(LocalDateTime publicationTimestamp) {
         this.publicationTimestamp = publicationTimestamp;

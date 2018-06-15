@@ -34,7 +34,7 @@ public class DatedServiceJourneyService {
     Map<ServiceJourneyKey, Set<ServiceJourneyDetailedKey>> serviceJourneys = new HashMap<>();
     Map<ServiceJourneyDetailedKey, DatedServiceJourney> datedServiceJourneys = new HashMap<>();
 
-    public boolean save(ServiceJourney serviceJourney, LocalDateTime publicationTimestamp) {
+    public boolean save(ServiceJourney serviceJourney, LocalDateTime publicationTimestamp, String sourceFileName) {
 
         ServiceJourneyKey serviceJourneyKey = createKey(serviceJourney);
         Set<ServiceJourneyDetailedKey> matchingServiceJourneys = serviceJourneys.getOrDefault(serviceJourneyKey, new HashSet<>());
