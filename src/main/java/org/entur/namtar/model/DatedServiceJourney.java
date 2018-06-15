@@ -24,15 +24,18 @@ import java.time.LocalDateTime;
 public class DatedServiceJourney {
 
 
-    private String datedServiceJourneyId;
+    private final String datedServiceJourneyId;
 
-    private LocalDateTime publicationTimestamp;
+    private final LocalDateTime publicationTimestamp;
 
-    private String sourceFileName;
+    private final String sourceFileName;
 
     private int hashcode;
 
-    public DatedServiceJourney() {
+    public DatedServiceJourney(String datedServiceJourneyId, LocalDateTime publicationTimestamp, String sourceFileName) {
+        this.datedServiceJourneyId = datedServiceJourneyId;
+        this.publicationTimestamp = publicationTimestamp;
+        this.sourceFileName = sourceFileName;
     }
 
     @Override
@@ -44,20 +47,8 @@ public class DatedServiceJourney {
         return datedServiceJourneyId;
     }
 
-    public void setDatedServiceJourneyId(String datedServiceJourneyId) {
-        this.datedServiceJourneyId = datedServiceJourneyId;
-    }
-
     public String getSourceFileName() {
         return sourceFileName;
-    }
-
-    public void setSourceFileName(String sourceFileName) {
-        this.sourceFileName = sourceFileName;
-    }
-
-    public void setPublicationTimestamp(LocalDateTime publicationTimestamp) {
-        this.publicationTimestamp = publicationTimestamp;
     }
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.TIME)

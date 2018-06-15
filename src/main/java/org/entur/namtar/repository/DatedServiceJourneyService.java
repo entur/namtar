@@ -45,12 +45,12 @@ public class DatedServiceJourneyService {
         }
         if (!datedServiceJourneys.containsKey(detailedKey)) {
 
-            DatedServiceJourney datedServiceJourney = new DatedServiceJourney();
-            datedServiceJourney.setDatedServiceJourneyId(generateDatedServiceJourneyId());
-            datedServiceJourney.setPublicationTimestamp(publicationTimestamp);
-
-
-            this.datedServiceJourneys.put(detailedKey, datedServiceJourney);
+            this.datedServiceJourneys.put(detailedKey,
+                    new DatedServiceJourney(
+                            generateDatedServiceJourneyId(),
+                            publicationTimestamp,
+                            sourceFileName)
+            );
         }
         return added;
     }
