@@ -18,14 +18,16 @@ package org.entur.namtar.services;
 
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Storage;
-import org.apache.camel.Exchange;
 import org.entur.namtar.repository.BlobStoreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 
 
 @Service
@@ -49,7 +51,13 @@ public class BlobStoreService {
 		repository.setContainerName(containerName);
 	}
 
-	public Iterator<Blob> getAllBlobs(String referential, Exchange exchange) {
-		return repository.listBlobs(subFolder);
-	}
+	public Iterator<Blob> getAllBlobs() {
+
+        Iterator<Blob> blobIterator = repository.listBlobs(subFolder);
+        List<Blob> blobs = new ArrayList<>();
+        blobIterator.forEachRemaining(blob -> blobs.add(blob));
+
+        blobs.sort(Comparator.comparing(Blob::getUpdateTime));
+        return blobs.iterator();
+    }
 }
