@@ -64,7 +64,8 @@ public class NetexLoader {
                 alreadyProcessedBlobName.add(name);
                 log.info("Loading netex-file {}", name);
                 String absolutePath = getFileFromInputStream(repository.getBlob(name));
-                processNetexFile(absolutePath, name);
+                String filename = name.substring(name.lastIndexOf("/")+1);
+                processNetexFile(absolutePath, filename);
             }
         }
     }
