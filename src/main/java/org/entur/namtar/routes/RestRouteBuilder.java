@@ -28,8 +28,8 @@ public class RestRouteBuilder extends RouteBuilder {
     public void configure() throws Exception {
         restConfiguration("jetty")
                 .port(incomingPort)
-                .apiContextPath("/api-doc")
-                    .apiProperty("api.title", "User API").apiProperty("api.version", "1.2.3")
+                .apiContextPath("api/api-doc")
+                    .apiProperty("api.title", "DatedServiceJourneys").apiProperty("api.version", "0.1")
                     // and enable CORS
                     .apiProperty("cors", "true")
         ;
