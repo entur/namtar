@@ -24,6 +24,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 public class DatedServiceJourneyService {
@@ -55,13 +56,33 @@ public class DatedServiceJourneyService {
         return added;
     }
 
-    public List<DatedServiceJourney> findDatedServiceJourneys(String serviceJourneyId, String departureDate) {
+    public List<DatedServiceJourney> findDatedServiceJourneys(String serviceJourneyId, String version, String departureDate) {
 
         Set<ServiceJourneyDetailedKey> detailedKeySet = serviceJourneys.get(new ServiceJourneyKey(serviceJourneyId, departureDate));
 
         List<DatedServiceJourney> results = new ArrayList<>();
         if (detailedKeySet != null) {
+
+            if (version != null) {
+                if ("latest".equals(version)) {
+                    int maxVersion = -1;
+                    for (ServiceJourneyDetailedKey detailedKey : detailedKeySet) {
+                        if (detailedKey.getVersion() > maxVersion) {
+                            maxVersion = detailedKey.getVersion();
+                        }
+                    }
+                    int finalVersion = maxVersion;
+                    detailedKeySet.removeIf(key -> key.getVersion() != finalVersion);
+
+                } else if (Integer.parseInt(version) >= 0) {
+                    detailedKeySet = detailedKeySet.stream()
+                            .filter(key -> key.getVersion() == Integer.parseInt(version))
+                            .collect(Collectors.toSet());
+                }
+            }
+
             detailedKeySet.forEach(key -> results.add(datedServiceJourneys.get(key)));
+
             results.sort(Comparator.comparing(DatedServiceJourney::getPublicationTimestamp).reversed());
         }
 
@@ -72,7 +93,7 @@ public class DatedServiceJourneyService {
         return new ServiceJourneyKey(serviceJourney.getServiceJourneyId(), serviceJourney.getDepartureDate());
     }
     private ServiceJourneyDetailedKey createDetailedKey(ServiceJourney serviceJourney) {
-        return new ServiceJourneyDetailedKey(serviceJourney.getVersion(), serviceJourney.getPrivateCode(), serviceJourney.getLineRef(), serviceJourney.getDepartureDate());
+        return new ServiceJourneyDetailedKey(Integer.parseInt(serviceJourney.getVersion()), serviceJourney.getPrivateCode(), serviceJourney.getLineRef(), serviceJourney.getDepartureDate());
     }
 
     private String generateDatedServiceJourneyId() {

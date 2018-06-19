@@ -45,12 +45,11 @@ public class MappingRoute extends RestRouteBuilder {
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         rest("/api")
-            .get("/{serviceJourneyId}/{date}").produces("text/json").to("direct:lookup.servicejourney.date")
+            .get("/{serviceJourneyId}/{version}/{date}").produces("text/json").to("direct:lookup.servicejourney.version.date")
         ;
 
-        from("direct:lookup.servicejourney.date")
-                .bean(repository, "findDatedServiceJourneys(${header.serviceJourneyId}, ${header.date})")
-//                .marshal().json(JsonLibrary.Jackson, true)
+        from("direct:lookup.servicejourney.version.date")
+                .bean(repository, "findDatedServiceJourneys(${header.serviceJourneyId}, ${header.version}, ${header.date})")
                 .bean(mapper, "writeValueAsString(${body})")
         ;
     }

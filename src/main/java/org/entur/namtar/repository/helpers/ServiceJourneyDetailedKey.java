@@ -20,14 +20,31 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class ServiceJourneyDetailedKey {
 
-    final String version, privateCode, lineRef, departureDate;
+    final String privateCode, lineRef, departureDate;
+    final int version;
     private int hashcode;
 
-    public ServiceJourneyDetailedKey(String version, String privateCode, String lineRef, String departureDate) {
+    public ServiceJourneyDetailedKey(int version, String privateCode, String lineRef, String departureDate) {
         this.version = version;
         this.privateCode = privateCode;
         this.lineRef = lineRef;
         this.departureDate = departureDate;
+    }
+
+    public String getPrivateCode() {
+        return privateCode;
+    }
+
+    public String getLineRef() {
+        return lineRef;
+    }
+
+    public String getDepartureDate() {
+        return departureDate;
+    }
+
+    public int getVersion() {
+        return version;
     }
 
     @Override
