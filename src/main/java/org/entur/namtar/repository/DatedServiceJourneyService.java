@@ -35,6 +35,9 @@ public class DatedServiceJourneyService {
     Map<ServiceJourneyKey, Set<ServiceJourneyDetailedKey>> serviceJourneys = new HashMap<>();
     Map<ServiceJourneyDetailedKey, DatedServiceJourney> datedServiceJourneys = new HashMap<>();
 
+    // Reverse mapping
+    Map<String, Set<ServiceJourney>> datedServiceJourneyToServiceJourneys = new HashMap<>();
+
     public boolean save(ServiceJourney serviceJourney, LocalDateTime publicationTimestamp, String sourceFileName) {
 
         ServiceJourneyKey serviceJourneyKey = createKey(serviceJourney);
@@ -46,14 +49,26 @@ public class DatedServiceJourneyService {
         }
         if (!datedServiceJourneys.containsKey(detailedKey)) {
 
-            this.datedServiceJourneys.put(detailedKey,
-                    new DatedServiceJourney(
-                            generateDatedServiceJourneyId(),
-                            publicationTimestamp,
-                            sourceFileName)
+
+            String datedServiceJourneyId = generateDatedServiceJourneyId();
+
+            this.datedServiceJourneys.put(detailedKey, new DatedServiceJourney(
+                    datedServiceJourneyId,
+                    publicationTimestamp,
+                    sourceFileName)
             );
+
+
+            Set<ServiceJourney> serviceJourneys = datedServiceJourneyToServiceJourneys.getOrDefault(datedServiceJourneyId, new HashSet<>());
+            serviceJourneys.add(serviceJourney);
+            datedServiceJourneyToServiceJourneys.put(datedServiceJourneyId, serviceJourneys);
+
         }
         return added;
+    }
+
+    public Set<ServiceJourney> findServiceJourneysBeDatedServiceJourney(String datedServiceJourneyId) {
+        return datedServiceJourneyToServiceJourneys.get(datedServiceJourneyId);
     }
 
     public List<DatedServiceJourney> findDatedServiceJourneys(String serviceJourneyId, String version, String departureDate) {

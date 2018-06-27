@@ -18,6 +18,7 @@ package org.entur.namtar.routes.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import org.entur.namtar.repository.DatedServiceJourneyService;
 import org.entur.namtar.routes.RestRouteBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,10 +43,17 @@ public class MappingRoute extends RestRouteBuilder {
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
+        mapper.registerModule(new JaxbAnnotationModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         rest("/api")
             .get("/{serviceJourneyId}/{version}/{date}").produces("text/json").to("direct:lookup.servicejourney.version.date")
+            .get("/{datedServiceJourneyId}").produces("text/json").to("direct:lookup.datedservicejourney.version.date")
+        ;
+
+        from("direct:lookup.datedservicejourney.version.date")
+                .bean(repository, "findServiceJourneysBeDatedServiceJourney(${header.datedServiceJourneyId})")
+                .bean(mapper, "writeValueAsString(${body})")
         ;
 
         from("direct:lookup.servicejourney.version.date")

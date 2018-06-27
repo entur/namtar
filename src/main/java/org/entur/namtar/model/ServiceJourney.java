@@ -30,18 +30,24 @@
 
 package org.entur.namtar.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class ServiceJourney {
 
     private String serviceJourneyId;
-    private String privateCode;
-
-    private String lineRef;
 
     private String departureDate;
+
+    @JsonIgnore
     private String departureTime;
+
+    @JsonIgnore
+    private String privateCode;
+    @JsonIgnore
+    private String lineRef;
+    @JsonIgnore
     private String version;
 
     public ServiceJourney(String serviceJourneyId, String version, String privateCode, String lineRef, String departureDate, String departureTime) {

@@ -28,6 +28,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 import static junit.framework.TestCase.*;
 
@@ -116,6 +117,24 @@ public class TestIdMappingService {
         // Previous version should also be returned
         assertFalse(matches_2.contains(matches.get(0)));
         assertTrue(matches_2.contains(expectedOldMatch.get(0)));
+    }
+    
+    @Test
+    public void testReverseSearch() {
+
+        LocalDateTime publicationTimestamp = this.publicationTimestamp.minusDays(1);
+        service.save(new ServiceJourney("NSB:ServiceJourney:2", "0",  "812", "NSB:Line:L1", "2018-01-01", "12:00"), publicationTimestamp, null);
+        service.save(new ServiceJourney("NSB:ServiceJourney:2", "0",  "812", "NSB:Line:L1", "2018-01-02", "12:00"), publicationTimestamp, null);
+
+        List<DatedServiceJourney> expectedOldMatch = service.findDatedServiceJourneys("NSB:ServiceJourney:2", "latest", "2018-01-02");
+
+        Set<ServiceJourney> serviceJourneys = service.findServiceJourneysBeDatedServiceJourney(expectedOldMatch.get(0).getDatedServiceJourneyId());
+
+        assertEquals(1, serviceJourneys.size());
+
+        ServiceJourney serviceJourney = serviceJourneys.iterator().next();
+        assertEquals("NSB:ServiceJourney:2", serviceJourney.getServiceJourneyId());
+        assertEquals("2018-01-02", serviceJourney.getDepartureDate());
     }
 
 }

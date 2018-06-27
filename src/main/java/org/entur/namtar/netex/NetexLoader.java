@@ -55,17 +55,25 @@ public class NetexLoader {
     private static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm");
 
     private static final Set<String> alreadyProcessedBlobName = new HashSet<>();
+    private static boolean isLoadingData;
 
     public void loadNetexFromBlobStore(Iterator<Blob> blobIterator) throws IOException {
-        while (blobIterator.hasNext()) {
-            Blob next = blobIterator.next();
-            String name = next.getName();
-            if (!alreadyProcessedBlobName.contains(name)) {
-                alreadyProcessedBlobName.add(name);
-                log.info("Loading netex-file {}", name);
-                String absolutePath = getFileFromInputStream(repository.getBlob(name));
-                String filename = name.substring(name.lastIndexOf("/")+1);
-                processNetexFile(absolutePath, filename);
+        if (!isLoadingData) {
+            isLoadingData = true;
+            try {
+                while (blobIterator.hasNext()) {
+                    Blob next = blobIterator.next();
+                    String name = next.getName();
+                    if (!alreadyProcessedBlobName.contains(name)) {
+                        alreadyProcessedBlobName.add(name);
+                        log.info("Loading netex-file {}", name);
+                        String absolutePath = getFileFromInputStream(repository.getBlob(name));
+                        String filename = name.substring(name.lastIndexOf("/") + 1);
+                        processNetexFile(absolutePath, filename);
+                    }
+                }
+            } finally {
+                isLoadingData = false;
             }
         }
     }
