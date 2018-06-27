@@ -47,7 +47,7 @@ public class ServiceJourney {
     private String privateCode;
     @JsonIgnore
     private String lineRef;
-    @JsonIgnore
+
     private String version;
 
     public ServiceJourney(String serviceJourneyId, String version, String privateCode, String lineRef, String departureDate, String departureTime) {
