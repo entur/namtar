@@ -61,10 +61,13 @@ public class NetexLoader {
         if (!isLoadingData) {
             isLoadingData = true;
             try {
+                int counter = 0;
+                long t1 = System.currentTimeMillis();
                 while (blobIterator.hasNext()) {
                     Blob next = blobIterator.next();
                     String name = next.getName();
                     if (!alreadyProcessedBlobName.contains(name)) {
+                        counter++;
                         alreadyProcessedBlobName.add(name);
                         log.info("Loading netex-file {}", name);
                         String absolutePath = getFileFromInputStream(repository.getBlob(name));
@@ -72,6 +75,7 @@ public class NetexLoader {
                         processNetexFile(absolutePath, filename);
                     }
                 }
+                log.info("Loaded {} netex-files in {} ms", counter, ( System.currentTimeMillis()-t1 ));
             } finally {
                 isLoadingData = false;
             }
@@ -91,7 +95,7 @@ public class NetexLoader {
 
         t1 = System.currentTimeMillis();
         int diffCounter = 0;
-        for (org.rutebanken.netex.model.ServiceJourney serviceJourney : processor.serviceJourneyByPatternId.values()) {
+        for (org.rutebanken.netex.model.ServiceJourney serviceJourney : processor.serviceJourneys) {
 
             String serviceJourneyId = serviceJourney.getId();
             String version = serviceJourney.getVersion();
@@ -102,7 +106,7 @@ public class NetexLoader {
             for (JAXBElement<? extends DayTypeRefStructure> dayTypeRef : dayTypes.getDayTypeRef()) {
 
                 DayType dayType = processor.dayTypeById.get(dayTypeRef.getValue().getRef());
-                DayTypeAssignment dayTypeAssignment = processor.dayTypeAssignmentByDayTypeId.get(dayType.getId());
+                DayTypeAssignment dayTypeAssignment = processor.dayTypeAssignmentByDayTypeId    .get(dayType.getId());
                 String departureDate = dayTypeAssignment.getDate().format(dateFormatter);
                 String privateCode = serviceJourney.getPrivateCode().getValue();
 

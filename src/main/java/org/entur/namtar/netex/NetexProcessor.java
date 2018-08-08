@@ -26,7 +26,10 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -38,14 +41,11 @@ public class NetexProcessor {
     LocalDateTime publicationTimestamp;
 
     Map<String, JourneyPattern> journeyPatternsById;
-    Map<String, ServiceJourney> serviceJourneyByPatternId;
-    Set<String> calendarServiceIds;
+    List<ServiceJourney> serviceJourneys;
     Map<String, DayType> dayTypeById;
     Map<String, DayTypeAssignment> dayTypeAssignmentByDayTypeId;
     Map<String, OperatingPeriod> operatingPeriodById;
     Map<String, Boolean> dayTypeAvailable;
-    Map<String, String> quayIdByStopPointRef;
-    Map<String, Route> routeById;
 
     ZipFile zipFile;
 
@@ -62,14 +62,11 @@ public class NetexProcessor {
     public NetexProcessor(File file) throws IOException {
         zipFile = new ZipFile(file, ZipFile.OPEN_READ);
         journeyPatternsById = new HashMap<>();
-        serviceJourneyByPatternId = new HashMap<>();
-        calendarServiceIds = new HashSet<>();
+        serviceJourneys = new ArrayList<>();
         dayTypeById = new HashMap<>();
         dayTypeAssignmentByDayTypeId = new HashMap<>();
         operatingPeriodById = new HashMap<>();
         dayTypeAvailable = new HashMap<>();
-        quayIdByStopPointRef = new HashMap<>();
-        routeById = new HashMap<>();
     }
 
 
@@ -146,7 +143,6 @@ public class NetexProcessor {
                     .getDatedServiceJourneyOrDeadRunOrServiceJourney();
             for (Journey_VersionStructure jStructure : datedServiceJourneyOrDeadRunOrServiceJourney) {
                 if (jStructure instanceof ServiceJourney) {
-                    loadServiceIds((ServiceJourney) jStructure);
                     ServiceJourney sj = (ServiceJourney) jStructure;
                     String journeyPatternId = sj.getJourneyPatternRef().getValue().getRef();
 
@@ -156,35 +152,12 @@ public class NetexProcessor {
                         if (journeyPattern.getPointsInSequence().
                                 getPointInJourneyPatternOrStopPointInJourneyPatternOrTimingPointInJourneyPattern()
                                 .size() == sj.getPassingTimes().getTimetabledPassingTime().size()) {
-
-                            serviceJourneyByPatternId.put(journeyPatternId, sj);
+                            serviceJourneys.add(sj);
                         }
                     }
                 }
             }
         }
-    }
-
-    private void loadServiceIds(ServiceJourney serviceJourney) {
-        DayTypeRefs_RelStructure dayTypes = serviceJourney.getDayTypes();
-        String serviceId = mapToServiceId(dayTypes);
-        // Add all unique service ids to map. Used when mapping calendars later.
-        calendarServiceIds.add(serviceId);
-    }
-    private static String mapToServiceId(DayTypeRefs_RelStructure dayTypes) {
-        StringBuilder serviceId = new StringBuilder();
-        boolean first = true;
-        for (JAXBElement dt : dayTypes.getDayTypeRef()) {
-            if (!first) {
-                serviceId.append("+");
-            }
-            first = false;
-            if (dt.getValue() instanceof DayTypeRefStructure) {
-                DayTypeRefStructure dayType = (DayTypeRefStructure) dt.getValue();
-                serviceId.append(dayType.getRef());
-            }
-        }
-        return serviceId.toString();
     }
 
     // ServiceCalendar
@@ -213,24 +186,10 @@ public class NetexProcessor {
                 }
             }
 
-            if (scf.getOperatingPeriods() != null) {
-                for (OperatingPeriod_VersionStructure operatingPeriodStruct : scf
-                        .getOperatingPeriods().getOperatingPeriodOrUicOperatingPeriod()) {
-                    OperatingPeriod operatingPeriod = (OperatingPeriod) operatingPeriodStruct;
-                    operatingPeriodById.put(operatingPeriod.getId(), operatingPeriod);
-                }
-            }
-
             List<DayTypeAssignment> dayTypeAssignments = scf.getDayTypeAssignments().getDayTypeAssignment();
 
             for (DayTypeAssignment dayTypeAssignment : dayTypeAssignments) {
                 String ref = dayTypeAssignment.getDayTypeRef().getValue().getRef();
-                Boolean available = dayTypeAssignment.isIsAvailable() == null ?
-                        true :
-                        dayTypeAssignment.isIsAvailable();
-
-                dayTypeAvailable.put(dayTypeAssignment.getId(), available);
-
 
                 dayTypeAssignmentByDayTypeId.put(ref, dayTypeAssignment);
             }
@@ -240,36 +199,6 @@ public class NetexProcessor {
     private void loadServiceFrames(JAXBElement commonFrame) {
         if (commonFrame.getValue() instanceof ServiceFrame) {
             ServiceFrame sf = (ServiceFrame) commonFrame.getValue();
-
-            //stop assignments
-            StopAssignmentsInFrame_RelStructure stopAssignments = sf.getStopAssignments();
-            if (stopAssignments != null) {
-                List<JAXBElement<? extends StopAssignment_VersionStructure>> assignments = stopAssignments
-                        .getStopAssignment();
-                for (JAXBElement assignment : assignments) {
-                    if (assignment.getValue() instanceof PassengerStopAssignment) {
-                        PassengerStopAssignment passengerStopAssignment =  (PassengerStopAssignment) assignment.getValue();
-
-                        String quayRef = passengerStopAssignment.getQuayRef().getRef();
-
-                        quayIdByStopPointRef.put(passengerStopAssignment.getScheduledStopPointRef().getValue().getRef(), quayRef);
-                    }
-                }
-            }
-
-            //routes
-            RoutesInFrame_RelStructure routes = sf.getRoutes();
-            if (routes != null) {
-                List<JAXBElement<? extends LinkSequence_VersionStructure>> route_ = routes
-                        .getRoute_();
-                for (JAXBElement element : route_) {
-                    if (element.getValue() instanceof Route) {
-                        Route route = (Route) element.getValue();
-                        routeById.put(route.getId(), route);
-                    }
-                }
-            }
-
 
             //journeyPatterns
             JourneyPatternsInFrame_RelStructure journeyPatterns = sf.getJourneyPatterns();

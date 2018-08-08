@@ -17,7 +17,7 @@ package org.entur.namtar.repository;
 
 import org.entur.namtar.model.DatedServiceJourney;
 import org.entur.namtar.model.ServiceJourney;
-import org.entur.namtar.repository.helpers.ServiceJourneyDetailedKey;
+import org.entur.namtar.repository.helpers.ServiceJourneyDetailedValue;
 import org.entur.namtar.repository.helpers.ServiceJourneyKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
@@ -32,8 +32,8 @@ public class DatedServiceJourneyService {
     @Value("${namtar.generated.id.prefix}")
     private String GENERATED_ID_PREFIX;
 
-    Map<ServiceJourneyKey, Set<ServiceJourneyDetailedKey>> serviceJourneys = new HashMap<>();
-    Map<ServiceJourneyDetailedKey, DatedServiceJourney> datedServiceJourneys = new HashMap<>();
+    Map<ServiceJourneyKey, Set<ServiceJourneyDetailedValue>> serviceJourneys = new HashMap<>();
+    Map<ServiceJourneyDetailedValue, DatedServiceJourney> datedServiceJourneys = new HashMap<>();
 
     // Reverse mapping
     Map<String, Set<ServiceJourney>> datedServiceJourneyToServiceJourneys = new HashMap<>();
@@ -41,8 +41,8 @@ public class DatedServiceJourneyService {
     public boolean save(ServiceJourney serviceJourney, LocalDateTime publicationTimestamp, String sourceFileName) {
 
         ServiceJourneyKey serviceJourneyKey = createKey(serviceJourney);
-        Set<ServiceJourneyDetailedKey> matchingServiceJourneys = serviceJourneys.getOrDefault(serviceJourneyKey, new HashSet<>());
-        ServiceJourneyDetailedKey detailedKey = createDetailedKey(serviceJourney);
+        Set<ServiceJourneyDetailedValue> matchingServiceJourneys = serviceJourneys.getOrDefault(serviceJourneyKey, new HashSet<>());
+        ServiceJourneyDetailedValue detailedKey = createDetailedKey(serviceJourney);
         boolean added = matchingServiceJourneys.add(detailedKey);
         if (added) {
             serviceJourneys.put(serviceJourneyKey, matchingServiceJourneys);
@@ -73,7 +73,7 @@ public class DatedServiceJourneyService {
 
     public List<DatedServiceJourney> findDatedServiceJourneys(String serviceJourneyId, String version, String departureDate) {
 
-        Set<ServiceJourneyDetailedKey> detailedKeySet = serviceJourneys.get(new ServiceJourneyKey(serviceJourneyId, departureDate));
+        Set<ServiceJourneyDetailedValue> detailedKeySet = serviceJourneys.get(new ServiceJourneyKey(serviceJourneyId, departureDate));
 
         List<DatedServiceJourney> results = new ArrayList<>();
         if (detailedKeySet != null) {
@@ -81,7 +81,7 @@ public class DatedServiceJourneyService {
             if (version != null) {
                 if ("latest".equals(version)) {
                     int maxVersion = -1;
-                    for (ServiceJourneyDetailedKey detailedKey : detailedKeySet) {
+                    for (ServiceJourneyDetailedValue detailedKey : detailedKeySet) {
                         if (detailedKey.getVersion() > maxVersion) {
                             maxVersion = detailedKey.getVersion();
                         }
@@ -90,8 +90,9 @@ public class DatedServiceJourneyService {
                     detailedKeySet.removeIf(key -> key.getVersion() != finalVersion);
 
                 } else if (Integer.parseInt(version) >= 0) {
+                    final int parsedVersion = Integer.parseInt(version);
                     detailedKeySet = detailedKeySet.stream()
-                            .filter(key -> key.getVersion() == Integer.parseInt(version))
+                            .filter(key -> key.getVersion() == parsedVersion)
                             .collect(Collectors.toSet());
                 }
             }
@@ -107,8 +108,8 @@ public class DatedServiceJourneyService {
     private ServiceJourneyKey createKey(ServiceJourney serviceJourney) {
         return new ServiceJourneyKey(serviceJourney.getServiceJourneyId(), serviceJourney.getDepartureDate());
     }
-    private ServiceJourneyDetailedKey createDetailedKey(ServiceJourney serviceJourney) {
-        return new ServiceJourneyDetailedKey(Integer.parseInt(serviceJourney.getVersion()), serviceJourney.getPrivateCode(), serviceJourney.getLineRef(), serviceJourney.getDepartureDate());
+    private ServiceJourneyDetailedValue createDetailedKey(ServiceJourney serviceJourney) {
+        return new ServiceJourneyDetailedValue(Integer.parseInt(serviceJourney.getVersion()), serviceJourney.getPrivateCode(), serviceJourney.getLineRef(), serviceJourney.getDepartureDate());
     }
 
     private String generateDatedServiceJourneyId() {

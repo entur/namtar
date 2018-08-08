@@ -18,13 +18,13 @@ package org.entur.namtar.repository.helpers;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-public class ServiceJourneyDetailedKey {
+public class ServiceJourneyDetailedValue {
 
     final String privateCode, lineRef, departureDate;
     final int version;
     private int hashcode;
 
-    public ServiceJourneyDetailedKey(int version, String privateCode, String lineRef, String departureDate) {
+    public ServiceJourneyDetailedValue(int version, String privateCode, String lineRef, String departureDate) {
         this.version = version;
         this.privateCode = privateCode;
         this.lineRef = lineRef;
@@ -57,7 +57,7 @@ public class ServiceJourneyDetailedKey {
             return false;
         }
 
-        ServiceJourneyDetailedKey that = (ServiceJourneyDetailedKey) o;
+        ServiceJourneyDetailedValue that = (ServiceJourneyDetailedValue) o;
 
         return new EqualsBuilder()
                 .append(version, that.version)
