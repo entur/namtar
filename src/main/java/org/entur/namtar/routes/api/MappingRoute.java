@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
+import org.apache.camel.model.rest.RestParamType;
 import org.entur.namtar.repository.DatedServiceJourneyService;
 import org.entur.namtar.routes.RestRouteBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,17 +49,24 @@ public class MappingRoute extends RestRouteBuilder {
 
         rest("/api")
             .get("/{serviceJourneyId}/{version}/{date}").produces("text/json").to("direct:lookup.servicejourney.version.date")
+                .param().required(true).name("serviceJourneyId").type(RestParamType.path).description("The id of the serviceJourney to look up").dataType("string").endParam()
+                .param().required(true).name("version").type(RestParamType.path).description("Specific version or `latest`").dataType("string").endParam()
+                .param().required(true).name("date").type(RestParamType.path).description("Date").dataType("string").endParam()
+
             .get("/{datedServiceJourneyId}").produces("text/json").to("direct:lookup.datedservicejourney.version.date")
+                .param().required(true).name("datedServiceJourneyId").type(RestParamType.path).description("DatedServiceJourney to lookup").dataType("string").endParam()
         ;
 
         from("direct:lookup.datedservicejourney.version.date")
                 .bean(repository, "findServiceJourneysBeDatedServiceJourney(${header.datedServiceJourneyId})")
                 .bean(mapper, "writeValueAsString(${body})")
+                .routeId("lookup.datedServiceJourney")
         ;
 
         from("direct:lookup.servicejourney.version.date")
                 .bean(repository, "findDatedServiceJourneys(${header.serviceJourneyId}, ${header.version}, ${header.date})")
                 .bean(mapper, "writeValueAsString(${body})")
+                .routeId("lookup.serviceJourney")
         ;
     }
 }
