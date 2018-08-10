@@ -40,11 +40,11 @@ public class ServiceJourney {
 
     private String departureDate;
 
+    private String privateCode;
+
     @JsonIgnore
     private String departureTime;
 
-    @JsonIgnore
-    private String privateCode;
     @JsonIgnore
     private String lineRef;
 
