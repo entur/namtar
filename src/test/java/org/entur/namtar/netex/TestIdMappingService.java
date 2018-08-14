@@ -27,7 +27,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 
 import static junit.framework.TestCase.*;
@@ -61,8 +60,8 @@ public class TestIdMappingService {
         ServiceJourney serviceJourney2 = new ServiceJourney("NSB:ServiceJourney:444444", "0", privateCode, lineRef, departureDate, departureTime);
         service.save(serviceJourney2, publicationTimestamp, null);
 
-        List<DatedServiceJourney> matches = service.findDatedServiceJourneys("NSB:ServiceJourney:1", "latest", departureDate);
-        List<DatedServiceJourney> matches_2 = service.findDatedServiceJourneys("NSB:ServiceJourney:444444", "latest", departureDate);
+        DatedServiceJourney matches = service.findDatedServiceJourneys("NSB:ServiceJourney:1", "latest", departureDate);
+        DatedServiceJourney matches_2 = service.findDatedServiceJourneys("NSB:ServiceJourney:444444", "latest", departureDate);
 
         assertEquals("Should have gotten the same id.", matches, matches_2);
     }
@@ -78,46 +77,42 @@ public class TestIdMappingService {
         service.save(serviceJourney2, publicationTimestamp, null);
 
 
-        List<DatedServiceJourney> matches = service.findDatedServiceJourneys("NSB:ServiceJourney:2", "latest", "2018-01-01");
-        List<DatedServiceJourney> matches_2 = service.findDatedServiceJourneys("NSB:ServiceJourney:2", "latest", "2018-01-02");
+        DatedServiceJourney matches = service.findDatedServiceJourneys("NSB:ServiceJourney:2", "latest", "2018-01-01");
+        DatedServiceJourney matches_2 = service.findDatedServiceJourneys("NSB:ServiceJourney:2", "latest", "2018-01-02");
 
         assertNotNull(matches);
         assertNotNull(matches_2);
-        assertTrue(matches.size() == 1);
-        assertTrue(matches_2.size() == 1);
-        assertNotNull(matches.get(0));
-        assertNotNull(matches_2.get(0));
-
-        assertFalse("Should have gotten different ids from different versions", matches.get(0).equals(matches_2.get(0)));
-    }
-
-    @Test
-    public void testAddNewServiceJourneyVersion() {
-
-
-        LocalDateTime publicationTimestamp = this.publicationTimestamp.minusDays(1);
-        service.save(new ServiceJourney("NSB:ServiceJourney:2", "0",  "812", "NSB:Line:L1", "2018-01-01", "12:00"), publicationTimestamp, null);
-        service.save(new ServiceJourney("NSB:ServiceJourney:2", "0",  "812", "NSB:Line:L1", "2018-01-02", "12:00"), publicationTimestamp, null);
-
-        List<DatedServiceJourney> expectedOldMatch = service.findDatedServiceJourneys("NSB:ServiceJourney:2", "latest", "2018-01-02");
-
-
-        // Add ServiceJourney with same serviceJourneyId, that should not match
-        service.save(new ServiceJourney("NSB:ServiceJourney:2", "1", "812", "NSB:Line:L1", "2018-01-02", "12:00"), this.publicationTimestamp, null);
-
-
-        List<DatedServiceJourney> matches = service.findDatedServiceJourneys("NSB:ServiceJourney:2", "latest", "2018-01-01");
-        List<DatedServiceJourney> matches_2 = service.findDatedServiceJourneys("NSB:ServiceJourney:2",  null, "2018-01-02");
 
         assertFalse("Should have gotten different ids from different versions", matches.equals(matches_2));
-        assertTrue(expectedOldMatch.size() == 1);
-        assertTrue(matches.size() == 1);
-        assertTrue(matches_2.size() == 2);
-
-        // Previous version should also be returned
-        assertFalse(matches_2.contains(matches.get(0)));
-        assertTrue(matches_2.contains(expectedOldMatch.get(0)));
     }
+
+//    @Test
+//    public void testAddNewServiceJourneyVersion() {
+//
+//
+//        LocalDateTime publicationTimestamp = this.publicationTimestamp.minusDays(1);
+//        service.save(new ServiceJourney("NSB:ServiceJourney:2", "0",  "812", "NSB:Line:L1", "2018-01-01", "12:00"), publicationTimestamp, null);
+//        service.save(new ServiceJourney("NSB:ServiceJourney:2", "0",  "812", "NSB:Line:L1", "2018-01-02", "12:00"), publicationTimestamp, null);
+//
+//        List<DatedServiceJourney> expectedOldMatch = service.findDatedServiceJourneys("NSB:ServiceJourney:2", "latest", "2018-01-02");
+//
+//
+//        // Add ServiceJourney with same serviceJourneyId, that should not match
+//        service.save(new ServiceJourney("NSB:ServiceJourney:2", "1", "812", "NSB:Line:L1", "2018-01-02", "12:00"), this.publicationTimestamp, null);
+//
+//
+//        DatedServiceJourney matches = service.findDatedServiceJourneys("NSB:ServiceJourney:2", "latest", "2018-01-01");
+//        DatedServiceJourney matches_2 = service.findDatedServiceJourneys("NSB:ServiceJourney:2",  null, "2018-01-02");
+//
+//        assertFalse("Should have gotten different ids from different versions", matches.equals(matches_2));
+//        assertTrue(expectedOldMatch.size() == 1);
+//        assertTrue(matches.size() == 1);
+//        assertTrue(matches_2.size() == 2);
+//
+//        // Previous version should also be returned
+//        assertFalse(matches_2.contains(matches.get(0)));
+//        assertTrue(matches_2.contains(expectedOldMatch.get(0)));
+//    }
     
     @Test
     public void testReverseSearch() {
@@ -126,9 +121,9 @@ public class TestIdMappingService {
         service.save(new ServiceJourney("NSB:ServiceJourney:2", "0",  "812", "NSB:Line:L1", "2018-01-01", "12:00"), publicationTimestamp, null);
         service.save(new ServiceJourney("NSB:ServiceJourney:2", "0",  "812", "NSB:Line:L1", "2018-01-02", "12:00"), publicationTimestamp, null);
 
-        List<DatedServiceJourney> expectedOldMatch = service.findDatedServiceJourneys("NSB:ServiceJourney:2", "latest", "2018-01-02");
+        DatedServiceJourney expectedOldMatch = service.findDatedServiceJourneys("NSB:ServiceJourney:2", "latest", "2018-01-02");
 
-        Set<ServiceJourney> serviceJourneys = service.findServiceJourneysBeDatedServiceJourney(expectedOldMatch.get(0).getDatedServiceJourneyId());
+        Set<ServiceJourney> serviceJourneys = service.findServiceJourneysByDatedServiceJourney(expectedOldMatch.getDatedServiceJourneyId());
 
         assertEquals(1, serviceJourneys.size());
 

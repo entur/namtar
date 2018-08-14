@@ -17,107 +17,79 @@ package org.entur.namtar.repository;
 
 import org.entur.namtar.model.DatedServiceJourney;
 import org.entur.namtar.model.ServiceJourney;
-import org.entur.namtar.repository.helpers.ServiceJourneyDetailedValue;
-import org.entur.namtar.repository.helpers.ServiceJourneyKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 @Repository
 public class DatedServiceJourneyService {
 
     @Value("${namtar.generated.id.prefix}")
     private String GENERATED_ID_PREFIX;
-
-    Map<ServiceJourneyKey, Set<ServiceJourneyDetailedValue>> serviceJourneys = new HashMap<>();
-    Map<ServiceJourneyDetailedValue, DatedServiceJourney> datedServiceJourneys = new HashMap<>();
+    private int idCounter;
 
     // Reverse mapping
-    Map<String, Set<ServiceJourney>> datedServiceJourneyToServiceJourneys = new HashMap<>();
+    Map<String, Set<ServiceJourney>> datedServiceJourney_serviceJourneyMap = new HashMap<>();
 
-    public boolean save(ServiceJourney serviceJourney, LocalDateTime publicationTimestamp, String sourceFileName) {
+    Map<String, String> serviceJourney_privateCodeMap = new HashMap<>();
 
-        ServiceJourneyKey serviceJourneyKey = createKey(serviceJourney);
-        Set<ServiceJourneyDetailedValue> matchingServiceJourneys = serviceJourneys.getOrDefault(serviceJourneyKey, new HashSet<>());
-        ServiceJourneyDetailedValue detailedKey = createDetailedKey(serviceJourney);
-        boolean added = matchingServiceJourneys.add(detailedKey);
-        if (added) {
-            serviceJourneys.put(serviceJourneyKey, matchingServiceJourneys);
-        }
-        if (!datedServiceJourneys.containsKey(detailedKey)) {
+    Map<String, DatedServiceJourney> privateCode_datedServiceJourneyMap = new HashMap<>();
 
+    public void save(ServiceJourney serviceJourney, LocalDateTime publicationTimestamp, String sourceFileName) {
 
-            String datedServiceJourneyId = generateDatedServiceJourneyId();
+        // Create serviceJourney-key
+        String serviceJourneyKey = serviceJourney.getServiceJourneyId() + "_" + serviceJourney.getDepartureDate();
 
-            this.datedServiceJourneys.put(detailedKey, new DatedServiceJourney(
-                    datedServiceJourneyId,
-                    publicationTimestamp,
-                    sourceFileName)
-            );
+        // privateCode is unique per day
+        String privateCodeKey = serviceJourney.getPrivateCode() + "_" + serviceJourney.getDepartureDate();
+
+        serviceJourney_privateCodeMap.put(serviceJourneyKey, privateCodeKey);
+
+        DatedServiceJourney datedServiceJourney = privateCode_datedServiceJourneyMap.get(privateCodeKey);
 
 
-            Set<ServiceJourney> serviceJourneys = datedServiceJourneyToServiceJourneys.getOrDefault(datedServiceJourneyId, new HashSet<>());
-            serviceJourneys.add(serviceJourney);
-            datedServiceJourneyToServiceJourneys.put(datedServiceJourneyId, serviceJourneys);
-
-        }
-        return added;
-    }
-
-    public Set<ServiceJourney> findServiceJourneysBeDatedServiceJourney(String datedServiceJourneyId) {
-        return datedServiceJourneyToServiceJourneys.get(datedServiceJourneyId);
-    }
-
-    public List<DatedServiceJourney> findDatedServiceJourneys(String serviceJourneyId, String version, String departureDate) {
-
-        Set<ServiceJourneyDetailedValue> detailedKeySet = serviceJourneys.get(new ServiceJourneyKey(serviceJourneyId, departureDate));
-
-        List<DatedServiceJourney> results = new ArrayList<>();
-        if (detailedKeySet != null) {
-
-            if (version != null) {
-                if ("latest".equals(version)) {
-                    int maxVersion = -1;
-                    for (ServiceJourneyDetailedValue detailedKey : detailedKeySet) {
-                        if (detailedKey.getVersion() > maxVersion) {
-                            maxVersion = detailedKey.getVersion();
-                        }
-                    }
-                    int finalVersion = maxVersion;
-                    detailedKeySet.removeIf(key -> key.getVersion() != finalVersion);
-
-                } else if (Integer.parseInt(version) >= 0) {
-                    final int parsedVersion = Integer.parseInt(version);
-                    detailedKeySet = detailedKeySet.stream()
-                            .filter(key -> key.getVersion() == parsedVersion)
-                            .collect(Collectors.toSet());
-                }
-            }
-
-            detailedKeySet.forEach(key -> results.add(datedServiceJourneys.get(key)));
-
-            results.sort(Comparator.comparing(DatedServiceJourney::getPublicationTimestamp).reversed());
+        String datedServiceJourneyId = generateDatedServiceJourneyId();
+        String originalDatedServiceJourney = datedServiceJourneyId;
+        if (datedServiceJourney != null) {
+            originalDatedServiceJourney = datedServiceJourney.getOriginalDatedServiceJourneyId();
         }
 
-        return results;
+        DatedServiceJourney newDatedServiceJourney = new DatedServiceJourney(
+                                                                datedServiceJourneyId,
+                                                                originalDatedServiceJourney,
+                                                                publicationTimestamp,
+                                                                sourceFileName);
+
+        privateCode_datedServiceJourneyMap.put(privateCodeKey, newDatedServiceJourney);
+
+        //Add mapping for reverse lookup
+        Set<ServiceJourney> serviceJourneys = datedServiceJourney_serviceJourneyMap.getOrDefault(datedServiceJourneyId, new HashSet<>());
+        serviceJourneys.add(serviceJourney);
+        datedServiceJourney_serviceJourneyMap.put(datedServiceJourneyId, serviceJourneys);
     }
 
-    private ServiceJourneyKey createKey(ServiceJourney serviceJourney) {
-        return new ServiceJourneyKey(serviceJourney.getServiceJourneyId(), serviceJourney.getDepartureDate());
+    public Set<ServiceJourney> findServiceJourneysByDatedServiceJourney(String datedServiceJourneyId) {
+        return datedServiceJourney_serviceJourneyMap.get(datedServiceJourneyId);
     }
-    private ServiceJourneyDetailedValue createDetailedKey(ServiceJourney serviceJourney) {
-        return new ServiceJourneyDetailedValue(Integer.parseInt(serviceJourney.getVersion()), serviceJourney.getPrivateCode(), serviceJourney.getLineRef(), serviceJourney.getDepartureDate());
+
+    public DatedServiceJourney findDatedServiceJourneys(String serviceJourneyId, String version, String departureDate) {
+
+        String privateCodeKey = serviceJourney_privateCodeMap.get(serviceJourneyId + "_" + departureDate);
+
+        return privateCode_datedServiceJourneyMap.get(privateCodeKey);
     }
 
     private String generateDatedServiceJourneyId() {
-        return GENERATED_ID_PREFIX + (datedServiceJourneys.size()+1);
+        return GENERATED_ID_PREFIX + idCounter++;
     }
 
     @Override
     public String toString() {
-        return "serviceJourneyCount: " + serviceJourneys.size() + ", datedServiceJourneyCount: " + datedServiceJourneys.size();
+        return "serviceJourneyCount: " + serviceJourney_privateCodeMap.size() + ", privateCodeCount: " + privateCode_datedServiceJourneyMap.size() + ", generatid ids " + idCounter;
     }
 }

@@ -58,7 +58,7 @@ public class MappingRoute extends RestRouteBuilder {
         ;
 
         from("direct:lookup.datedservicejourney.version.date")
-                .bean(repository, "findServiceJourneysBeDatedServiceJourney(${header.datedServiceJourneyId})")
+                .bean(repository, "findServiceJourneysByDatedServiceJourney(${header.datedServiceJourneyId})")
                 .bean(mapper, "writeValueAsString(${body})")
                 .routeId("lookup.datedServiceJourney")
         ;

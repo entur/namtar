@@ -15,12 +15,14 @@
 
 package org.entur.namtar.model;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
+@JsonPropertyOrder({"datedServiceJourneyId", "publicationTimestamp", "sourceFileName", "originalDatedServiceJourneyId"})
 public class DatedServiceJourney {
 
 
@@ -30,10 +32,13 @@ public class DatedServiceJourney {
 
     private final String sourceFileName;
 
+    private final String originalDatedServiceJourneyId;
+
     private int hashcode;
 
-    public DatedServiceJourney(String datedServiceJourneyId, LocalDateTime publicationTimestamp, String sourceFileName) {
+    public DatedServiceJourney(String datedServiceJourneyId, String originalDatedServiceJourneyId, LocalDateTime publicationTimestamp, String sourceFileName) {
         this.datedServiceJourneyId = datedServiceJourneyId;
+        this.originalDatedServiceJourneyId = originalDatedServiceJourneyId;
         this.publicationTimestamp = publicationTimestamp;
         this.sourceFileName = sourceFileName;
     }
@@ -56,6 +61,10 @@ public class DatedServiceJourney {
         return publicationTimestamp;
     }
 
+    public String getOriginalDatedServiceJourneyId() {
+        return originalDatedServiceJourneyId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -70,6 +79,7 @@ public class DatedServiceJourney {
 
         return new EqualsBuilder()
                 .append(datedServiceJourneyId, that.datedServiceJourneyId)
+                .append(originalDatedServiceJourneyId, that.originalDatedServiceJourneyId)
                 .append(publicationTimestamp, that.publicationTimestamp)
                 .isEquals();
     }

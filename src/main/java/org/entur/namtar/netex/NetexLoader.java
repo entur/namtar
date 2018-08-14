@@ -69,10 +69,15 @@ public class NetexLoader {
                     if (!alreadyProcessedBlobName.contains(name)) {
                         counter++;
                         alreadyProcessedBlobName.add(name);
-                        log.info("Loading netex-file {}", name);
+
+                        long download = System.currentTimeMillis();
                         String absolutePath = getFileFromInputStream(repository.getBlob(name));
+                        long process = System.currentTimeMillis();
                         String filename = name.substring(name.lastIndexOf("/") + 1);
                         processNetexFile(absolutePath, filename);
+                        long done = System.currentTimeMillis();
+
+                        log.info("{} read - download {} ms, process {} ms", name, (process-download), (done-process));
                     }
                 }
                 log.info("Loaded {} netex-files in {} ms", counter, ( System.currentTimeMillis()-t1 ));
@@ -91,10 +96,10 @@ public class NetexLoader {
 
         long t1 = System.currentTimeMillis();
         processor.loadFiles();
-        log.info("Loading file {} took {} ms", pathname, (System.currentTimeMillis()-t1));
+        log.info("Reading file {} took {} ms", pathname, (System.currentTimeMillis()-t1));
 
         t1 = System.currentTimeMillis();
-        int diffCounter = 0;
+        int dayCounter = 0;
         for (org.rutebanken.netex.model.ServiceJourney serviceJourney : processor.serviceJourneys) {
 
             String serviceJourneyId = serviceJourney.getId();
@@ -103,6 +108,7 @@ public class NetexLoader {
             String departureTime = serviceJourney.getPassingTimes().getTimetabledPassingTime().get(0).getDepartureTime().format(timeFormatter);
 
             DayTypeRefs_RelStructure dayTypes = serviceJourney.getDayTypes();
+            dayCounter += dayTypes.getDayTypeRef().size();
             for (JAXBElement<? extends DayTypeRefStructure> dayTypeRef : dayTypes.getDayTypeRef()) {
 
                 DayType dayType = processor.dayTypeById.get(dayTypeRef.getValue().getRef());
@@ -112,12 +118,10 @@ public class NetexLoader {
 
                 ServiceJourney currentServiceJourney = new ServiceJourney(serviceJourneyId, version, privateCode, lineRef, departureDate, departureTime);
 
-                if (datedServiceJourneyService.save(currentServiceJourney, processor.publicationTimestamp, sourceFileName)) {
-                    diffCounter++;
-                }
+                datedServiceJourneyService.save(currentServiceJourney, processor.publicationTimestamp, sourceFileName);
             }
         }
-        log.info("Added {} rows in {} ms", diffCounter, (System.currentTimeMillis()-t1));
+        log.info("Added {} ServiceJourneys for {} days in {} ms", processor.serviceJourneys.size(), dayCounter, (System.currentTimeMillis()-t1));
         log.info(datedServiceJourneyService.toString());
     }
 
