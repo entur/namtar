@@ -26,6 +26,7 @@ import org.rutebanken.netex.model.DayTypeRefs_RelStructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.JAXBElement;
@@ -46,9 +47,20 @@ public class NetexLoader {
     private final DatedServiceJourneyService datedServiceJourneyService;
     private final BlobStoreRepository repository;
 
-    public NetexLoader(@Autowired DatedServiceJourneyService datedServiceJourneyServicey, @Autowired BlobStoreRepository repository) {
+    private File tmpFileDirectory;
+
+    public NetexLoader(@Autowired DatedServiceJourneyService datedServiceJourneyServicey,
+                       @Autowired BlobStoreRepository repository,
+                       @Value("${namtar.tempfile.directory:/tmp}") String tmpFileDirectoryPath) {
         this.datedServiceJourneyService = datedServiceJourneyServicey;
         this.repository = repository;
+        tmpFileDirectory = new File(tmpFileDirectoryPath);
+        if (!tmpFileDirectory.exists()) {
+            boolean created = tmpFileDirectory.mkdirs();
+            log.info("Created tmp-directory with path {}, success: {}", tmpFileDirectoryPath, created);
+        } else {
+            log.info("Using tmp-directory with path {}, already existed.", tmpFileDirectoryPath);
+        }
     }
 
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -79,6 +91,7 @@ public class NetexLoader {
 
                         log.info("{} read - download {} ms, process {} ms", name, (process-download), (done-process));
                     }
+                    blobIterator.remove();
                 }
                 log.info("Loaded {} netex-files in {} ms", counter, ( System.currentTimeMillis()-t1 ));
             } finally {
@@ -126,7 +139,7 @@ public class NetexLoader {
     }
 
     private String getFileFromInputStream(InputStream inputStream) throws IOException {
-        File f = File.createTempFile("netex", ".zip");
+        File f = File.createTempFile("netex", ".zip", tmpFileDirectory);
 
         // opens an output stream to save into file
         FileOutputStream outputStream = new FileOutputStream(f);
