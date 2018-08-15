@@ -90,6 +90,6 @@ public class DatedServiceJourneyService {
 
     @Override
     public String toString() {
-        return "serviceJourneyCount: " + serviceJourney_privateCodeMap.size() + ", privateCodeCount: " + privateCode_datedServiceJourneyMap.size() + ", generatid ids " + idCounter;
+        return "serviceJourneyCount: " + serviceJourney_privateCodeMap.size() + ", privateCodeCount: " + privateCode_datedServiceJourneyMap.size() + ", generated ids " + idCounter;
     }
 }
