@@ -82,14 +82,16 @@ public class NetexLoader {
                         counter++;
                         alreadyProcessedBlobName.add(name);
 
-                        long download = System.currentTimeMillis();
-                        String absolutePath = getFileFromInputStream(repository.getBlob(name));
-                        long process = System.currentTimeMillis();
                         String filename = name.substring(name.lastIndexOf("/") + 1);
-                        processNetexFile(absolutePath, filename);
-                        long done = System.currentTimeMillis();
+                        if (!filename.isEmpty()) {
+                            long download = System.currentTimeMillis();
+                            String absolutePath = getFileFromInputStream(repository.getBlob(name), filename);
+                            long process = System.currentTimeMillis();
+                            processNetexFile(absolutePath, filename);
+                            long done = System.currentTimeMillis();
 
-                        log.info("{} read - download {} ms, process {} ms", name, (process-download), (done-process));
+                            log.info("{} read - download {} ms, process {} ms", name, (process - download), (done - process));
+                        }
                     }
                     blobIterator.remove();
                 }
@@ -138,11 +140,11 @@ public class NetexLoader {
         log.info(datedServiceJourneyService.toString());
     }
 
-    private String getFileFromInputStream(InputStream inputStream) throws IOException {
-        File f = File.createTempFile("netex", ".zip", tmpFileDirectory);
+    private String getFileFromInputStream(InputStream inputStream, String fileName) throws IOException {
+        File file = new File(tmpFileDirectory, fileName);
 
         // opens an output stream to save into file
-        FileOutputStream outputStream = new FileOutputStream(f);
+        FileOutputStream outputStream = new FileOutputStream(file);
 
         int bytesRead = -1;
         byte[] buffer = new byte[2048];
@@ -152,6 +154,6 @@ public class NetexLoader {
 
         outputStream.close();
         inputStream.close();
-        return f.getAbsolutePath();
+        return file.getAbsolutePath();
     }
 }
