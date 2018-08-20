@@ -40,6 +40,8 @@ public class DatedServiceJourneyService {
 
     Map<String, DatedServiceJourney> privateCode_datedServiceJourneyMap = new HashMap<>();
 
+    Map<String, DatedServiceJourney> serviceJourney_datedServiceJourneyMap = new HashMap<>();
+
     public void save(ServiceJourney serviceJourney, LocalDateTime publicationTimestamp, String sourceFileName) {
 
         // Create serviceJourney-key
@@ -48,15 +50,23 @@ public class DatedServiceJourneyService {
         // privateCode is unique per day
         String privateCodeKey = serviceJourney.getPrivateCode() + "_" + serviceJourney.getDepartureDate();
 
-        serviceJourney_privateCodeMap.put(serviceJourneyKey, privateCodeKey);
+        String existingKey = serviceJourney_privateCodeMap.put(serviceJourneyKey, privateCodeKey);
+        if (existingKey != null && existingKey.equals(privateCodeKey)) {
+            // Already exists - no need to update
+            return;
+        }
 
+        // Check to see if departure with same privateCode already exists...
         DatedServiceJourney datedServiceJourney = privateCode_datedServiceJourneyMap.get(privateCodeKey);
 
-
         String datedServiceJourneyId = generateDatedServiceJourneyId();
-        String originalDatedServiceJourney = datedServiceJourneyId;
+        String originalDatedServiceJourney;
         if (datedServiceJourney != null) {
+            // ...exists - set original Id
             originalDatedServiceJourney = datedServiceJourney.getOriginalDatedServiceJourneyId();
+        } else {
+            // ...does not exist - use current as original Id
+            originalDatedServiceJourney = datedServiceJourneyId;
         }
 
         DatedServiceJourney newDatedServiceJourney = new DatedServiceJourney(
@@ -65,7 +75,13 @@ public class DatedServiceJourneyService {
                                                                 publicationTimestamp,
                                                                 sourceFileName);
 
-        privateCode_datedServiceJourneyMap.put(privateCodeKey, newDatedServiceJourney);
+        // Save relation between serviceJourney and DatedServiceJourney
+        serviceJourney_datedServiceJourneyMap.put(serviceJourneyKey, newDatedServiceJourney);
+
+        if (!privateCode_datedServiceJourneyMap.containsKey(privateCodeKey)) {
+            // Save privateCode with future originalId
+            privateCode_datedServiceJourneyMap.put(privateCodeKey, newDatedServiceJourney);
+        }
 
         //Add mapping for reverse lookup
         Set<ServiceJourney> serviceJourneys = datedServiceJourney_serviceJourneyMap.getOrDefault(datedServiceJourneyId, new HashSet<>());
@@ -79,9 +95,7 @@ public class DatedServiceJourneyService {
 
     public DatedServiceJourney findDatedServiceJourneys(String serviceJourneyId, String version, String departureDate) {
 
-        String privateCodeKey = serviceJourney_privateCodeMap.get(serviceJourneyId + "_" + departureDate);
-
-        return privateCode_datedServiceJourneyMap.get(privateCodeKey);
+        return serviceJourney_datedServiceJourneyMap.get(serviceJourneyId + "_" + departureDate);
     }
 
     private String generateDatedServiceJourneyId() {
@@ -90,6 +104,6 @@ public class DatedServiceJourneyService {
 
     @Override
     public String toString() {
-        return "serviceJourneyCount: " + serviceJourney_privateCodeMap.size() + ", privateCodeCount: " + privateCode_datedServiceJourneyMap.size() + ", generated ids " + idCounter;
+        return "departures: " + serviceJourney_privateCodeMap.size() + ", privateCode_date: " + privateCode_datedServiceJourneyMap.size() + ", generated ids " + idCounter;
     }
 }

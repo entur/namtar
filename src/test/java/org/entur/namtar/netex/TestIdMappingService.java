@@ -63,7 +63,10 @@ public class TestIdMappingService {
         DatedServiceJourney matches = service.findDatedServiceJourneys("NSB:ServiceJourney:1", "latest", departureDate);
         DatedServiceJourney matches_2 = service.findDatedServiceJourneys("NSB:ServiceJourney:444444", "latest", departureDate);
 
-        assertEquals("Should have gotten the same id.", matches, matches_2);
+        assertFalse(matches.equals(matches_2));
+        assertFalse(matches.getDatedServiceJourneyId().equals(matches_2.getDatedServiceJourneyId()));
+
+        assertEquals("Should have gotten the same Original id.", matches.getOriginalDatedServiceJourneyId(), matches_2.getOriginalDatedServiceJourneyId());
     }
 
     @Test
