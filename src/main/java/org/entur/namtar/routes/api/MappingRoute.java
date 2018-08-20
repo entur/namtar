@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
+import org.apache.camel.Exchange;
 import org.apache.camel.model.rest.RestParamType;
 import org.entur.namtar.repository.DatedServiceJourneyService;
 import org.entur.namtar.routes.RestRouteBuilder;
@@ -59,14 +60,26 @@ public class MappingRoute extends RestRouteBuilder {
 
         from("direct:lookup.datedservicejourney.version.date")
                 .bean(repository, "findServiceJourneysByDatedServiceJourney(${header.datedServiceJourneyId})")
-                .bean(mapper, "writeValueAsString(${body})")
-                .routeId("lookup.datedServiceJourney")
+                .to("direct:createResponse")
+                .routeId("namtar.datedServiceJourney")
         ;
 
         from("direct:lookup.servicejourney.version.date")
                 .bean(repository, "findDatedServiceJourneys(${header.serviceJourneyId}, ${header.version}, ${header.date})")
+                .to("direct:createResponse")
+                .routeId("namtar.serviceJourney")
+        ;
+
+        from("direct:createResponse")
+            .choice()
+                .when(body().isNull())
+                    .log("Body is null")
+                    .setHeader(Exchange.HTTP_RESPONSE_CODE, constant("404"))
+                .otherwise()
+                .log("Body is [${body}]")
                 .bean(mapper, "writeValueAsString(${body})")
-                .routeId("lookup.serviceJourney")
+            .endChoice()
+            .routeId("namtar.createResponse")
         ;
     }
 }
