@@ -73,11 +73,9 @@ public class MappingRoute extends RestRouteBuilder {
         from("direct:createResponse")
             .choice()
                 .when(body().isNull())
-                    .log("Body is null")
                     .setHeader(Exchange.HTTP_RESPONSE_CODE, constant("404"))
                 .otherwise()
-                .log("Body is [${body}]")
-                .bean(mapper, "writeValueAsString(${body})")
+                    .bean(mapper, "writeValueAsString(${body})")
             .endChoice()
             .routeId("namtar.createResponse")
         ;
