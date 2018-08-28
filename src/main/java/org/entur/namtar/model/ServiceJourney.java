@@ -30,7 +30,6 @@
 
 package org.entur.namtar.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -42,15 +41,13 @@ public class ServiceJourney {
 
     private String privateCode;
 
-    @JsonIgnore
     private String departureTime;
 
-    @JsonIgnore
     private String lineRef;
 
-    private String version;
+    private Integer version;
 
-    public ServiceJourney(String serviceJourneyId, String version, String privateCode, String lineRef, String departureDate, String departureTime) {
+    public ServiceJourney(String serviceJourneyId, Integer version, String privateCode, String lineRef, String departureDate, String departureTime) {
         this.serviceJourneyId = serviceJourneyId;
         this.version = version;
         this.privateCode = privateCode;
@@ -99,6 +96,14 @@ public class ServiceJourney {
         this.privateCode = privateCode;
     }
 
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -131,11 +136,4 @@ public class ServiceJourney {
                 .toHashCode();
     }
 
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
-    }
 }

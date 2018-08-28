@@ -42,12 +42,16 @@ public class BlobStoreRoute extends RouteBuilder {
         log.info("Check with cron-expression [{}], first upload at: {}.", cronExpression,
                 new CronExpression(cronExpression).getNextValidTimeAfter(new Date()));
 
-        // If successful, delete file from bucket
+
+        // TODO: Use singleton route to support multiple instances
         from("quartz2://namtar.blobstore.polling?cron=" + cronExpression)
                 .to("direct:getAllBlobs")
                 .bean(netexLoader, "loadNetexFromBlobStore")
                 .routeId("namtar-blobstore.polling")
         ;
+
+        // TODO: If successful, delete/move file from bucket
+
 
         from("direct:getAllBlobs")
                 .to("log:" + getClass().getName() + "?level=DEBUG&showAll=true&multiline=true")

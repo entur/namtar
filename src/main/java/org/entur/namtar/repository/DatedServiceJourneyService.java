@@ -15,51 +15,59 @@
 
 package org.entur.namtar.repository;
 
+import com.google.gson.JsonObject;
 import org.entur.namtar.model.DatedServiceJourney;
 import org.entur.namtar.model.ServiceJourney;
+import org.entur.namtar.netex.NetexLoader;
+import org.entur.namtar.services.DataStorageService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.time.format.DateTimeFormatter;
 
 @Repository
 public class DatedServiceJourneyService {
 
+    protected static Logger logger = LoggerFactory.getLogger(NetexLoader.class);
+
+
+    private final DataStorageService storageService;
+
     @Value("${namtar.generated.id.prefix}")
     private String GENERATED_ID_PREFIX;
-    private int idCounter;
 
-    // Reverse mapping
-    Map<String, Set<ServiceJourney>> datedServiceJourney_serviceJourneyMap = new HashMap<>();
+    private long nextId;
 
-    Map<String, String> serviceJourney_privateCodeMap = new HashMap<>();
 
-    Map<String, DatedServiceJourney> privateCode_datedServiceJourneyMap = new HashMap<>();
+    public DatedServiceJourneyService(@Autowired DataStorageService storageService) throws IOException, InterruptedException {
+        this.storageService = storageService;
+        nextId = storageService.findNextCreationNumber();
+    }
 
-    Map<String, DatedServiceJourney> serviceJourney_datedServiceJourneyMap = new HashMap<>();
+    public DatedServiceJourney createDatedServiceJourney(ServiceJourney serviceJourney, LocalDateTime publicationTimestamp, String sourceFileName) {
 
-    public void save(ServiceJourney serviceJourney, LocalDateTime publicationTimestamp, String sourceFileName) {
+        long t1 = System.currentTimeMillis();
 
-        // Create serviceJourney-key
-        String serviceJourneyKey = serviceJourney.getServiceJourneyId() + "_" + serviceJourney.getDepartureDate();
+        // TODO: Handle versions
 
-        // privateCode is unique per day
-        String privateCodeKey = serviceJourney.getPrivateCode() + "_" + serviceJourney.getDepartureDate();
+        DatedServiceJourney alreadyProcessed = storageService.findByServiceJourneyIdAndDate(serviceJourney.getServiceJourneyId(), serviceJourney.getDepartureDate());
+        long t2 = System.currentTimeMillis()-t1;
 
-        String existingKey = serviceJourney_privateCodeMap.put(serviceJourneyKey, privateCodeKey);
-        if (existingKey != null && existingKey.equals(privateCodeKey)) {
-            // Already exists - no need to update
-            return;
+        if (alreadyProcessed != null) {
+            return null;
         }
 
         // Check to see if departure with same privateCode already exists...
-        DatedServiceJourney datedServiceJourney = privateCode_datedServiceJourneyMap.get(privateCodeKey);
+        DatedServiceJourney datedServiceJourney = storageService.findByPrivateCodeDepartureDate(serviceJourney.getPrivateCode(), serviceJourney.getDepartureDate());
 
-        String datedServiceJourneyId = generateDatedServiceJourneyId();
+        long creationNumber = nextId++;
+
+        String datedServiceJourneyId = generateDatedServiceJourneyId(creationNumber);
         String originalDatedServiceJourney;
         if (datedServiceJourney != null) {
             // ...exists - set original Id
@@ -69,41 +77,66 @@ public class DatedServiceJourneyService {
             originalDatedServiceJourney = datedServiceJourneyId;
         }
 
-        DatedServiceJourney newDatedServiceJourney = new DatedServiceJourney(
-                                                                datedServiceJourneyId,
-                                                                originalDatedServiceJourney,
-                                                                publicationTimestamp,
-                                                                sourceFileName);
+        DatedServiceJourney storageDatedServiceJourney = new DatedServiceJourney();
+        storageDatedServiceJourney.setServiceJourneyId(serviceJourney.getServiceJourneyId());
+        storageDatedServiceJourney.setDepartureDate(serviceJourney.getDepartureDate());
+        storageDatedServiceJourney.setDepartureTime(serviceJourney.getDepartureTime());
+        storageDatedServiceJourney.setPrivateCode(serviceJourney.getPrivateCode());
+        storageDatedServiceJourney.setLineRef(serviceJourney.getLineRef());
+        storageDatedServiceJourney.setVersion(serviceJourney.getVersion());
+        storageDatedServiceJourney.setDatedServiceJourneyId(datedServiceJourneyId);
+        storageDatedServiceJourney.setDatedServiceJourneyCreationNumber(creationNumber);
+        storageDatedServiceJourney.setOriginalDatedServiceJourneyId(originalDatedServiceJourney);
+        storageDatedServiceJourney.setPublicationTimestamp(publicationTimestamp.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        storageDatedServiceJourney.setSourceFileName(sourceFileName);
 
-        // Save relation between serviceJourney and DatedServiceJourney
-        serviceJourney_datedServiceJourneyMap.put(serviceJourneyKey, newDatedServiceJourney);
-
-        if (!privateCode_datedServiceJourneyMap.containsKey(privateCodeKey)) {
-            // Save privateCode with future originalId
-            privateCode_datedServiceJourneyMap.put(privateCodeKey, newDatedServiceJourney);
-        }
-
-        //Add mapping for reverse lookup
-        Set<ServiceJourney> serviceJourneys = datedServiceJourney_serviceJourneyMap.getOrDefault(datedServiceJourneyId, new HashSet<>());
-        serviceJourneys.add(serviceJourney);
-        datedServiceJourney_serviceJourneyMap.put(datedServiceJourneyId, serviceJourneys);
+        return storageDatedServiceJourney;
     }
 
-    public Set<ServiceJourney> findServiceJourneysByDatedServiceJourney(String datedServiceJourneyId) {
-        return datedServiceJourney_serviceJourneyMap.get(datedServiceJourneyId);
+    public DatedServiceJourney findServiceJourneysByDatedServiceJourney(String datedServiceJourneyId) {
+        DatedServiceJourney datedServiceJourney = storageService.findByDatedServiceJourneyId(datedServiceJourneyId);
+        return datedServiceJourney;
     }
 
     public DatedServiceJourney findDatedServiceJourneys(String serviceJourneyId, String version, String departureDate) {
 
-        return serviceJourney_datedServiceJourneyMap.get(serviceJourneyId + "_" + departureDate);
+        //TODO: Handle versions
+
+        DatedServiceJourney datedServiceJourney = storageService.findByServiceJourneyIdAndDate(serviceJourneyId, departureDate);
+
+        return datedServiceJourney;
     }
 
-    private String generateDatedServiceJourneyId() {
-        return GENERATED_ID_PREFIX + idCounter++;
+    private String generateDatedServiceJourneyId(long creationNumber) {
+        return GENERATED_ID_PREFIX + creationNumber;
     }
 
-    @Override
-    public String toString() {
-        return "departures: " + serviceJourney_privateCodeMap.size() + ", privateCode_date: " + privateCode_datedServiceJourneyMap.size() + ", generated ids " + idCounter;
+    public DataStorageService getStorageService() {
+        return storageService;
+    }
+
+
+    public String getServiceJourneyAsJson(DatedServiceJourney datedServiceJourney) {
+        if (datedServiceJourney == null) {
+            return null;
+        }
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("datedServiceJourneyId", datedServiceJourney.getDatedServiceJourneyId());
+        jsonObject.addProperty("originalDatedServiceJourneyId", datedServiceJourney.getOriginalDatedServiceJourneyId());
+        jsonObject.addProperty("publicationTimestamp", datedServiceJourney.getPublicationTimestamp());
+        jsonObject.addProperty("sourceFileName", datedServiceJourney.getSourceFileName());
+        return jsonObject.toString();
+    }
+
+    public String getDatedServiceJourneyAsJson(DatedServiceJourney datedServiceJourney) {
+        if (datedServiceJourney == null) {
+            return null;
+        }
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("serviceJourneyId", datedServiceJourney.getServiceJourneyId());
+        jsonObject.addProperty("departureDate", datedServiceJourney.getDepartureDate());
+        jsonObject.addProperty("privateCode", datedServiceJourney.getPrivateCode());
+        jsonObject.addProperty("version", datedServiceJourney.getVersion());
+        return jsonObject.toString();
     }
 }

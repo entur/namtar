@@ -16,6 +16,7 @@
 package org.entur.namtar.netex;
 
 import com.google.cloud.storage.Blob;
+import org.entur.namtar.model.DatedServiceJourney;
 import org.entur.namtar.model.ServiceJourney;
 import org.entur.namtar.repository.BlobStoreRepository;
 import org.entur.namtar.repository.DatedServiceJourneyService;
@@ -35,9 +36,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.format.DateTimeFormatter;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.List;
 
 @Service
 public class NetexLoader {
@@ -49,10 +50,10 @@ public class NetexLoader {
 
     private File tmpFileDirectory;
 
-    public NetexLoader(@Autowired DatedServiceJourneyService datedServiceJourneyServicey,
+    public NetexLoader(@Autowired DatedServiceJourneyService datedServiceJourneyService,
                        @Autowired BlobStoreRepository repository,
                        @Value("${namtar.tempfile.directory:/tmp}") String tmpFileDirectoryPath) {
-        this.datedServiceJourneyService = datedServiceJourneyServicey;
+        this.datedServiceJourneyService = datedServiceJourneyService;
         this.repository = repository;
         tmpFileDirectory = new File(tmpFileDirectoryPath);
         if (!tmpFileDirectory.exists()) {
@@ -63,10 +64,9 @@ public class NetexLoader {
         }
     }
 
-    private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE;///ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm");
 
-    private static final Set<String> alreadyProcessedBlobName = new HashSet<>();
     private static boolean isLoadingData;
 
     public void loadNetexFromBlobStore(Iterator<Blob> blobIterator) throws IOException {
@@ -78,11 +78,11 @@ public class NetexLoader {
                 while (blobIterator.hasNext()) {
                     Blob next = blobIterator.next();
                     String name = next.getName();
-                    if (!alreadyProcessedBlobName.contains(name)) {
-                        counter++;
-                        alreadyProcessedBlobName.add(name);
+                    String filename = name.substring(name.lastIndexOf("/") + 1);
 
-                        String filename = name.substring(name.lastIndexOf("/") + 1);
+                    if (!datedServiceJourneyService.getStorageService().isAlreadyProcessed(filename)) {
+                        counter++;
+
                         if (!filename.isEmpty()) {
                             long download = System.currentTimeMillis();
                             String absolutePath = getFileFromInputStream(repository.getBlob(name), filename);
@@ -114,11 +114,12 @@ public class NetexLoader {
         log.info("Reading file {} took {} ms", pathname, (System.currentTimeMillis()-t1));
 
         t1 = System.currentTimeMillis();
+        List<DatedServiceJourney> datedServiceJourneys = new ArrayList<>();
         int dayCounter = 0;
         for (org.rutebanken.netex.model.ServiceJourney serviceJourney : processor.serviceJourneys) {
 
             String serviceJourneyId = serviceJourney.getId();
-            String version = serviceJourney.getVersion();
+            Integer version = Integer.parseInt(serviceJourney.getVersion());
             String lineRef = serviceJourney.getLineRef().getValue().getRef();
             String departureTime = serviceJourney.getPassingTimes().getTimetabledPassingTime().get(0).getDepartureTime().format(timeFormatter);
 
@@ -133,9 +134,15 @@ public class NetexLoader {
 
                 ServiceJourney currentServiceJourney = new ServiceJourney(serviceJourneyId, version, privateCode, lineRef, departureDate, departureTime);
 
-                datedServiceJourneyService.save(currentServiceJourney, processor.publicationTimestamp, sourceFileName);
+                DatedServiceJourney datedServiceJourney = datedServiceJourneyService.createDatedServiceJourney(currentServiceJourney, processor.publicationTimestamp, sourceFileName);
+                if (datedServiceJourney != null) { // If null, it already exists and should not be added
+                    datedServiceJourneys.add(datedServiceJourney);
+                }
             }
         }
+
+        datedServiceJourneyService.getStorageService().addDatedServiceJourneys(datedServiceJourneys);
+
         log.info("Added {} ServiceJourneys for {} days in {} ms", processor.serviceJourneys.size(), dayCounter, (System.currentTimeMillis()-t1));
         log.info(datedServiceJourneyService.toString());
     }
@@ -143,10 +150,10 @@ public class NetexLoader {
     private String getFileFromInputStream(InputStream inputStream, String fileName) throws IOException {
         File file = new File(tmpFileDirectory, fileName);
 
-        // opens an output stream to save into file
+        // opens an output stream to createDatedServiceJourney into file
         FileOutputStream outputStream = new FileOutputStream(file);
 
-        int bytesRead = -1;
+        int bytesRead;
         byte[] buffer = new byte[2048];
         while ((bytesRead = inputStream.read(buffer)) != -1) {
             outputStream.write(buffer, 0, bytesRead);

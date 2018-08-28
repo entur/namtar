@@ -48,6 +48,9 @@ public class MappingRoute extends RestRouteBuilder {
         mapper.registerModule(new JaxbAnnotationModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
+
+        //TODO: Handle request for multiple DatedServiceJourneys
+
         rest("/api")
             .get("/{serviceJourneyId}/{version}/{date}").produces("text/json").to("direct:lookup.servicejourney.version.date")
                 .param().required(true).name("serviceJourneyId").type(RestParamType.path).description("The id of the serviceJourney to look up").dataType("string").endParam()

@@ -15,28 +15,93 @@
 
 package org.entur.namtar.model;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.springframework.format.annotation.DateTimeFormat;
 
-import java.time.LocalDateTime;
-
-@JsonPropertyOrder({"datedServiceJourneyId", "publicationTimestamp", "sourceFileName", "originalDatedServiceJourneyId"})
 public class DatedServiceJourney {
 
 
-    private final String datedServiceJourneyId;
+    private String serviceJourneyId;
 
-    private final LocalDateTime publicationTimestamp;
+    private String departureDate;
 
-    private final String sourceFileName;
+    private String privateCode;
 
-    private final String originalDatedServiceJourneyId;
+    private String departureTime;
+
+    private String lineRef;
+
+    private Integer version;
+
+    private String datedServiceJourneyId;
+
+    private String publicationTimestamp;
+
+    private String sourceFileName;
+
+    private String originalDatedServiceJourneyId;
+
+    @JsonIgnore
+    private long datedServiceJourneyCreationNumber;
+
+    public DatedServiceJourney() {
+
+    }
+
+
+    public String getServiceJourneyId() {
+        return serviceJourneyId;
+    }
+
+    public void setServiceJourneyId(String serviceJourneyId) {
+        this.serviceJourneyId = serviceJourneyId;
+    }
+
+    public String getLineRef() {
+        return lineRef;
+    }
+
+    public void setLineRef(String lineRef) {
+        this.lineRef = lineRef;
+    }
+
+    public String getDepartureDate() {
+        return departureDate;
+    }
+
+    public void setDepartureDate(String departureDate) {
+        this.departureDate = departureDate;
+    }
+
+    public String getDepartureTime() {
+        return departureTime;
+    }
+
+    public void setDepartureTime(String departureTime) {
+        this.departureTime = departureTime;
+    }
+
+    public String getPrivateCode() {
+        return privateCode;
+    }
+
+    public void setPrivateCode(String privateCode) {
+        this.privateCode = privateCode;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
+    }
+
 
     private int hashcode;
 
-    public DatedServiceJourney(String datedServiceJourneyId, String originalDatedServiceJourneyId, LocalDateTime publicationTimestamp, String sourceFileName) {
+    public DatedServiceJourney(String datedServiceJourneyId, String originalDatedServiceJourneyId, String publicationTimestamp, String sourceFileName) {
         this.datedServiceJourneyId = datedServiceJourneyId;
         this.originalDatedServiceJourneyId = originalDatedServiceJourneyId;
         this.publicationTimestamp = publicationTimestamp;
@@ -56,9 +121,25 @@ public class DatedServiceJourney {
         return sourceFileName;
     }
 
-    @DateTimeFormat(iso = DateTimeFormat.ISO.TIME)
-    public LocalDateTime getPublicationTimestamp() {
+    public String getPublicationTimestamp() {
         return publicationTimestamp;
+    }
+
+
+    public void setDatedServiceJourneyId(String datedServiceJourneyId) {
+        this.datedServiceJourneyId = datedServiceJourneyId;
+    }
+
+    public void setPublicationTimestamp(String publicationTimestamp) {
+        this.publicationTimestamp = publicationTimestamp;
+    }
+
+    public void setSourceFileName(String sourceFileName) {
+        this.sourceFileName = sourceFileName;
+    }
+
+    public void setOriginalDatedServiceJourneyId(String originalDatedServiceJourneyId) {
+        this.originalDatedServiceJourneyId = originalDatedServiceJourneyId;
     }
 
     public String getOriginalDatedServiceJourneyId() {
@@ -93,5 +174,13 @@ public class DatedServiceJourney {
                     .toHashCode();
         }
         return hashcode;
+    }
+
+    public void setDatedServiceJourneyCreationNumber(long datedServiceJourneyCreationNumber) {
+        this.datedServiceJourneyCreationNumber = datedServiceJourneyCreationNumber;
+    }
+
+    public long getDatedServiceJourneyCreationNumber() {
+        return datedServiceJourneyCreationNumber;
     }
 }
