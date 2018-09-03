@@ -17,8 +17,7 @@ package org.entur.namtar.netex;
 
 import org.entur.namtar.App;
 import org.entur.namtar.model.DatedServiceJourney;
-import org.entur.namtar.model.ServiceJourney;
-import org.entur.namtar.repository.DatedServiceJourneyService;
+import org.entur.namtar.services.DatedServiceJourneyService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,6 +36,7 @@ public class TestIdMappingService {
 
     @Autowired
     DatedServiceJourneyService service;
+
     private LocalDateTime publicationTimestamp;
     private String sourceFileName = "tmp.zip";
 
@@ -53,11 +53,11 @@ public class TestIdMappingService {
         String departureDate = "2018-01-01";
         String departureTime = "12:00";
 
-        ServiceJourney serviceJourney = new ServiceJourney("NSB:ServiceJourney:1", 0, privateCode, lineRef, departureDate, departureTime);
+        DatedServiceJourney serviceJourney = new DatedServiceJourney("NSB:ServiceJourney:1", 0, privateCode, lineRef, departureDate, departureTime);
         service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(serviceJourney, publicationTimestamp, sourceFileName));
 
         // Add ServiceJourney that matches, but with different serviceJourneyId
-        ServiceJourney serviceJourney2 = new ServiceJourney("NSB:ServiceJourney:444444", 0, privateCode, lineRef, departureDate, departureTime);
+        DatedServiceJourney serviceJourney2 = new DatedServiceJourney("NSB:ServiceJourney:444444", 0, privateCode, lineRef, departureDate, departureTime);
         service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(serviceJourney2, publicationTimestamp, sourceFileName));
 
         DatedServiceJourney matches = service.findDatedServiceJourneys("NSB:ServiceJourney:1", "latest", departureDate);
@@ -72,11 +72,11 @@ public class TestIdMappingService {
     @Test
     public void testAddNewServiceJourney() {
 
-        ServiceJourney serviceJourney = new ServiceJourney("NSB:ServiceJourney:2", 0,  "812", "NSB:Line:L1", "2018-01-01", "12:00");
+        DatedServiceJourney serviceJourney = new DatedServiceJourney("NSB:ServiceJourney:2", 0,  "812", "NSB:Line:L1", "2018-01-01", "12:00");
         service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(serviceJourney, publicationTimestamp, sourceFileName));
 
         // Add ServiceJourney with same serviceJourneyId, that should not match
-        ServiceJourney serviceJourney2 = new ServiceJourney("NSB:ServiceJourney:2", 0, "812", "NSB:Line:L1", "2018-01-02", "12:00");
+        DatedServiceJourney serviceJourney2 = new DatedServiceJourney("NSB:ServiceJourney:2", 0, "812", "NSB:Line:L1", "2018-01-02", "12:00");
         service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(serviceJourney2, publicationTimestamp, sourceFileName));
 
         DatedServiceJourney matches = service.findDatedServiceJourneys("NSB:ServiceJourney:2", "latest", "2018-01-01");
@@ -88,40 +88,12 @@ public class TestIdMappingService {
         assertFalse("Should have gotten different ids from different versions", matches.equals(matches_2));
     }
 
-//    @Test
-//    public void testAddNewServiceJourneyVersion() {
-//
-//
-//        LocalDateTime publicationTimestamp = this.publicationTimestamp.minusDays(1);
-//        service.createDatedServiceJourney(new ServiceJourney("NSB:ServiceJourney:2", "0",  "812", "NSB:Line:L1", "2018-01-01", "12:00"), publicationTimestamp, null);
-//        service.createDatedServiceJourney(new ServiceJourney("NSB:ServiceJourney:2", "0",  "812", "NSB:Line:L1", "2018-01-02", "12:00"), publicationTimestamp, null);
-//
-//        List<DatedServiceJourney> expectedOldMatch = service.findDatedServiceJourneys("NSB:ServiceJourney:2", "latest", "2018-01-02");
-//
-//
-//        // Add ServiceJourney with same serviceJourneyId, that should not match
-//        service.createDatedServiceJourney(new ServiceJourney("NSB:ServiceJourney:2", "1", "812", "NSB:Line:L1", "2018-01-02", "12:00"), this.publicationTimestamp, null);
-//
-//
-//        DatedServiceJourney matches = service.findDatedServiceJourneys("NSB:ServiceJourney:2", "latest", "2018-01-01");
-//        DatedServiceJourney matches_2 = service.findDatedServiceJourneys("NSB:ServiceJourney:2",  null, "2018-01-02");
-//
-//        assertFalse("Should have gotten different ids from different versions", matches.equals(matches_2));
-//        assertTrue(expectedOldMatch.size() == 1);
-//        assertTrue(matches.size() == 1);
-//        assertTrue(matches_2.size() == 2);
-//
-//        // Previous version should also be returned
-//        assertFalse(matches_2.contains(matches.get(0)));
-//        assertTrue(matches_2.contains(expectedOldMatch.get(0)));
-//    }
-    
     @Test
     public void testReverseSearch() {
 
         LocalDateTime publicationTimestamp = this.publicationTimestamp.minusDays(1);
-        service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(new ServiceJourney("NSB:ServiceJourney:2", 0,  "812", "NSB:Line:L1", "2018-01-01", "12:00"), publicationTimestamp, sourceFileName));
-        service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(new ServiceJourney("NSB:ServiceJourney:2", 0,  "812", "NSB:Line:L1", "2018-01-02", "12:00"), publicationTimestamp, sourceFileName));
+        service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(new DatedServiceJourney("NSB:ServiceJourney:2", 0,  "812", "NSB:Line:L1", "2018-01-01", "12:00"), publicationTimestamp, sourceFileName));
+        service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(new DatedServiceJourney("NSB:ServiceJourney:2", 0,  "812", "NSB:Line:L1", "2018-01-02", "12:00"), publicationTimestamp, sourceFileName));
 
         DatedServiceJourney expectedOldMatch = service.findDatedServiceJourneys("NSB:ServiceJourney:2", "latest", "2018-01-02");
 

@@ -13,50 +13,49 @@
  * limitations under the Licence.
  */
 
-package org.entur.namtar.repository;
+package org.entur.namtar.services;
 
-import com.google.gson.JsonObject;
 import org.entur.namtar.model.DatedServiceJourney;
-import org.entur.namtar.model.ServiceJourney;
-import org.entur.namtar.netex.NetexLoader;
-import org.entur.namtar.services.DataStorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-@Repository
+@Service
 public class DatedServiceJourneyService {
 
-    protected static Logger logger = LoggerFactory.getLogger(NetexLoader.class);
+    protected static Logger logger = LoggerFactory.getLogger(DatedServiceJourneyService.class);
 
 
-    private final DataStorageService storageService;
+    private DataStorageService storageService;
 
-    @Value("${namtar.generated.id.prefix}")
     private String GENERATED_ID_PREFIX;
 
     private long nextId;
 
 
-    public DatedServiceJourneyService(@Autowired DataStorageService storageService) throws IOException, InterruptedException {
+    public DatedServiceJourneyService(@Autowired DataStorageService storageService,
+                                      @Value("${namtar.generated.id.prefix}") String idPrefix)
+            throws IOException, InterruptedException {
         this.storageService = storageService;
         nextId = storageService.findNextCreationNumber();
+        GENERATED_ID_PREFIX = idPrefix;
     }
 
-    public DatedServiceJourney createDatedServiceJourney(ServiceJourney serviceJourney, LocalDateTime publicationTimestamp, String sourceFileName) {
+    public DatedServiceJourney createDatedServiceJourney(DatedServiceJourney serviceJourney, LocalDateTime publicationTimestamp, String sourceFileName) {
 
         long t1 = System.currentTimeMillis();
 
         // TODO: Handle versions
 
         DatedServiceJourney alreadyProcessed = storageService.findByServiceJourneyIdAndDate(serviceJourney.getServiceJourneyId(), serviceJourney.getDepartureDate());
-        long t2 = System.currentTimeMillis()-t1;
+        long t2 = System.currentTimeMillis();
 
         if (alreadyProcessed != null) {
             return null;
@@ -64,7 +63,11 @@ public class DatedServiceJourneyService {
 
         // Check to see if departure with same privateCode already exists...
         DatedServiceJourney datedServiceJourney = storageService.findByPrivateCodeDepartureDate(serviceJourney.getPrivateCode(), serviceJourney.getDepartureDate());
+        long t3 = System.currentTimeMillis();
 
+        if (((t2-t1) > 10) & (t3-t2 > 10)) {
+            logger.info("Check existing: serviceJourneyId: {} ms, privateCode: {} ms", (t2 - t1), (t3 - t2));
+        }
         long creationNumber = nextId++;
 
         String datedServiceJourneyId = generateDatedServiceJourneyId(creationNumber);
@@ -78,6 +81,7 @@ public class DatedServiceJourneyService {
         }
 
         DatedServiceJourney storageDatedServiceJourney = new DatedServiceJourney();
+        storageDatedServiceJourney.setCreatedDate(new Timestamp(System.currentTimeMillis()));
         storageDatedServiceJourney.setServiceJourneyId(serviceJourney.getServiceJourneyId());
         storageDatedServiceJourney.setDepartureDate(serviceJourney.getDepartureDate());
         storageDatedServiceJourney.setDepartureTime(serviceJourney.getDepartureTime());
@@ -85,7 +89,7 @@ public class DatedServiceJourneyService {
         storageDatedServiceJourney.setLineRef(serviceJourney.getLineRef());
         storageDatedServiceJourney.setVersion(serviceJourney.getVersion());
         storageDatedServiceJourney.setDatedServiceJourneyId(datedServiceJourneyId);
-        storageDatedServiceJourney.setDatedServiceJourneyCreationNumber(creationNumber);
+        storageDatedServiceJourney.setCreationNumber(creationNumber);
         storageDatedServiceJourney.setOriginalDatedServiceJourneyId(originalDatedServiceJourney);
         storageDatedServiceJourney.setPublicationTimestamp(publicationTimestamp.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         storageDatedServiceJourney.setSourceFileName(sourceFileName);
@@ -113,30 +117,5 @@ public class DatedServiceJourneyService {
 
     public DataStorageService getStorageService() {
         return storageService;
-    }
-
-
-    public String getServiceJourneyAsJson(DatedServiceJourney datedServiceJourney) {
-        if (datedServiceJourney == null) {
-            return null;
-        }
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("datedServiceJourneyId", datedServiceJourney.getDatedServiceJourneyId());
-        jsonObject.addProperty("originalDatedServiceJourneyId", datedServiceJourney.getOriginalDatedServiceJourneyId());
-        jsonObject.addProperty("publicationTimestamp", datedServiceJourney.getPublicationTimestamp());
-        jsonObject.addProperty("sourceFileName", datedServiceJourney.getSourceFileName());
-        return jsonObject.toString();
-    }
-
-    public String getDatedServiceJourneyAsJson(DatedServiceJourney datedServiceJourney) {
-        if (datedServiceJourney == null) {
-            return null;
-        }
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("serviceJourneyId", datedServiceJourney.getServiceJourneyId());
-        jsonObject.addProperty("departureDate", datedServiceJourney.getDepartureDate());
-        jsonObject.addProperty("privateCode", datedServiceJourney.getPrivateCode());
-        jsonObject.addProperty("version", datedServiceJourney.getVersion());
-        return jsonObject.toString();
     }
 }

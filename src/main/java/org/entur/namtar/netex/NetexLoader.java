@@ -17,9 +17,8 @@ package org.entur.namtar.netex;
 
 import com.google.cloud.storage.Blob;
 import org.entur.namtar.model.DatedServiceJourney;
-import org.entur.namtar.model.ServiceJourney;
-import org.entur.namtar.repository.BlobStoreRepository;
-import org.entur.namtar.repository.DatedServiceJourneyService;
+import org.entur.namtar.repository.blobstore.BlobStoreRepository;
+import org.entur.namtar.services.DatedServiceJourneyService;
 import org.rutebanken.netex.model.DayType;
 import org.rutebanken.netex.model.DayTypeAssignment;
 import org.rutebanken.netex.model.DayTypeRefStructure;
@@ -81,14 +80,19 @@ public class NetexLoader {
                     String filename = name.substring(name.lastIndexOf("/") + 1);
 
                     if (!datedServiceJourneyService.getStorageService().isAlreadyProcessed(filename)) {
-                        counter++;
 
                         if (!filename.isEmpty()) {
+                            counter++;
+
+                            datedServiceJourneyService.getStorageService().setFileStatus(filename, false);
+
                             long download = System.currentTimeMillis();
                             String absolutePath = getFileFromInputStream(repository.getBlob(name), filename);
                             long process = System.currentTimeMillis();
                             processNetexFile(absolutePath, filename);
                             long done = System.currentTimeMillis();
+
+                            datedServiceJourneyService.getStorageService().setFileStatus(filename, true);
 
                             log.info("{} read - download {} ms, process {} ms", name, (process - download), (done - process));
                         }
@@ -115,7 +119,8 @@ public class NetexLoader {
 
         t1 = System.currentTimeMillis();
         List<DatedServiceJourney> datedServiceJourneys = new ArrayList<>();
-        int dayCounter = 0;
+        int departureCounter = 0;
+        int ignoreCounter = 0;
         for (org.rutebanken.netex.model.ServiceJourney serviceJourney : processor.serviceJourneys) {
 
             String serviceJourneyId = serviceJourney.getId();
@@ -124,7 +129,7 @@ public class NetexLoader {
             String departureTime = serviceJourney.getPassingTimes().getTimetabledPassingTime().get(0).getDepartureTime().format(timeFormatter);
 
             DayTypeRefs_RelStructure dayTypes = serviceJourney.getDayTypes();
-            dayCounter += dayTypes.getDayTypeRef().size();
+            departureCounter += dayTypes.getDayTypeRef().size();
             for (JAXBElement<? extends DayTypeRefStructure> dayTypeRef : dayTypes.getDayTypeRef()) {
 
                 DayType dayType = processor.dayTypeById.get(dayTypeRef.getValue().getRef());
@@ -132,18 +137,21 @@ public class NetexLoader {
                 String departureDate = dayTypeAssignment.getDate().format(dateFormatter);
                 String privateCode = serviceJourney.getPrivateCode().getValue();
 
-                ServiceJourney currentServiceJourney = new ServiceJourney(serviceJourneyId, version, privateCode, lineRef, departureDate, departureTime);
+                DatedServiceJourney currentServiceJourney = new DatedServiceJourney(serviceJourneyId, version, privateCode, lineRef, departureDate, departureTime);
 
                 DatedServiceJourney datedServiceJourney = datedServiceJourneyService.createDatedServiceJourney(currentServiceJourney, processor.publicationTimestamp, sourceFileName);
                 if (datedServiceJourney != null) { // If null, it already exists and should not be added
                     datedServiceJourneys.add(datedServiceJourney);
+                    datedServiceJourneyService.getStorageService().addDatedServiceJourney(datedServiceJourney);
+                } else {
+                    ignoreCounter++;
                 }
             }
         }
 
-        datedServiceJourneyService.getStorageService().addDatedServiceJourneys(datedServiceJourneys);
+//        datedServiceJourneyService.getStorageService().addDatedServiceJourneys(datedServiceJourneys);
 
-        log.info("Added {} ServiceJourneys for {} days in {} ms", processor.serviceJourneys.size(), dayCounter, (System.currentTimeMillis()-t1));
+        log.info("Added {} ServiceJourneys with {} departures in {} ms. {} already existed.", processor.serviceJourneys.size(), departureCounter, (System.currentTimeMillis()-t1), ignoreCounter);
         log.info(datedServiceJourneyService.toString());
     }
 

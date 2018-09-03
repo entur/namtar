@@ -13,7 +13,7 @@
  * limitations under the Licence.
  */
 
-package org.entur.namtar.repository.blobstore;
+package org.entur.namtar.repository.blobstore.config;
 
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;

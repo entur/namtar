@@ -19,8 +19,21 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import javax.persistence.*;
+import java.sql.Timestamp;
+
+@Entity
+@Table(indexes = {@Index(name = "serviceJourney_date_idx", columnList = "serviceJourneyId, departureDate"),
+                    @Index(name = "privateCode_date_idx", columnList = "privateCode, departureDate")}
+        )
 public class DatedServiceJourney {
 
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @Transient
+    private int hashcode;
 
     private String serviceJourneyId;
 
@@ -43,12 +56,31 @@ public class DatedServiceJourney {
     private String originalDatedServiceJourneyId;
 
     @JsonIgnore
-    private long datedServiceJourneyCreationNumber;
+    private long creationNumber;
+
+    @JsonIgnore
+    private Timestamp createdDate;
 
     public DatedServiceJourney() {
 
     }
 
+    public DatedServiceJourney(String serviceJourneyId, Integer version, String privateCode, String lineRef, String departureDate, String departureTime) {
+        this.serviceJourneyId = serviceJourneyId;
+        this.version = version;
+        this.privateCode = privateCode;
+        this.lineRef = lineRef;
+        this.departureDate = departureDate;
+        this.departureTime = departureTime;
+    }
+
+    public Timestamp getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Timestamp createdDate) {
+        this.createdDate = createdDate;
+    }
 
     public String getServiceJourneyId() {
         return serviceJourneyId;
@@ -99,7 +131,6 @@ public class DatedServiceJourney {
     }
 
 
-    private int hashcode;
 
     public DatedServiceJourney(String datedServiceJourneyId, String originalDatedServiceJourneyId, String publicationTimestamp, String sourceFileName) {
         this.datedServiceJourneyId = datedServiceJourneyId;
@@ -159,28 +190,49 @@ public class DatedServiceJourney {
         DatedServiceJourney that = (DatedServiceJourney) o;
 
         return new EqualsBuilder()
+                .append(creationNumber, that.creationNumber)
+                .append(id, that.id)
+                .append(serviceJourneyId, that.serviceJourneyId)
+                .append(departureDate, that.departureDate)
+                .append(privateCode, that.privateCode)
+                .append(departureTime, that.departureTime)
+                .append(lineRef, that.lineRef)
+                .append(version, that.version)
                 .append(datedServiceJourneyId, that.datedServiceJourneyId)
-                .append(originalDatedServiceJourneyId, that.originalDatedServiceJourneyId)
                 .append(publicationTimestamp, that.publicationTimestamp)
+                .append(sourceFileName, that.sourceFileName)
+                .append(originalDatedServiceJourneyId, that.originalDatedServiceJourneyId)
+                .append(createdDate, that.createdDate)
                 .isEquals();
     }
 
     @Override
     public int hashCode() {
-        if (hashcode == 0) {
+        if (hashcode < 0) {
             hashcode = new HashCodeBuilder(17, 37)
+                    .append(id)
+                    .append(serviceJourneyId)
+                    .append(departureDate)
+                    .append(privateCode)
+                    .append(departureTime)
+                    .append(lineRef)
+                    .append(version)
                     .append(datedServiceJourneyId)
                     .append(publicationTimestamp)
+                    .append(sourceFileName)
+                    .append(originalDatedServiceJourneyId)
+                    .append(creationNumber)
+                    .append(createdDate)
                     .toHashCode();
         }
         return hashcode;
     }
 
-    public void setDatedServiceJourneyCreationNumber(long datedServiceJourneyCreationNumber) {
-        this.datedServiceJourneyCreationNumber = datedServiceJourneyCreationNumber;
+    public void setCreationNumber(long creationNumber) {
+        this.creationNumber = creationNumber;
     }
 
-    public long getDatedServiceJourneyCreationNumber() {
-        return datedServiceJourneyCreationNumber;
+    public long getCreationNumber() {
+        return creationNumber;
     }
 }

@@ -15,27 +15,23 @@
 
 package org.entur.namtar.repository.blobstore;
 
+import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Storage;
-import org.rutebanken.helper.gcp.BlobStoreHelper;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
-@Configuration
-@Profile("gcs-blobstore")
-public class GcsStorageConfig {
+import java.io.InputStream;
+import java.util.Iterator;
 
-    @Value("${blobstore.gcs.credential.path}")
-    private String credentialPath;
+public interface BlobStoreRepository {
 
-    @Value("${blobstore.gcs.project.id}")
-    private String projectId;
+//    boolean delete(BlobId blobId);
 
-    @Bean
-    public Storage storage() {
-        return BlobStoreHelper.getStorage(credentialPath, projectId);
-    }
+    Iterator<Blob> listBlobs(String prefix);
+
+    InputStream getBlob(String objectName);
+
+    void setStorage(Storage storage);
+
+    void setContainerName(String containerName);
 
 
 }

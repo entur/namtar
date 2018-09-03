@@ -18,7 +18,7 @@ package org.entur.namtar.services;
 
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Storage;
-import org.entur.namtar.repository.BlobStoreRepository;
+import org.entur.namtar.repository.blobstore.BlobStoreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

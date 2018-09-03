@@ -13,38 +13,29 @@
  * limitations under the Licence.
  */
 
-package org.entur.namtar.repository;
+package org.entur.namtar.repository.blobstore.config;
 
-import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Storage;
+import org.rutebanken.helper.gcp.BlobStoreHelper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Repository;
 
-import java.io.InputStream;
-import java.util.Iterator;
+@Configuration
+@Profile("gcs-blobstore")
+public class GcsStorageConfig {
 
-@Repository
-@Profile("in-memory-blobstore")
-public class InMemoryBlobStoreRepository implements BlobStoreRepository {
+    @Value("${blobstore.gcs.credential.path}")
+    private String credentialPath;
 
-    @Override
-    public Iterator<Blob> listBlobs(String prefix) {
-        return null;
+    @Value("${blobstore.gcs.project.id}")
+    private String projectId;
+
+    @Bean
+    public Storage storage() {
+        return BlobStoreHelper.getStorage(credentialPath, projectId);
     }
 
-    @Override
-    public InputStream getBlob(String objectName) {
-        return null;
-    }
-
-    @Override
-    public void setStorage(Storage storage) {
-
-    }
-
-    @Override
-    public void setContainerName(String containerName) {
-
-    }
 
 }
