@@ -127,6 +127,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-hazelcast</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.entur</groupId>
             <artifactId>netex-java-model</artifactId>
             <version>1.0.8-SNAPSHOT</version>
@@ -222,6 +227,18 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.5</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.entur.helpers</groupId>
+            <artifactId>hazelcast-helper</artifactId>
+            <version>0.0.3-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast</artifactId>
+            <version>3.9.4</version>
         </dependency>
 
         <!-- testing -->

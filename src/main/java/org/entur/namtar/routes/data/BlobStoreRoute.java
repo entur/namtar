@@ -15,8 +15,8 @@
 
 package org.entur.namtar.routes.data;
 
-import org.apache.camel.builder.RouteBuilder;
 import org.entur.namtar.netex.NetexLoader;
+import org.entur.namtar.routes.RestRouteBuilder;
 import org.quartz.CronExpression;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 
 @Service
-public class BlobStoreRoute extends RouteBuilder {
+public class BlobStoreRoute extends RestRouteBuilder {
 
     private final NetexLoader netexLoader;
 
@@ -42,12 +42,17 @@ public class BlobStoreRoute extends RouteBuilder {
         log.info("Check with cron-expression [{}], first upload at: {}.", cronExpression,
                 new CronExpression(cronExpression).getNextValidTimeAfter(new Date()));
 
-
-        // TODO: Use singleton route to support multiple instances
-        from("quartz2://namtar.blobstore.polling?cron=" + cronExpression)
-                .to("direct:getAllBlobs")
-                .bean(netexLoader, "loadNetexFromBlobStore")
-                .routeId("namtar-blobstore.polling")
+        singletonFrom("quartz2://namtar.blobstore.polling?cron=" + cronExpression,
+                "namtar.blobstore.singleton.polling")
+                .choice()
+                .when(p -> isLeader(p.getFromRouteId()))
+                    .log("Is leader - polling for new files")
+                    .to("direct:getAllBlobs")
+                    .bean(netexLoader, "loadNetexFromBlobStore")
+                .endChoice()
+                .otherwise()
+                    .log("Is NOT leader - doing nothing")
+                .end()
         ;
 
         // TODO: If successful, delete/move file from bucket

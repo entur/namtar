@@ -16,7 +16,15 @@
 package org.entur.namtar.routes;
 
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.hazelcast.policy.HazelcastRoutePolicy;
+import org.apache.camel.model.RouteDefinition;
+import org.apache.camel.spi.RouteContext;
+import org.apache.camel.spi.RoutePolicy;
 import org.springframework.beans.factory.annotation.Value;
+
+import java.util.List;
+
+import static org.entur.namtar.routes.policy.SingletonRoutePolicyFactory.SINGLETON_ROUTE_DEFINITION_GROUP_NAME;
 
 public class RestRouteBuilder extends RouteBuilder {
 
@@ -33,5 +41,28 @@ public class RestRouteBuilder extends RouteBuilder {
                     // and enable CORS
                     .apiProperty("cors", "true")
         ;
+    }
+
+    /**
+     * Create a new singleton route definition from URI. Only one such route should be active throughout the cluster at any time.
+     */
+    protected RouteDefinition singletonFrom(String uri, String routeId) {
+        return this.from(uri)
+                .group(SINGLETON_ROUTE_DEFINITION_GROUP_NAME)
+                .routeId(routeId)
+                .autoStartup(true);
+    }
+
+    protected boolean isLeader(String routeId) {
+        RouteContext routeContext = getContext().getRoute(routeId).getRouteContext();
+        List<RoutePolicy> routePolicyList = routeContext.getRoutePolicyList();
+        if (routePolicyList != null) {
+            for (RoutePolicy routePolicy : routePolicyList) {
+                if (routePolicy instanceof HazelcastRoutePolicy) {
+                    return ((HazelcastRoutePolicy) (routePolicy)).isLeader();
+                }
+            }
+        }
+        return false;
     }
 }
