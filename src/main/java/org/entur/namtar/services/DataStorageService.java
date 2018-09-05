@@ -37,7 +37,8 @@ public class DataStorageService {
     private final StorageRepository repository;
 
     Cache<String, DatedServiceJourney> cache = CacheBuilder.newBuilder()
-            .expireAfterAccess(1, TimeUnit.HOURS)
+            .expireAfterAccess(1, TimeUnit.DAYS)
+            .recordStats()
             .build();
 
     Cache<String, String> sourceFileNameCache = CacheBuilder.newBuilder()
@@ -45,18 +46,15 @@ public class DataStorageService {
             .build();
 
     private Date lastCacheUpdate;
+    private int searchCount;
 
     public DataStorageService(StorageRepository repository) {
         this.repository = repository;
 
-        populateCacheFromDatastore();
+        populateCache(lastCacheUpdate);
     }
 
-    public void populateCacheFromDatastore() {
-        populateCacheFromDatastore(lastCacheUpdate);
-    }
-
-    public void populateCacheFromDatastore(Date date) {
+    private void populateCache(Date date) {
 
         lastCacheUpdate = new Date();
         long queryStart = System.currentTimeMillis();
@@ -112,6 +110,9 @@ public class DataStorageService {
     }
 
     protected DatedServiceJourney findInCache(String... keys) {
+        if (searchCount++ % 1000 ==  0) {
+            logger.info("Searches: {}, Cache stats: {}", searchCount, cache.stats());
+        }
         return cache.getIfPresent(createCacheKey(keys));
     }
 

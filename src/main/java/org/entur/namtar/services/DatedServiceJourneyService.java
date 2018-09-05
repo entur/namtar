@@ -16,6 +16,8 @@
 package org.entur.namtar.services;
 
 import org.entur.namtar.model.DatedServiceJourney;
+import org.entur.namtar.routes.api.DatedServiceJourneyParam;
+import org.entur.namtar.routes.api.ServiceJourneyParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,8 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class DatedServiceJourneyService {
@@ -97,18 +101,44 @@ public class DatedServiceJourneyService {
         return storageDatedServiceJourney;
     }
 
-    public DatedServiceJourney findServiceJourneysByDatedServiceJourney(String datedServiceJourneyId) {
+    public DatedServiceJourney findServiceJourneyByDatedServiceJourney(String datedServiceJourneyId) {
         DatedServiceJourney datedServiceJourney = storageService.findByDatedServiceJourneyId(datedServiceJourneyId);
         return datedServiceJourney;
     }
 
-    public DatedServiceJourney findDatedServiceJourneys(String serviceJourneyId, String version, String departureDate) {
+
+    public List<DatedServiceJourney> findServiceJourneysByDatedServiceJourneys(DatedServiceJourneyParam... datedServiceJourneyParams) {
+
+        List<DatedServiceJourney> result = new ArrayList<>();
+        for (DatedServiceJourneyParam datedServiceJourneyParam : datedServiceJourneyParams) {
+            DatedServiceJourney serviceJourney = storageService.findByDatedServiceJourneyId(datedServiceJourneyParam.datedServiceJourneyId);
+            if (serviceJourney != null) {
+                result.add(serviceJourney);
+            }
+        }
+
+        return result;
+    }
+
+    public DatedServiceJourney findDatedServiceJourney(String serviceJourneyId, String version, String departureDate) {
 
         //TODO: Handle versions
 
         DatedServiceJourney datedServiceJourney = storageService.findByServiceJourneyIdAndDate(serviceJourneyId, departureDate);
 
         return datedServiceJourney;
+    }
+
+    public List<DatedServiceJourney> findDatedServiceJourneys(ServiceJourneyParam... serviceJourneyParams) {
+        List<DatedServiceJourney> result = new ArrayList<>();
+        for (ServiceJourneyParam serviceJourneyParam : serviceJourneyParams) {
+            DatedServiceJourney datedServiceJourney = storageService.findByServiceJourneyIdAndDate(serviceJourneyParam.serviceJourneyId, serviceJourneyParam.departureDate);
+            if (datedServiceJourney != null) {
+                result.add(datedServiceJourney);
+            }
+        }
+
+        return result;
     }
 
     private String generateDatedServiceJourneyId(long creationNumber) {

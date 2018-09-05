@@ -63,8 +63,8 @@ public class TestIdMappingService {
         DatedServiceJourney serviceJourney2 = new DatedServiceJourney(serviceJourneyId_2, 0, privateCode, lineRef, departureDate, departureTime);
         service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(serviceJourney2, publicationTimestamp, sourceFileName));
 
-        DatedServiceJourney matches = service.findDatedServiceJourneys(serviceJourneyId, "latest", departureDate);
-        DatedServiceJourney matches_2 = service.findDatedServiceJourneys(serviceJourneyId_2, "latest", departureDate);
+        DatedServiceJourney matches = service.findDatedServiceJourney(serviceJourneyId, "latest", departureDate);
+        DatedServiceJourney matches_2 = service.findDatedServiceJourney(serviceJourneyId_2, "latest", departureDate);
 
         assertFalse(matches.equals(matches_2));
         assertFalse(matches.getDatedServiceJourneyId().equals(matches_2.getDatedServiceJourneyId()));
@@ -84,8 +84,8 @@ public class TestIdMappingService {
         DatedServiceJourney serviceJourney2 = new DatedServiceJourney(serviceJourneyId, 0, "812", "NSB:Line:L1", "2018-01-02", "12:00");
         service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(serviceJourney2, publicationTimestamp, sourceFileName));
 
-        DatedServiceJourney matches = service.findDatedServiceJourneys(serviceJourneyId, "latest", "2018-01-01");
-        DatedServiceJourney matches_2 = service.findDatedServiceJourneys(serviceJourneyId, "latest", "2018-01-02");
+        DatedServiceJourney matches = service.findDatedServiceJourney(serviceJourneyId, "latest", "2018-01-01");
+        DatedServiceJourney matches_2 = service.findDatedServiceJourney(serviceJourneyId, "latest", "2018-01-02");
 
         assertNotNull(matches);
         assertNotNull(matches_2);
@@ -101,9 +101,9 @@ public class TestIdMappingService {
         service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(new DatedServiceJourney(serviceJourneyId, 0,  "812", "NSB:Line:L1", "2018-01-01", "12:00"), publicationTimestamp, sourceFileName));
         service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(new DatedServiceJourney(serviceJourneyId, 0,  "812", "NSB:Line:L1", "2018-01-02", "12:00"), publicationTimestamp, sourceFileName));
 
-        DatedServiceJourney expectedOldMatch = service.findDatedServiceJourneys(serviceJourneyId, "latest", "2018-01-02");
+        DatedServiceJourney expectedOldMatch = service.findDatedServiceJourney(serviceJourneyId, "latest", "2018-01-02");
 
-        DatedServiceJourney serviceJourney = service.findServiceJourneysByDatedServiceJourney(expectedOldMatch.getDatedServiceJourneyId());
+        DatedServiceJourney serviceJourney = service.findServiceJourneyByDatedServiceJourney(expectedOldMatch.getDatedServiceJourneyId());
 
         assertNotNull(serviceJourney);
         assertEquals(serviceJourneyId, serviceJourney.getServiceJourneyId());

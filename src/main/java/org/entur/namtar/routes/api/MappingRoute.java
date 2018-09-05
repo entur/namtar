@@ -27,6 +27,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 
+import java.io.InputStream;
+
 
 @Service
 @Configuration
@@ -52,25 +54,53 @@ public class MappingRoute extends RestRouteBuilder {
         //TODO: Handle request for multiple DatedServiceJourneys
 
         rest("/api")
-            .get("/{serviceJourneyId}/{version}/{date}").produces("text/json").to("direct:lookup.servicejourney.version.date")
+            .get("/{serviceJourneyId}/{version}/{date}").produces("text/json").to("direct:lookup.single.servicejourney.version.date")
                 .param().required(true).name("serviceJourneyId").type(RestParamType.path).description("The id of the serviceJourney to look up").dataType("string").endParam()
                 .param().required(true).name("version").type(RestParamType.path).description("Specific version or `latest`").dataType("string").endParam()
                 .param().required(true).name("date").type(RestParamType.path).description("Date").dataType("string").endParam()
 
-            .get("/{datedServiceJourneyId}").produces("text/json").to("direct:lookup.datedservicejourney.version.date")
+             .post("/query").type(ServiceJourneyParam[].class).consumes("application/json").produces("text/json")
+                .param().name("body").type(RestParamType.body).description("The ServiceJourneys to look up").endParam()
+                .to("direct:lookup.multiple.servicejourneys.version.date")
+
+
+            .get("/{datedServiceJourneyId}").produces("text/json").to("direct:lookup.single.datedservicejourney")
                 .param().required(true).name("datedServiceJourneyId").type(RestParamType.path).description("DatedServiceJourney to lookup").dataType("string").endParam()
+            .post("/reverse-query").type(DatedServiceJourneyParam[].class).consumes("application/json").produces("text/json")
+                .param().name("body").type(RestParamType.body).description("The DatedServiceJourneys to look up").endParam()
+                .to("direct:lookup.multiple.datedservicejourneys")
+
         ;
 
-        from("direct:lookup.datedservicejourney.version.date")
-                .bean(repository, "findServiceJourneysByDatedServiceJourney(${header.datedServiceJourneyId})")
+        from("direct:lookup.single.datedservicejourney")
+                .bean(repository, "findServiceJourneyByDatedServiceJourney(${header.datedServiceJourneyId})")
                 .to("direct:createResponse")
-                .routeId("namtar.datedServiceJourney")
+                .routeId("namtar.single.datedServiceJourney")
         ;
 
-        from("direct:lookup.servicejourney.version.date")
-                .bean(repository, "findDatedServiceJourneys(${header.serviceJourneyId}, ${header.version}, ${header.date})")
+        from("direct:lookup.multiple.datedservicejourneys")
+                .process((Exchange p) -> {
+                    p.getOut().setBody(mapper.readValue(p.getIn().getBody(InputStream.class), DatedServiceJourneyParam[].class));
+                })
+                .bean(repository, "findServiceJourneysByDatedServiceJourneys(${body})")
                 .to("direct:createResponse")
-                .routeId("namtar.serviceJourney")
+                .routeId("namtar.multiple.datedServiceJourneys")
+        ;
+
+        from("direct:lookup.single.servicejourney.version.date")
+                .bean(repository, "findDatedServiceJourney(${header.serviceJourneyId}, ${header.version}, ${header.date})")
+                .to("direct:createResponse")
+                .routeId("namtar.single.serviceJourney")
+        ;
+
+
+        from("direct:lookup.multiple.servicejourneys.version.date")
+                .process((Exchange p) -> {
+                    p.getOut().setBody(mapper.readValue(p.getIn().getBody(InputStream.class), ServiceJourneyParam[].class));
+                })
+                .bean(repository, "findDatedServiceJourneys(${body})")
+                .to("direct:createResponse")
+                .routeId("namtar.multiple.serviceJourneys")
         ;
 
         from("direct:createResponse")
