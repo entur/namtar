@@ -36,7 +36,7 @@ public interface DatedServiceJourneyRepository extends JpaRepository<DatedServic
 
     List<DatedServiceJourney> findDatedServiceJourneysByCreatedDateAfter(Date createdDate);
 
-    DatedServiceJourney findByPrivateCodeAndDepartureDate(String privateCode, String departureDate);
+    DatedServiceJourney findFirstByPrivateCodeAndDepartureDateOrderByCreationNumberAsc(String privateCode, String departureDate);
 
     @Query("select count(sourceFileName) from DatedServiceJourney where sourceFileName = ?1")
     int findDistinctFirstBySourceFileName(String sourceFileName);

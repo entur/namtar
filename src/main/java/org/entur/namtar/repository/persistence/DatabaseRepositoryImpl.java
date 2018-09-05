@@ -79,7 +79,7 @@ public class DatabaseRepositoryImpl implements StorageRepository {
 
     @Override
     public DatedServiceJourney findByPrivateCodeDepartureDate(String privateCode, String departureDate) {
-        return datedServiceJourneyRepository.findByPrivateCodeAndDepartureDate(privateCode, departureDate);
+        return datedServiceJourneyRepository.findFirstByPrivateCodeAndDepartureDateOrderByCreationNumberAsc(privateCode, departureDate);
     }
 
     @Override
