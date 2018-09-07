@@ -64,7 +64,7 @@ public class NetexLoader {
     }
 
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE;///ofPattern("yyyy-MM-dd");
-    private static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm");
+    private static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
     private static boolean isLoadingData;
 
