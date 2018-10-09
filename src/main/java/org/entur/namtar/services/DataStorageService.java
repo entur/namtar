@@ -135,6 +135,10 @@ public class DataStorageService {
         return addToCache(repository.findByDatedServiceJourneyId(datedServiceJourneyId));
     }
 
+    public Collection<DatedServiceJourney> findByOriginalDatedServiceJourneyId(String datedServiceJourneyId) {
+        return repository.findByOriginalDatedServiceJourneyId(datedServiceJourneyId);
+    }
+
     public DatedServiceJourney findByPrivateCodeDepartureDate(String privateCode, String departureDate) {
         DatedServiceJourney cachedValue = findInCache(privateCode, departureDate);
         if (cachedValue != null) {

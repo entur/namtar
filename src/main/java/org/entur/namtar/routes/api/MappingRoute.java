@@ -65,17 +65,27 @@ public class MappingRoute extends RestRouteBuilder {
 
 
             .get("/{datedServiceJourneyId}").produces("text/json").to("direct:lookup.single.datedservicejourney")
+                .description("DEPRECATED: Use `/dated/{datedServiceJourneyId}`")
+            .get("/dated/{datedServiceJourneyId}").produces("text/json").to("direct:lookup.single.datedservicejourney")
                 .param().required(true).name("datedServiceJourneyId").type(RestParamType.path).description("DatedServiceJourney to lookup").dataType("string").endParam()
+            .get("/original/{originalDatedServiceJourneyId}").produces("text/json").to("direct:lookup.original.datedservicejourney")
+                .param().required(true).name("originalDatedServiceJourneyId").type(RestParamType.path).description("OriginalDatedServiceJourney to lookup").dataType("string").endParam()
+
             .post("/reverse-query").type(DatedServiceJourneyParam[].class).consumes("application/json").produces("text/json")
                 .param().name("body").type(RestParamType.body).description("The DatedServiceJourneys to look up").endParam()
                 .to("direct:lookup.multiple.datedservicejourneys")
-
         ;
 
         from("direct:lookup.single.datedservicejourney")
                 .bean(repository, "findServiceJourneyByDatedServiceJourney(${header.datedServiceJourneyId})")
                 .to("direct:createResponse")
                 .routeId("namtar.single.datedServiceJourney")
+        ;
+
+        from("direct:lookup.original.datedservicejourney")
+                .bean(repository, "findServiceJourneysByOriginalDatedServiceJourney(${header.originalDatedServiceJourneyId})")
+                .to("direct:createResponse")
+                .routeId("namtar.original.datedServiceJourney")
         ;
 
         from("direct:lookup.multiple.datedservicejourneys")

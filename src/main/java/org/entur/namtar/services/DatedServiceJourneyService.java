@@ -29,6 +29,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -102,10 +103,13 @@ public class DatedServiceJourneyService {
     }
 
     public DatedServiceJourney findServiceJourneyByDatedServiceJourney(String datedServiceJourneyId) {
-        DatedServiceJourney datedServiceJourney = storageService.findByDatedServiceJourneyId(datedServiceJourneyId);
-        return datedServiceJourney;
+        return storageService.findByDatedServiceJourneyId(datedServiceJourneyId);
     }
 
+
+    public Collection<DatedServiceJourney> findServiceJourneysByOriginalDatedServiceJourney(String datedServiceJourneyId) {
+        return storageService.findByOriginalDatedServiceJourneyId(datedServiceJourneyId);
+    }
 
     public List<DatedServiceJourney> findServiceJourneysByDatedServiceJourneys(DatedServiceJourneyParam... datedServiceJourneyParams) {
 

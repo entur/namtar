@@ -40,6 +40,8 @@ public interface StorageRepository {
 
     DatedServiceJourney findByDatedServiceJourneyId(String datedServiceJourneyId);
 
+    Collection<DatedServiceJourney> findByOriginalDatedServiceJourneyId(String originalDatedServiceJourneyId);
+
     DatedServiceJourney findByPrivateCodeDepartureDate(String privateCode, String departureDate);
 
     SourceFile findSourceFileByName(String sourceFileName);

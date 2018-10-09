@@ -103,8 +103,11 @@ public class TestIdMappingService {
 
         DatedServiceJourney expectedOldMatch = service.findDatedServiceJourney(serviceJourneyId, "latest", "2018-01-02");
 
-        DatedServiceJourney serviceJourney = service.findServiceJourneyByDatedServiceJourney(expectedOldMatch.getDatedServiceJourneyId());
+        DatedServiceJourney serviceJourney = (DatedServiceJourney) service.findServiceJourneyByDatedServiceJourney(expectedOldMatch.getDatedServiceJourneyId());
 
+//        assertNotNull(serviceJourneys);
+//
+//        DatedServiceJourney serviceJourney = serviceJourneys.iterator().next();
         assertNotNull(serviceJourney);
         assertEquals(serviceJourneyId, serviceJourney.getServiceJourneyId());
         assertEquals("2018-01-02", serviceJourney.getDepartureDate());

@@ -32,6 +32,8 @@ public interface DatedServiceJourneyRepository extends JpaRepository<DatedServic
 
     DatedServiceJourney findByDatedServiceJourneyId(String datedServiceJourneyId);
 
+    List<DatedServiceJourney> findByOriginalDatedServiceJourneyIdOrderByPublicationTimestampDesc(String originalDatedServiceJourneyId);
+
     List<DatedServiceJourney> findDatedServiceJourneysByDepartureDateGreaterThan(String departureDate);
 
     List<DatedServiceJourney> findDatedServiceJourneysByCreatedDateAfter(Date createdDate);

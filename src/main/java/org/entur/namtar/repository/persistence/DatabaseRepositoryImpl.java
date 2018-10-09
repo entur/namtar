@@ -78,6 +78,11 @@ public class DatabaseRepositoryImpl implements StorageRepository {
     }
 
     @Override
+    public Collection<DatedServiceJourney> findByOriginalDatedServiceJourneyId(String originalDatedServiceJourneyId) {
+        return datedServiceJourneyRepository.findByOriginalDatedServiceJourneyIdOrderByPublicationTimestampDesc(originalDatedServiceJourneyId);
+    }
+
+    @Override
     public DatedServiceJourney findByPrivateCodeDepartureDate(String privateCode, String departureDate) {
         return datedServiceJourneyRepository.findFirstByPrivateCodeAndDepartureDateOrderByCreationNumberAsc(privateCode, departureDate);
     }
