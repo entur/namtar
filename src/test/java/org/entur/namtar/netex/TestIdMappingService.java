@@ -26,6 +26,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 
 import static junit.framework.TestCase.*;
 
@@ -103,14 +104,34 @@ public class TestIdMappingService {
 
         DatedServiceJourney expectedOldMatch = service.findDatedServiceJourney(serviceJourneyId, "latest", "2018-01-02");
 
-        DatedServiceJourney serviceJourney = (DatedServiceJourney) service.findServiceJourneyByDatedServiceJourney(expectedOldMatch.getDatedServiceJourneyId());
+        DatedServiceJourney serviceJourney = service.findServiceJourneyByDatedServiceJourney(expectedOldMatch.getDatedServiceJourneyId());
 
-//        assertNotNull(serviceJourneys);
-//
-//        DatedServiceJourney serviceJourney = serviceJourneys.iterator().next();
         assertNotNull(serviceJourney);
         assertEquals(serviceJourneyId, serviceJourney.getServiceJourneyId());
         assertEquals("2018-01-02", serviceJourney.getDepartureDate());
+    }
+
+
+    @Test
+    public void testReverseSearchForOriginalDatedServiceJourney() {
+
+        LocalDateTime publicationTimestamp = this.publicationTimestamp.minusDays(1);
+        DatedServiceJourney datedServiceJourney_1 = service.createDatedServiceJourney(new DatedServiceJourney("NSB:ServiceJourney:1111", 0, "812", "NSB:Line:L1", "2018-01-01", "12:00"), publicationTimestamp, sourceFileName);
+        service.getStorageService().addDatedServiceJourney(datedServiceJourney_1);
+
+        String originalDatedServiceJourneyId = datedServiceJourney_1.getOriginalDatedServiceJourneyId();
+
+        DatedServiceJourney datedServiceJourney_2 = service.createDatedServiceJourney(new DatedServiceJourney("NSB:ServiceJourney:2222", 0, "812", "NSB:Line:L1", "2018-01-01", "12:00"), publicationTimestamp, sourceFileName);
+        service.getStorageService().addDatedServiceJourney(datedServiceJourney_2);
+
+
+        assertEquals(datedServiceJourney_1.getOriginalDatedServiceJourneyId(), datedServiceJourney_2.getOriginalDatedServiceJourneyId());
+
+        Collection<DatedServiceJourney> serviceJourneys = service.findServiceJourneysByOriginalDatedServiceJourney(originalDatedServiceJourneyId);
+
+        assertNotNull(serviceJourneys);
+        assertTrue(serviceJourneys.contains(datedServiceJourney_1));
+        assertTrue(serviceJourneys.contains(datedServiceJourney_2));
     }
 
 }
