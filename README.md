@@ -1,4 +1,4 @@
-# namtar
+# namtar [![CircleCI](https://circleci.com/gh/entur/namtar/tree/master.svg?style=svg)](https://circleci.com/gh/entur/namtar/tree/master)
 
 Application responsible for producing and providing persistent DatedServiceJourneyIds from NeTEx-data
 
