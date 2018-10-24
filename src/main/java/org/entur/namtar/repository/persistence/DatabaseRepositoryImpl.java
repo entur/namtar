@@ -41,8 +41,9 @@ public class DatabaseRepositoryImpl implements StorageRepository {
     @Override
     public Collection<DatedServiceJourney> getAllFutureDatedServiceJourneys(Date createdDate, int departureDateOffset) {
         if (createdDate == null) {
-            String departureDate = getDepartureDateCacheLimit(departureDateOffset);
-            return datedServiceJourneyRepository.findDatedServiceJourneysByDepartureDateGreaterThan(departureDate);
+            String departureDateFrom = getDepartureDateCacheLimit(departureDateOffset);
+            String departureDateTo = getDepartureDateCacheLimit(1); //Preloading cache for first day
+            return datedServiceJourneyRepository.findDatedServiceJourneysByDepartureDateGreaterThanAndDepartureDateLessThan(departureDateFrom, departureDateTo);
         }
         return datedServiceJourneyRepository.findDatedServiceJourneysByCreatedDateAfter(createdDate);
     }

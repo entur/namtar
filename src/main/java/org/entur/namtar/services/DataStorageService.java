@@ -60,7 +60,7 @@ public class DataStorageService {
         long queryStart = System.currentTimeMillis();
 
 
-        Collection<DatedServiceJourney> results = repository.getAllFutureDatedServiceJourneys(date, -2);
+        Collection<DatedServiceJourney> results = repository.getAllFutureDatedServiceJourneys(date, 0);
         long queryRun = System.currentTimeMillis();
 
         // Add to cache
