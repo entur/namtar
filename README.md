@@ -11,27 +11,27 @@ http://<server>:<port>/path/health/up
 
 # Usage
 Lookup serviceJourneyId and date
-``` 
+```
 http://<server>:<port>/path/api/{serviceJourneyId}/{version}/{date}
 
 {version} is either number (0-n) or ´latest´
 
-``` 
+```
 
 Reverse lookup to resolve serviceJourney, version and date from DatedServiceJourney
-``` 
+```
 http://<server>:<port>/path/api/dated/{datedServiceJourneyId}
-``` 
+```
 
 
 Reverse lookup to resolve all serviceJourneys that share the provided originalDatedServiceJourney
-``` 
+```
 http://<server>:<port>/path/api/original/{originalDatedServiceJourneyId}
-``` 
+```
 
 
 Example-response:
-``` 
+```
 {
     "serviceJourneyId": "XXX:ServiceJourney:1-234-567",
     "departureDate": "2018-12-24",
