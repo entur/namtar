@@ -60,7 +60,7 @@ public class DatabaseRepositoryImpl implements StorageRepository {
 
     @Override
     public void save(Collection<DatedServiceJourney> journeys) {
-        datedServiceJourneyRepository.save(journeys);
+        datedServiceJourneyRepository.saveAll(journeys);
     }
 
     @Override
