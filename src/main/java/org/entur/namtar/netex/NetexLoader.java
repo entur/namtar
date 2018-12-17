@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -49,6 +50,8 @@ public class NetexLoader {
 
     private File tmpFileDirectory;
 
+    Instant lastSuccessfulDataLoaded;
+
     public NetexLoader(@Autowired DatedServiceJourneyService datedServiceJourneyService,
                        @Autowired BlobStoreRepository repository,
                        @Value("${namtar.tempfile.directory:/tmp}") String tmpFileDirectoryPath) {
@@ -61,6 +64,7 @@ public class NetexLoader {
         } else {
             log.info("Using tmp-directory with path {}, already existed.", tmpFileDirectoryPath);
         }
+        lastSuccessfulDataLoaded = Instant.now();
     }
 
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE;///ofPattern("yyyy-MM-dd");
@@ -95,6 +99,7 @@ public class NetexLoader {
                             datedServiceJourneyService.getStorageService().setFileStatus(filename, true);
 
                             log.info("{} read - download {} ms, process {} ms", name, (process - download), (done - process));
+                            lastSuccessfulDataLoaded = Instant.now();
                         }
                     }
                     blobIterator.remove();
@@ -104,6 +109,10 @@ public class NetexLoader {
                 isLoadingData = false;
             }
         }
+    }
+
+    public Instant getLastSuccessfulDataLoaded() {
+        return lastSuccessfulDataLoaded;
     }
 
     private void processNetexFile(String pathname, String sourceFileName) throws IOException {
