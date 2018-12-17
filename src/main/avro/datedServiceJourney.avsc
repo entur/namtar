@@ -1,0 +1,47 @@
+{
+    "name": "DatedServiceJourney",
+    "namespace": "org.entur.namtar.model.avro",
+    "type": "record",
+    "fields": [
+        {
+            "name": "datedServiceJourneyId",
+            "type": "string"
+        },
+        {
+            "name": "departureDate",
+            "type": "string"
+        },
+        {
+            "name": "departureTime",
+            "type": "string"
+        },
+        {
+            "name": "lineRef",
+            "type": "string"
+        },
+        {
+            "name": "originalDatedServiceJourneyId",
+            "type": "string"
+        },
+        {
+            "name": "privateCode",
+            "type": "string"
+        },
+        {
+            "name": "publicationTimestamp",
+            "type": "string"
+        },
+        {
+            "name": "serviceJourneyId",
+            "type": "string"
+        },
+        {
+            "name": "sourceFileName",
+            "type": "string"
+        },
+        {
+            "name": "version",
+            "type": "int"
+        }
+    ]
+}

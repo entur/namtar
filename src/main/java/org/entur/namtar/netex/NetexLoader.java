@@ -157,7 +157,9 @@ public class NetexLoader {
 
     private String getFileFromInputStream(InputStream inputStream, String fileName) throws IOException {
         File file = new File(tmpFileDirectory, fileName);
-
+        if (file.exists() && file.length() > 0) {
+            return file.getAbsolutePath();
+        }
         // opens an output stream to createDatedServiceJourney into file
         FileOutputStream outputStream = new FileOutputStream(file);
 

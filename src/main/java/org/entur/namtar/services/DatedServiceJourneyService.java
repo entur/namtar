@@ -18,6 +18,7 @@ package org.entur.namtar.services;
 import org.entur.namtar.model.DatedServiceJourney;
 import org.entur.namtar.routes.api.DatedServiceJourneyParam;
 import org.entur.namtar.routes.api.ServiceJourneyParam;
+import org.entur.namtar.routes.kafka.KafkaPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,8 @@ public class DatedServiceJourneyService {
 
     private long nextId;
 
+    @Autowired
+    private KafkaPublisher kafkaNotifier;
 
     public DatedServiceJourneyService(@Autowired DataStorageService storageService,
                                       @Value("${namtar.generated.id.prefix}") String idPrefix)
@@ -75,6 +78,8 @@ public class DatedServiceJourneyService {
         }
         long creationNumber = nextId++;
 
+        boolean createdNewOriginalDatedServiceJourney = false;
+
         String datedServiceJourneyId = generateDatedServiceJourneyId(creationNumber);
         String originalDatedServiceJourney;
         if (datedServiceJourney != null) {
@@ -83,6 +88,7 @@ public class DatedServiceJourneyService {
         } else {
             // ...does not exist - use current as original Id
             originalDatedServiceJourney = datedServiceJourneyId;
+            createdNewOriginalDatedServiceJourney = true;
         }
 
         DatedServiceJourney storageDatedServiceJourney = new DatedServiceJourney();
@@ -99,6 +105,10 @@ public class DatedServiceJourneyService {
         storageDatedServiceJourney.setPublicationTimestamp(publicationTimestamp.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         storageDatedServiceJourney.setSourceFileName(sourceFileName);
 
+        if (createdNewOriginalDatedServiceJourney) {
+            kafkaNotifier.publishToKafka(storageDatedServiceJourney);
+
+        }
         return storageDatedServiceJourney;
     }
 
