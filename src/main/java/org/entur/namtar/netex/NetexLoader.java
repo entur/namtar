@@ -108,6 +108,8 @@ public class NetexLoader {
             } finally {
                 isLoadingData = false;
             }
+        } else {
+            log.info("Already loading data - ignoring until finished");
         }
     }
 

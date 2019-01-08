@@ -44,7 +44,7 @@ public class BlobStoreRoute extends RestRouteBuilder {
                 .when(p -> isLeader(p.getFromRouteId()))
                     .log("Is leader - polling for new files")
                     .to("direct:getAllBlobs")
-                    .bean(netexLoader, "loadNetexFromBlobStore")
+                    .wireTap("direct:loadBlobs")
                 .endChoice()
                 .otherwise()
                     .log("Is NOT leader - doing nothing")
@@ -58,6 +58,14 @@ public class BlobStoreRoute extends RestRouteBuilder {
                 .to("log:" + getClass().getName() + "?level=DEBUG&showAll=true&multiline=true")
                 .bean("blobStoreService", "getAllBlobs")
                 .to("log:" + getClass().getName() + "?level=DEBUG&showAll=true&multiline=true")
-                .routeId("blobstore-list");
+                .routeId("blobstore-list")
+        ;
+
+        from("direct:loadBlobs")
+                .to("log:" + getClass().getName() + "?level=DEBUG&showAll=true&multiline=true")
+                .bean(netexLoader, "loadNetexFromBlobStore")
+                .to("log:" + getClass().getName() + "?level=DEBUG&showAll=true&multiline=true")
+                .routeId("blobstore-load")
+        ;
     }
 }
