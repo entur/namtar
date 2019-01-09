@@ -17,38 +17,34 @@ package org.entur.namtar.routes.data;
 
 import org.entur.namtar.netex.NetexLoader;
 import org.entur.namtar.routes.RestRouteBuilder;
-import org.quartz.CronExpression;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.util.Date;
 
 @Service
 public class BlobStoreRoute extends RestRouteBuilder {
 
     private final NetexLoader netexLoader;
 
-    @Value("${namtar.blobstore.polling.cron.expression}")
-    private String cronExpression;
+    @Value("${namtar.blobstore.polling.update.frequency}")
+    private String updateFrequency;
 
     public BlobStoreRoute(@Autowired NetexLoader netexLoader) {
         this.netexLoader = netexLoader;
     }
 
     @Override
-    public void configure() throws Exception {
+    public void configure() {
 
-        log.info("Check with cron-expression [{}], first upload at: {}.", cronExpression,
-                new CronExpression(cronExpression).getNextValidTimeAfter(new Date()));
+        log.info("Polling for updates with frequency: [{}]", updateFrequency);
 
-        singletonFrom("quartz2://namtar.blobstore.polling?cron=" + cronExpression,
+        singletonFrom("timer://namtar.blobstore.polling?fixedRate=true&period=" + updateFrequency,
                 "namtar.blobstore.singleton.polling")
                 .choice()
                 .when(p -> isLeader(p.getFromRouteId()))
                     .log("Is leader - polling for new files")
                     .to("direct:getAllBlobs")
-                    .bean(netexLoader, "loadNetexFromBlobStore")
+                    .wireTap("direct:loadBlobs")
                 .endChoice()
                 .otherwise()
                     .log("Is NOT leader - doing nothing")
@@ -62,6 +58,14 @@ public class BlobStoreRoute extends RestRouteBuilder {
                 .to("log:" + getClass().getName() + "?level=DEBUG&showAll=true&multiline=true")
                 .bean("blobStoreService", "getAllBlobs")
                 .to("log:" + getClass().getName() + "?level=DEBUG&showAll=true&multiline=true")
-                .routeId("blobstore-list");
+                .routeId("blobstore-list")
+        ;
+
+        from("direct:loadBlobs")
+                .to("log:" + getClass().getName() + "?level=DEBUG&showAll=true&multiline=true")
+                .bean(netexLoader, "loadNetexFromBlobStore")
+                .to("log:" + getClass().getName() + "?level=DEBUG&showAll=true&multiline=true")
+                .routeId("blobstore-load")
+        ;
     }
 }

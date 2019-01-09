@@ -16,16 +16,31 @@
 package org.entur.namtar.routes.health;
 
 import org.apache.camel.Exchange;
+import org.apache.camel.LoggingLevel;
+import org.entur.namtar.netex.NetexLoader;
 import org.entur.namtar.routes.RestRouteBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.time.Instant;
 
 
 @Service
 public class LivenessRoute extends RestRouteBuilder {
 
+    @Autowired
+    private NetexLoader netexLoader;
+
+    @Value("${namtar.health.allowed.inactivity.hours:48}")
+    private int allowedInactivityHours;
+    private int allowedInactivitySeconds;
+
     @Override
     public void configure() throws Exception {
         super.configure();
+
+        allowedInactivitySeconds = allowedInactivityHours*60*60;
 
         rest("/health")
             .get("/ready").to("direct:health.ready")
@@ -38,8 +53,15 @@ public class LivenessRoute extends RestRouteBuilder {
                 .routeId("health.ready");
 
         from("direct:health.up")
-                .setHeader(Exchange.HTTP_RESPONSE_CODE, constant("200"))
-                .setBody(constant("OK"))
+                .choice()
+                .when(p -> netexLoader.getLastSuccessfulDataLoaded().isBefore(Instant.now().minusSeconds(allowedInactivitySeconds)))
+                    .log(LoggingLevel.ERROR, "Data not processed in " + allowedInactivityHours + " hours. Triggering restart")
+                    .setHeader(Exchange.HTTP_RESPONSE_CODE, constant("503")) // Service unavailable
+                    .setBody(constant("Data not processed during the last " + allowedInactivityHours + " hours"))
+                .otherwise()
+                    .setHeader(Exchange.HTTP_RESPONSE_CODE, constant("200"))
+                    .setBody(constant("OK"))
+                .endChoice()
                 .routeId("health.up");
     }
 }
