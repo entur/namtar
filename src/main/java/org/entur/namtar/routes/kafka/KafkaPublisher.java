@@ -94,8 +94,6 @@ public class KafkaPublisher {
         properties.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, truststoreLocation);
         properties.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, truststorePassword);
 
-        log.info("Password configured: '{}' ", truststorePassword);
-
 
         producer = new KafkaProducer(properties);
 
