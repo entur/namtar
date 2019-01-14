@@ -36,10 +36,9 @@
         <!-- versions for use in mvn plugins as we cannot inherit them from a BOM -->
         <fabric8.version>2.3.7</fabric8.version>
         <docker.maven.plugin.version>0.21.0</docker.maven.plugin.version>
-        <spring-boot-plugin.version>2.0.5.RELEASE</spring-boot-plugin.version>
-        <spring-boot.version>2.0.5.RELEASE</spring-boot.version>
+        <spring-boot-plugin.version>1.5.13.RELEASE</spring-boot-plugin.version>
+        <spring-boot.version>1.5.13.RELEASE</spring-boot.version>
 
-        <camel.version>2.23.0</camel.version>
         <!-- Docker & Fabric8 Configs -->
         <docker.from>eu.gcr.io/carbon-1287/java-base-image</docker.from>
         <fabric8.dockerUser>carbon-1287/</fabric8.dockerUser>
@@ -53,13 +52,6 @@
         <fabric8.iconRef>camel</fabric8.iconRef>
 
     </properties>
-
-    <repositories>
-        <repository>
-            <id>confluent</id>
-            <url>https://repo.maven.apache.org/maven2/</url>
-        </repository>
-    </repositories>
 
     <dependencyManagement>
         <dependencies>
@@ -97,62 +89,52 @@
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-core</artifactId>
-            <version>${camel.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-jetty</artifactId>
-            <version>${camel.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-spring-boot</artifactId>
-            <version>${camel.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-bean-validator</artifactId>
-            <version>${camel.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-spring</artifactId>
-            <version>${camel.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-jackson</artifactId>
-            <version>${camel.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-swagger-java</artifactId>
-            <version>${camel.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-hazelcast</artifactId>
-            <version>${camel.version}</version>
         </dependency>
 
 
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-kafka</artifactId>
-            <version>${camel.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-avro</artifactId>
-            <version>${camel.version}</version>
         </dependency>
 
         <dependency>
