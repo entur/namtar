@@ -88,11 +88,11 @@ public class KafkaPublisher {
 
         properties.put(SaslConfigs.SASL_MECHANISM, saslMechanism);
         properties.put(SaslConfigs.SASL_JAAS_CONFIG,
-                String.format("org.apache.kafka.common.security.scram.ScramLoginModule required " +
-                                "username=\"%s\" " +
-                                "password=\"%s\";",
+                String.format("org.apache.kafka.common.security.scram.ScramLoginModule required\n" +
+                                "   username=\"%s\"\n" +
+                                "   password=\"%s\";",
                         saslUsername, saslPassword));
-        System.err.println(properties.get(SaslConfigs.SASL_JAAS_CONFIG));
+
         properties.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, truststoreLocation);
         properties.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, truststorePassword);
 
