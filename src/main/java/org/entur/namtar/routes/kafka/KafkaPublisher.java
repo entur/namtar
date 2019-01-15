@@ -122,6 +122,14 @@ public class KafkaPublisher {
 
         Future future = producer.send(new ProducerRecord(topicName, avroDatedServiceJourney.toString()));
 
+        Object result = null;
+        try {
+            result = future.get();
+        } catch (Exception e) {
+            result = e;
+        } finally {
+            log.info("Pushed {} to kafka, result: {}", dsj.getDatedServiceJourneyId(), result);
+        }
     }
 
 }
