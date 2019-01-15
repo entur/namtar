@@ -91,7 +91,7 @@ public class KafkaPublisher {
                 String.format("org.apache.kafka.common.security.scram.ScramLoginModule required\nusername=\"%s\"\npassword=\"%s\";",
                         saslUsername, saslPassword));
 
-        log.info("SASL: username, password-length: {}, {}", saslUsername, saslPassword.length());
+        log.info("SASL: [{}]", properties.get(SaslConfigs.SASL_JAAS_CONFIG));
 
         properties.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, truststoreLocation);
         properties.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, truststorePassword);
