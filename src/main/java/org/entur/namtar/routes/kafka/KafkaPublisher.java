@@ -92,9 +92,9 @@ public class KafkaPublisher {
                 String.format(jaas_config_contents, saslUsername, saslPassword)
         );
 
-        log.info("jaas_config_contents: ", jaas_config_contents);
-        log.info("User: ", saslUsername);
-        log.info("Password contains '=': ", saslPassword.contains("="));
+        log.info("jaas_config_contents: {}", jaas_config_contents);
+        log.info("User: {}", saslUsername);
+        log.info("Password contains '=': {}", saslPassword.contains("="));
 
         properties.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, truststoreLocation);
         properties.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, truststorePassword);
