@@ -24,6 +24,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.config.SslConfigs;
 import org.entur.namtar.model.avro.DatedServiceJourney;
+import org.entur.namtar.serializers.AvroSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -70,11 +71,14 @@ public class KafkaPublisher {
 
     private KafkaProducer producer;
 
+    private AvroSerializer<DatedServiceJourney> avroSerializer;
+
     @PostConstruct
     public void init() {
         if (!kafkaEnabled) {
             return;
         }
+        avroSerializer = new AvroSerializer<>();
         KafkaConfiguration config = new KafkaConfiguration();
 
         Properties properties = config.createProducerProperties();
@@ -120,7 +124,9 @@ public class KafkaPublisher {
                 .build();
 
 
-        Future future = producer.send(new ProducerRecord(topicName, avroDatedServiceJourney.toString()));
+        byte[] avroBytes = avroSerializer.serialize(topicName, avroDatedServiceJourney);
+
+        Future future = producer.send(new ProducerRecord(topicName, avroBytes));
 
         Object result = null;
         try {
@@ -128,7 +134,7 @@ public class KafkaPublisher {
         } catch (Exception e) {
             result = e;
         } finally {
-            log.info("Pushed {} to kafka, result: {}", dsj.getDatedServiceJourneyId(), result);
+            log.info("Pushed avro-data {} to kafka, result: {}", dsj.getDatedServiceJourneyId(), result);
         }
     }
 
