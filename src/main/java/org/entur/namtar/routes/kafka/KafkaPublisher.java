@@ -71,20 +71,18 @@ public class KafkaPublisher {
 
     private KafkaProducer producer;
 
-    private AvroSerializer<DatedServiceJourney> avroSerializer;
-
     @PostConstruct
     public void init() {
         if (!kafkaEnabled) {
             return;
         }
-        avroSerializer = new AvroSerializer<>();
         KafkaConfiguration config = new KafkaConfiguration();
 
         Properties properties = config.createProducerProperties();
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers);
 //
-//        properties.put("specific.avro.reader", true);
+        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, new AvroSerializer<DatedServiceJourney>().getClass().getName());
+
 //        properties.put("schema.registry.url",schemaRegistryUrl);
 
 // Security
@@ -123,10 +121,7 @@ public class KafkaPublisher {
                 .setVersion(dsj.getVersion())
                 .build();
 
-
-        byte[] avroBytes = avroSerializer.serialize(topicName, avroDatedServiceJourney);
-
-        Future future = producer.send(new ProducerRecord(topicName, avroBytes));
+        Future future = producer.send(new ProducerRecord(topicName, avroDatedServiceJourney));
 
         Object result = null;
         try {
