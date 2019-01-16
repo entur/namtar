@@ -41,6 +41,7 @@ public class NetexProcessor {
     LocalDateTime publicationTimestamp;
 
     Map<String, JourneyPattern> journeyPatternsById;
+    Map<String, Route> routesById;
     List<ServiceJourney> serviceJourneys;
     Map<String, DayType> dayTypeById;
     Map<String, DayTypeAssignment> dayTypeAssignmentByDayTypeId;
@@ -62,6 +63,7 @@ public class NetexProcessor {
     public NetexProcessor(File file) throws IOException {
         zipFile = new ZipFile(file, ZipFile.OPEN_READ);
         journeyPatternsById = new HashMap<>();
+        routesById = new HashMap<>();
         serviceJourneys = new ArrayList<>();
         dayTypeById = new HashMap<>();
         dayTypeAssignmentByDayTypeId = new HashMap<>();
@@ -114,6 +116,7 @@ public class NetexProcessor {
                             .getFrames().getCommonFrame();
                     for (JAXBElement commonFrame : commonFrames) {
                         loadServiceFrames(commonFrame);
+                        loadRoutes(commonFrame);
                         loadServiceCalendarFrames(commonFrame);
                         loadTimeTableFrames(commonFrame);
                     }
@@ -209,6 +212,25 @@ public class NetexProcessor {
                     if (pattern.getValue() instanceof JourneyPattern) {
                         JourneyPattern journeyPattern = (JourneyPattern) pattern.getValue();
                         journeyPatternsById.put(journeyPattern.getId(), journeyPattern);
+                    }
+                }
+
+            }
+        }
+    }
+
+    private void loadRoutes(JAXBElement commonFrame) {
+        if (commonFrame.getValue() instanceof ServiceFrame) {
+            ServiceFrame sf = (ServiceFrame) commonFrame.getValue();
+
+            //Routes
+            RoutesInFrame_RelStructure routesInFrame_relStructure = sf.getRoutes();
+            if (routesInFrame_relStructure != null) {
+                List<JAXBElement<? extends LinkSequence_VersionStructure>> routesList = routesInFrame_relStructure.getRoute_();
+                for (JAXBElement element : routesList) {
+                    if (element.getValue() instanceof Route) {
+                        Route route = (Route) element.getValue();
+                        routesById.put(route.getId(), route);
                     }
                 }
 

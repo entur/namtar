@@ -19,10 +19,7 @@ import com.google.cloud.storage.Blob;
 import org.entur.namtar.model.DatedServiceJourney;
 import org.entur.namtar.repository.blobstore.BlobStoreRepository;
 import org.entur.namtar.services.DatedServiceJourneyService;
-import org.rutebanken.netex.model.DayType;
-import org.rutebanken.netex.model.DayTypeAssignment;
-import org.rutebanken.netex.model.DayTypeRefStructure;
-import org.rutebanken.netex.model.DayTypeRefs_RelStructure;
+import org.rutebanken.netex.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -136,7 +133,9 @@ public class NetexLoader {
 
             String serviceJourneyId = serviceJourney.getId();
             Integer version = Integer.parseInt(serviceJourney.getVersion());
-            String lineRef = serviceJourney.getLineRef().getValue().getRef();
+
+            String lineRef = resolveLineRef(processor, serviceJourney);
+
             String departureTime = serviceJourney.getPassingTimes().getTimetabledPassingTime().get(0).getDepartureTime().format(timeFormatter);
 
             DayTypeRefs_RelStructure dayTypes = serviceJourney.getDayTypes();
@@ -164,6 +163,25 @@ public class NetexLoader {
 
         log.info("Added {} ServiceJourneys with {} departures in {} ms. {} already existed.", processor.serviceJourneys.size(), departureCounter, (System.currentTimeMillis()-t1), ignoreCounter);
         log.info(datedServiceJourneyService.toString());
+    }
+
+    private String resolveLineRef(NetexProcessor processor, ServiceJourney serviceJourney) {
+
+        if (serviceJourney != null) {
+            if (serviceJourney.getJourneyPatternRef() != null) {
+                String journeyPatternRef = serviceJourney.getJourneyPatternRef().getValue().getRef();
+
+                JourneyPattern journeyPattern = processor.journeyPatternsById.get(journeyPatternRef);
+                String routeRefValue = journeyPattern.getRouteRef().getRef();
+
+                Route route = processor.routesById.get(routeRefValue);
+                JAXBElement<? extends LineRefStructure> lineRef = route.getLineRef();
+                return lineRef.getValue().getRef();
+            }
+
+        }
+
+        return null;
     }
 
     private String getFileFromInputStream(InputStream inputStream, String fileName) throws IOException {
