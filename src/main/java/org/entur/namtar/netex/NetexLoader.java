@@ -135,6 +135,15 @@ public class NetexLoader {
 
             String departureTime = serviceJourney.getPassingTimes().getTimetabledPassingTime().get(0).getDepartureTime().format(timeFormatter);
 
+            // TODO: Future support for more operators should rely on requirement and usage of ExternalVehicleJourneyRef - not PrivateCode
+            // e.g. serviceJourney.getExternalVehicleJourneyRef().getRef();
+
+            if (serviceJourney.getPrivateCode() == null) {
+                continue;
+            }
+
+            String privateCode = serviceJourney.getPrivateCode().getValue();
+
             DayTypeRefs_RelStructure dayTypes = serviceJourney.getDayTypes();
             departureCounter += dayTypes.getDayTypeRef().size();
             for (JAXBElement<? extends DayTypeRefStructure> dayTypeRef : dayTypes.getDayTypeRef()) {
@@ -143,7 +152,6 @@ public class NetexLoader {
                 DayTypeAssignment dayTypeAssignment = processor.dayTypeAssignmentByDayTypeId.get(dayType.getId());
 
                 String departureDate = dayTypeAssignment.getDate().format(dateFormatter);
-                String privateCode = serviceJourney.getPrivateCode().getValue();
 
                 DatedServiceJourney currentServiceJourney = new DatedServiceJourney(serviceJourneyId, version, privateCode, lineRef, departureDate, departureTime);
 
