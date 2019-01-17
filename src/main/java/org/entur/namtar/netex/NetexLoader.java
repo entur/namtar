@@ -33,21 +33,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 @Service
 public class NetexLoader {
 
-    protected static Logger log = LoggerFactory.getLogger(NetexLoader.class);
+    private final Logger log = LoggerFactory.getLogger(NetexLoader.class);
 
     private final DatedServiceJourneyService datedServiceJourneyService;
     private final BlobStoreRepository repository;
 
-    private File tmpFileDirectory;
+    private final File tmpFileDirectory;
 
-    Instant lastSuccessfulDataLoaded;
+    private Instant lastSuccessfulDataLoaded;
 
     public NetexLoader(@Autowired DatedServiceJourneyService datedServiceJourneyService,
                        @Autowired BlobStoreRepository repository,
@@ -126,7 +124,6 @@ public class NetexLoader {
         log.info("Reading file {} took {} ms", pathname, (System.currentTimeMillis()-t1));
 
         t1 = System.currentTimeMillis();
-        List<DatedServiceJourney> datedServiceJourneys = new ArrayList<>();
         int departureCounter = 0;
         int ignoreCounter = 0;
         for (org.rutebanken.netex.model.ServiceJourney serviceJourney : processor.serviceJourneys) {
@@ -143,7 +140,8 @@ public class NetexLoader {
             for (JAXBElement<? extends DayTypeRefStructure> dayTypeRef : dayTypes.getDayTypeRef()) {
 
                 DayType dayType = processor.dayTypeById.get(dayTypeRef.getValue().getRef());
-                DayTypeAssignment dayTypeAssignment = processor.dayTypeAssignmentByDayTypeId    .get(dayType.getId());
+                DayTypeAssignment dayTypeAssignment = processor.dayTypeAssignmentByDayTypeId.get(dayType.getId());
+
                 String departureDate = dayTypeAssignment.getDate().format(dateFormatter);
                 String privateCode = serviceJourney.getPrivateCode().getValue();
 
@@ -151,7 +149,6 @@ public class NetexLoader {
 
                 DatedServiceJourney datedServiceJourney = datedServiceJourneyService.createDatedServiceJourney(currentServiceJourney, processor.publicationTimestamp, sourceFileName);
                 if (datedServiceJourney != null) { // If null, it already exists and should not be added
-                    datedServiceJourneys.add(datedServiceJourney);
                     datedServiceJourneyService.getStorageService().addDatedServiceJourney(datedServiceJourney);
                 } else {
                     ignoreCounter++;
@@ -180,7 +177,7 @@ public class NetexLoader {
             }
 
         }
-
+        log.warn("Unable to find LineRef from ServiceJourney with id [{}]", serviceJourney.getId());
         return null;
     }
 

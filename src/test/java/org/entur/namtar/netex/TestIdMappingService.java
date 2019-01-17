@@ -39,7 +39,7 @@ public class TestIdMappingService {
     DatedServiceJourneyService service;
 
     private LocalDateTime publicationTimestamp;
-    private String sourceFileName = "tmp.zip";
+    private final String sourceFileName = "tmp.zip";
 
     @Before
     public void init() {

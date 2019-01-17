@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -36,12 +35,12 @@ import java.util.List;
 @Service
 public class DatedServiceJourneyService {
 
-    protected static Logger logger = LoggerFactory.getLogger(DatedServiceJourneyService.class);
+    private final Logger logger = LoggerFactory.getLogger(DatedServiceJourneyService.class);
 
 
-    private DataStorageService storageService;
+    private final DataStorageService storageService;
 
-    private String GENERATED_ID_PREFIX;
+    private final String GENERATED_ID_PREFIX;
 
     private long nextId;
 
@@ -49,8 +48,7 @@ public class DatedServiceJourneyService {
     private KafkaPublisher kafkaNotifier;
 
     public DatedServiceJourneyService(@Autowired DataStorageService storageService,
-                                      @Value("${namtar.generated.id.prefix}") String idPrefix)
-            throws IOException, InterruptedException {
+                                      @Value("${namtar.generated.id.prefix}") String idPrefix) {
         this.storageService = storageService;
         nextId = storageService.findNextCreationNumber();
         GENERATED_ID_PREFIX = idPrefix;

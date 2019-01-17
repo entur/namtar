@@ -36,7 +36,7 @@ import java.util.concurrent.Future;
 
 @Service
 public class KafkaPublisher {
-    protected static Logger log = LoggerFactory.getLogger(KafkaPublisher.class);
+    private final Logger log = LoggerFactory.getLogger(KafkaPublisher.class);
 
     @Value("${namtar.kafka.enabled:true}")
     private boolean kafkaEnabled;

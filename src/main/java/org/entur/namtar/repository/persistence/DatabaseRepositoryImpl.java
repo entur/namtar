@@ -100,8 +100,7 @@ public class DatabaseRepositoryImpl implements StorageRepository {
 
     @Override
     public long findNextCreationNumber() {
-        long num = datedServiceJourneyRepository.findMaxCreationNumber();
 
-        return num;
+        return datedServiceJourneyRepository.findMaxCreationNumber();
     }
 }

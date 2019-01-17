@@ -20,7 +20,7 @@ package org.entur.namtar.repository.persistence;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class QueryHelper {
+class QueryHelper {
     static String getDepartureDateCacheLimit(int dayOffset) {
         return DateTimeFormatter.ISO_LOCAL_DATE.format(ZonedDateTime.now().plusDays(dayOffset));
     }

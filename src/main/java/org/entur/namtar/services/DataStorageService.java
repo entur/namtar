@@ -32,16 +32,16 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class DataStorageService {
-    Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final StorageRepository repository;
 
-    Cache<String, DatedServiceJourney> cache = CacheBuilder.newBuilder()
+    private final Cache<String, DatedServiceJourney> cache = CacheBuilder.newBuilder()
             .expireAfterAccess(1, TimeUnit.DAYS)
             .recordStats()
             .build();
 
-    Cache<String, String> sourceFileNameCache = CacheBuilder.newBuilder()
+    private final Cache<String, String> sourceFileNameCache = CacheBuilder.newBuilder()
             .expireAfterAccess(1, TimeUnit.DAYS)
             .build();
 
@@ -109,7 +109,7 @@ public class DataStorageService {
         addToCache(journey);
     }
 
-    protected DatedServiceJourney findInCache(String... keys) {
+    private DatedServiceJourney findInCache(String... keys) {
         if (searchCount++ % 1000 ==  0) {
             logger.info("Searches: {}, Cache stats: {}", searchCount, cache.stats());
         }

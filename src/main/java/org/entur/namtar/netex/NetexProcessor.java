@@ -33,7 +33,7 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-public class NetexProcessor {
+class NetexProcessor {
 
     private static JAXBContext jaxbContext;
     private String timeZone;
