@@ -16,6 +16,7 @@
 
 package org.entur.namtar.routes.kafka;
 
+import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import org.apache.camel.component.kafka.KafkaConfiguration;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -24,7 +25,6 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.config.SslConfigs;
 import org.entur.namtar.model.avro.DatedServiceJourney;
-import org.entur.namtar.serializers.AvroSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -80,10 +80,10 @@ public class KafkaPublisher {
 
         Properties properties = config.createProducerProperties();
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers);
-//
-        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, new AvroSerializer<DatedServiceJourney>().getClass().getName());
+        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, new KafkaAvroSerializer().getClass().getName());
+        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, new KafkaAvroSerializer().getClass().getName());
 
-//        properties.put("schema.registry.url",schemaRegistryUrl);
+        properties.put("schema.registry.url",schemaRegistryUrl);
 
 // Security
         properties.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, securityProtocol);
