@@ -10,8 +10,8 @@ import org.apache.avro.specific.SpecificData;
 @SuppressWarnings("all")
 @org.apache.avro.specific.AvroGenerated
 public class DatedServiceJourney extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  private static final long serialVersionUID = -8373760963327146843L;
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"AvroDatedServiceJourney\",\"namespace\":\"org.entur.namtar.model.avro\",\"fields\":[{\"name\":\"datedServiceJourneyId\",\"type\":\"string\"},{\"name\":\"departureDate\",\"type\":\"string\"},{\"name\":\"departureTime\",\"type\":\"string\"},{\"name\":\"lineRef\",\"type\":\"string\"},{\"name\":\"originalDatedServiceJourneyId\",\"type\":\"string\"},{\"name\":\"privateCode\",\"type\":\"string\"},{\"name\":\"publicationTimestamp\",\"type\":\"string\"},{\"name\":\"serviceJourneyId\",\"type\":\"string\"},{\"name\":\"sourceFileName\",\"type\":\"string\"},{\"name\":\"version\",\"type\":\"int\"}]}");
+  private static final long serialVersionUID = -6220774830014673909L;
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"DatedServiceJourney\",\"namespace\":\"org.entur.namtar.model.avro\",\"fields\":[{\"name\":\"datedServiceJourneyId\",\"type\":\"string\"},{\"name\":\"departureDate\",\"type\":\"string\"},{\"name\":\"departureTime\",\"type\":\"string\"},{\"name\":\"lineRef\",\"type\":\"string\"},{\"name\":\"originalDatedServiceJourneyId\",\"type\":\"string\"},{\"name\":\"privateCode\",\"type\":\"string\"},{\"name\":\"publicationTimestamp\",\"type\":\"string\"},{\"name\":\"serviceJourneyId\",\"type\":\"string\"},{\"name\":\"sourceFileName\",\"type\":\"string\"},{\"name\":\"version\",\"type\":\"int\"}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
   @Deprecated public java.lang.CharSequence datedServiceJourneyId;
   @Deprecated public java.lang.CharSequence departureDate;
@@ -254,33 +254,33 @@ public class DatedServiceJourney extends org.apache.avro.specific.SpecificRecord
   }
 
   /**
-   * Creates a new AvroDatedServiceJourney RecordBuilder.
-   * @return A new AvroDatedServiceJourney RecordBuilder
+   * Creates a new DatedServiceJourney RecordBuilder.
+   * @return A new DatedServiceJourney RecordBuilder
    */
-  public static DatedServiceJourney.Builder newBuilder() {
-    return new DatedServiceJourney.Builder();
+  public static org.entur.namtar.model.avro.DatedServiceJourney.Builder newBuilder() {
+    return new org.entur.namtar.model.avro.DatedServiceJourney.Builder();
   }
 
   /**
-   * Creates a new AvroDatedServiceJourney RecordBuilder by copying an existing Builder.
+   * Creates a new DatedServiceJourney RecordBuilder by copying an existing Builder.
    * @param other The existing builder to copy.
-   * @return A new AvroDatedServiceJourney RecordBuilder
+   * @return A new DatedServiceJourney RecordBuilder
    */
-  public static DatedServiceJourney.Builder newBuilder(DatedServiceJourney.Builder other) {
-    return new DatedServiceJourney.Builder(other);
+  public static org.entur.namtar.model.avro.DatedServiceJourney.Builder newBuilder(org.entur.namtar.model.avro.DatedServiceJourney.Builder other) {
+    return new org.entur.namtar.model.avro.DatedServiceJourney.Builder(other);
   }
 
   /**
-   * Creates a new AvroDatedServiceJourney RecordBuilder by copying an existing AvroDatedServiceJourney instance.
+   * Creates a new DatedServiceJourney RecordBuilder by copying an existing DatedServiceJourney instance.
    * @param other The existing instance to copy.
-   * @return A new AvroDatedServiceJourney RecordBuilder
+   * @return A new DatedServiceJourney RecordBuilder
    */
-  public static DatedServiceJourney.Builder newBuilder(DatedServiceJourney other) {
-    return new DatedServiceJourney.Builder(other);
+  public static org.entur.namtar.model.avro.DatedServiceJourney.Builder newBuilder(org.entur.namtar.model.avro.DatedServiceJourney other) {
+    return new org.entur.namtar.model.avro.DatedServiceJourney.Builder(other);
   }
 
   /**
-   * RecordBuilder for AvroDatedServiceJourney instances.
+   * RecordBuilder for DatedServiceJourney instances.
    */
   public static class Builder extends org.apache.avro.specific.SpecificRecordBuilderBase<DatedServiceJourney>
     implements org.apache.avro.data.RecordBuilder<DatedServiceJourney> {
@@ -305,7 +305,7 @@ public class DatedServiceJourney extends org.apache.avro.specific.SpecificRecord
      * Creates a Builder by copying an existing Builder.
      * @param other The existing Builder to copy.
      */
-    private Builder(DatedServiceJourney.Builder other) {
+    private Builder(org.entur.namtar.model.avro.DatedServiceJourney.Builder other) {
       super(other);
       if (isValidValue(fields()[0], other.datedServiceJourneyId)) {
         this.datedServiceJourneyId = data().deepCopy(fields()[0].schema(), other.datedServiceJourneyId);
@@ -350,10 +350,10 @@ public class DatedServiceJourney extends org.apache.avro.specific.SpecificRecord
     }
 
     /**
-     * Creates a Builder by copying an existing AvroDatedServiceJourney instance
+     * Creates a Builder by copying an existing DatedServiceJourney instance
      * @param other The existing instance to copy.
      */
-    private Builder(DatedServiceJourney other) {
+    private Builder(org.entur.namtar.model.avro.DatedServiceJourney other) {
             super(SCHEMA$);
       if (isValidValue(fields()[0], other.datedServiceJourneyId)) {
         this.datedServiceJourneyId = data().deepCopy(fields()[0].schema(), other.datedServiceJourneyId);
@@ -410,7 +410,7 @@ public class DatedServiceJourney extends org.apache.avro.specific.SpecificRecord
       * @param value The value of 'datedServiceJourneyId'.
       * @return This builder.
       */
-    public DatedServiceJourney.Builder setDatedServiceJourneyId(java.lang.CharSequence value) {
+    public org.entur.namtar.model.avro.DatedServiceJourney.Builder setDatedServiceJourneyId(java.lang.CharSequence value) {
       validate(fields()[0], value);
       this.datedServiceJourneyId = value;
       fieldSetFlags()[0] = true;
@@ -430,7 +430,7 @@ public class DatedServiceJourney extends org.apache.avro.specific.SpecificRecord
       * Clears the value of the 'datedServiceJourneyId' field.
       * @return This builder.
       */
-    public DatedServiceJourney.Builder clearDatedServiceJourneyId() {
+    public org.entur.namtar.model.avro.DatedServiceJourney.Builder clearDatedServiceJourneyId() {
       datedServiceJourneyId = null;
       fieldSetFlags()[0] = false;
       return this;
@@ -449,7 +449,7 @@ public class DatedServiceJourney extends org.apache.avro.specific.SpecificRecord
       * @param value The value of 'departureDate'.
       * @return This builder.
       */
-    public DatedServiceJourney.Builder setDepartureDate(java.lang.CharSequence value) {
+    public org.entur.namtar.model.avro.DatedServiceJourney.Builder setDepartureDate(java.lang.CharSequence value) {
       validate(fields()[1], value);
       this.departureDate = value;
       fieldSetFlags()[1] = true;
@@ -469,7 +469,7 @@ public class DatedServiceJourney extends org.apache.avro.specific.SpecificRecord
       * Clears the value of the 'departureDate' field.
       * @return This builder.
       */
-    public DatedServiceJourney.Builder clearDepartureDate() {
+    public org.entur.namtar.model.avro.DatedServiceJourney.Builder clearDepartureDate() {
       departureDate = null;
       fieldSetFlags()[1] = false;
       return this;
@@ -488,7 +488,7 @@ public class DatedServiceJourney extends org.apache.avro.specific.SpecificRecord
       * @param value The value of 'departureTime'.
       * @return This builder.
       */
-    public DatedServiceJourney.Builder setDepartureTime(java.lang.CharSequence value) {
+    public org.entur.namtar.model.avro.DatedServiceJourney.Builder setDepartureTime(java.lang.CharSequence value) {
       validate(fields()[2], value);
       this.departureTime = value;
       fieldSetFlags()[2] = true;
@@ -508,7 +508,7 @@ public class DatedServiceJourney extends org.apache.avro.specific.SpecificRecord
       * Clears the value of the 'departureTime' field.
       * @return This builder.
       */
-    public DatedServiceJourney.Builder clearDepartureTime() {
+    public org.entur.namtar.model.avro.DatedServiceJourney.Builder clearDepartureTime() {
       departureTime = null;
       fieldSetFlags()[2] = false;
       return this;
@@ -527,7 +527,7 @@ public class DatedServiceJourney extends org.apache.avro.specific.SpecificRecord
       * @param value The value of 'lineRef'.
       * @return This builder.
       */
-    public DatedServiceJourney.Builder setLineRef(java.lang.CharSequence value) {
+    public org.entur.namtar.model.avro.DatedServiceJourney.Builder setLineRef(java.lang.CharSequence value) {
       validate(fields()[3], value);
       this.lineRef = value;
       fieldSetFlags()[3] = true;
@@ -547,7 +547,7 @@ public class DatedServiceJourney extends org.apache.avro.specific.SpecificRecord
       * Clears the value of the 'lineRef' field.
       * @return This builder.
       */
-    public DatedServiceJourney.Builder clearLineRef() {
+    public org.entur.namtar.model.avro.DatedServiceJourney.Builder clearLineRef() {
       lineRef = null;
       fieldSetFlags()[3] = false;
       return this;
@@ -566,7 +566,7 @@ public class DatedServiceJourney extends org.apache.avro.specific.SpecificRecord
       * @param value The value of 'originalDatedServiceJourneyId'.
       * @return This builder.
       */
-    public DatedServiceJourney.Builder setOriginalDatedServiceJourneyId(java.lang.CharSequence value) {
+    public org.entur.namtar.model.avro.DatedServiceJourney.Builder setOriginalDatedServiceJourneyId(java.lang.CharSequence value) {
       validate(fields()[4], value);
       this.originalDatedServiceJourneyId = value;
       fieldSetFlags()[4] = true;
@@ -586,7 +586,7 @@ public class DatedServiceJourney extends org.apache.avro.specific.SpecificRecord
       * Clears the value of the 'originalDatedServiceJourneyId' field.
       * @return This builder.
       */
-    public DatedServiceJourney.Builder clearOriginalDatedServiceJourneyId() {
+    public org.entur.namtar.model.avro.DatedServiceJourney.Builder clearOriginalDatedServiceJourneyId() {
       originalDatedServiceJourneyId = null;
       fieldSetFlags()[4] = false;
       return this;
@@ -605,7 +605,7 @@ public class DatedServiceJourney extends org.apache.avro.specific.SpecificRecord
       * @param value The value of 'privateCode'.
       * @return This builder.
       */
-    public DatedServiceJourney.Builder setPrivateCode(java.lang.CharSequence value) {
+    public org.entur.namtar.model.avro.DatedServiceJourney.Builder setPrivateCode(java.lang.CharSequence value) {
       validate(fields()[5], value);
       this.privateCode = value;
       fieldSetFlags()[5] = true;
@@ -625,7 +625,7 @@ public class DatedServiceJourney extends org.apache.avro.specific.SpecificRecord
       * Clears the value of the 'privateCode' field.
       * @return This builder.
       */
-    public DatedServiceJourney.Builder clearPrivateCode() {
+    public org.entur.namtar.model.avro.DatedServiceJourney.Builder clearPrivateCode() {
       privateCode = null;
       fieldSetFlags()[5] = false;
       return this;
@@ -644,7 +644,7 @@ public class DatedServiceJourney extends org.apache.avro.specific.SpecificRecord
       * @param value The value of 'publicationTimestamp'.
       * @return This builder.
       */
-    public DatedServiceJourney.Builder setPublicationTimestamp(java.lang.CharSequence value) {
+    public org.entur.namtar.model.avro.DatedServiceJourney.Builder setPublicationTimestamp(java.lang.CharSequence value) {
       validate(fields()[6], value);
       this.publicationTimestamp = value;
       fieldSetFlags()[6] = true;
@@ -664,7 +664,7 @@ public class DatedServiceJourney extends org.apache.avro.specific.SpecificRecord
       * Clears the value of the 'publicationTimestamp' field.
       * @return This builder.
       */
-    public DatedServiceJourney.Builder clearPublicationTimestamp() {
+    public org.entur.namtar.model.avro.DatedServiceJourney.Builder clearPublicationTimestamp() {
       publicationTimestamp = null;
       fieldSetFlags()[6] = false;
       return this;
@@ -683,7 +683,7 @@ public class DatedServiceJourney extends org.apache.avro.specific.SpecificRecord
       * @param value The value of 'serviceJourneyId'.
       * @return This builder.
       */
-    public DatedServiceJourney.Builder setServiceJourneyId(java.lang.CharSequence value) {
+    public org.entur.namtar.model.avro.DatedServiceJourney.Builder setServiceJourneyId(java.lang.CharSequence value) {
       validate(fields()[7], value);
       this.serviceJourneyId = value;
       fieldSetFlags()[7] = true;
@@ -703,7 +703,7 @@ public class DatedServiceJourney extends org.apache.avro.specific.SpecificRecord
       * Clears the value of the 'serviceJourneyId' field.
       * @return This builder.
       */
-    public DatedServiceJourney.Builder clearServiceJourneyId() {
+    public org.entur.namtar.model.avro.DatedServiceJourney.Builder clearServiceJourneyId() {
       serviceJourneyId = null;
       fieldSetFlags()[7] = false;
       return this;
@@ -722,7 +722,7 @@ public class DatedServiceJourney extends org.apache.avro.specific.SpecificRecord
       * @param value The value of 'sourceFileName'.
       * @return This builder.
       */
-    public DatedServiceJourney.Builder setSourceFileName(java.lang.CharSequence value) {
+    public org.entur.namtar.model.avro.DatedServiceJourney.Builder setSourceFileName(java.lang.CharSequence value) {
       validate(fields()[8], value);
       this.sourceFileName = value;
       fieldSetFlags()[8] = true;
@@ -742,7 +742,7 @@ public class DatedServiceJourney extends org.apache.avro.specific.SpecificRecord
       * Clears the value of the 'sourceFileName' field.
       * @return This builder.
       */
-    public DatedServiceJourney.Builder clearSourceFileName() {
+    public org.entur.namtar.model.avro.DatedServiceJourney.Builder clearSourceFileName() {
       sourceFileName = null;
       fieldSetFlags()[8] = false;
       return this;
@@ -761,7 +761,7 @@ public class DatedServiceJourney extends org.apache.avro.specific.SpecificRecord
       * @param value The value of 'version'.
       * @return This builder.
       */
-    public DatedServiceJourney.Builder setVersion(int value) {
+    public org.entur.namtar.model.avro.DatedServiceJourney.Builder setVersion(int value) {
       validate(fields()[9], value);
       this.version = value;
       fieldSetFlags()[9] = true;
@@ -781,7 +781,7 @@ public class DatedServiceJourney extends org.apache.avro.specific.SpecificRecord
       * Clears the value of the 'version' field.
       * @return This builder.
       */
-    public DatedServiceJourney.Builder clearVersion() {
+    public org.entur.namtar.model.avro.DatedServiceJourney.Builder clearVersion() {
       fieldSetFlags()[9] = false;
       return this;
     }
