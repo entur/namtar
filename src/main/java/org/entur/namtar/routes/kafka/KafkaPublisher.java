@@ -80,7 +80,7 @@ public class KafkaPublisher {
 
         Properties properties = config.createProducerProperties();
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers);
-        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, new KafkaAvroSerializer().getClass().getName());
+//        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, new KafkaAvroSerializer().getClass().getName());
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, new KafkaAvroSerializer().getClass().getName());
 
         properties.put("schema.registry.url",schemaRegistryUrl);
