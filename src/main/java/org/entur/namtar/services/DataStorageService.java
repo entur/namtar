@@ -51,7 +51,8 @@ public class DataStorageService {
     public DataStorageService(StorageRepository repository) {
         this.repository = repository;
 
-        populateCache(lastCacheUpdate);
+        //Skip pre-populating cache to reduce startup-time
+//        populateCache(lastCacheUpdate);
     }
 
     private void populateCache(Date date) {
