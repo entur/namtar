@@ -118,6 +118,7 @@ public class NetexLoader {
             return;
         }
         NetexProcessor processor = new NetexProcessor(file);
+        datedServiceJourneyService.updateNextCreationNumber();
 
         long t1 = System.currentTimeMillis();
         processor.loadFiles();

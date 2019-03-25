@@ -50,8 +50,12 @@ public class DatedServiceJourneyService {
     public DatedServiceJourneyService(@Autowired DataStorageService storageService,
                                       @Value("${namtar.generated.id.prefix}") String idPrefix) {
         this.storageService = storageService;
-        nextId = storageService.findNextCreationNumber();
         GENERATED_ID_PREFIX = idPrefix;
+        updateNextCreationNumber();
+    }
+
+    public void updateNextCreationNumber() {
+        nextId = this.storageService.findNextCreationNumber();
     }
 
     public DatedServiceJourney createDatedServiceJourney(DatedServiceJourney serviceJourney, LocalDateTime publicationTimestamp, String sourceFileName) {
