@@ -27,8 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class DataStorageService {
@@ -41,44 +39,19 @@ public class DataStorageService {
             .recordStats()
             .build();
 
-    private final Cache<String, String> sourceFileNameCache = CacheBuilder.newBuilder()
+    private final Cache<String, String> processedFileNameCache = CacheBuilder.newBuilder()
             .expireAfterAccess(1, TimeUnit.DAYS)
             .build();
 
-    private Date lastCacheUpdate;
     private int searchCount;
 
     public DataStorageService(StorageRepository repository) {
         this.repository = repository;
-
-        //Skip pre-populating cache to reduce startup-time
-//        populateCache(lastCacheUpdate);
-    }
-
-    private void populateCache(Date date) {
-
-        lastCacheUpdate = new Date();
-        long queryStart = System.currentTimeMillis();
-
-
-        Collection<DatedServiceJourney> results = repository.getAllFutureDatedServiceJourneys(date, 0);
-        long queryRun = System.currentTimeMillis();
-
-        // Add to cache
-        results.forEach(datedServiceJourney -> addToCache(datedServiceJourney));
-
-        logger.info("Cache populated with {} entities. Query: {} ms, fetch data: {} ms", results.size(), (queryRun-queryStart), (System.currentTimeMillis()-queryRun));
-
-
-        List<String> sourceFileResults = repository.getAllDistinctSourceFileNames();
-
-        sourceFileResults.forEach(s -> addSourceFileToCache(s));
-
     }
 
     private void addSourceFileToCache(String sourceFileName) {
         if (sourceFileName != null) {
-            sourceFileNameCache.put(createCacheKey(sourceFileName), sourceFileName);
+            processedFileNameCache.put(createCacheKey(sourceFileName), sourceFileName);
         }
     }
 
@@ -150,7 +123,7 @@ public class DataStorageService {
 
     public boolean isAlreadyProcessed(String name) {
         String key = createCacheKey(name);
-        if (sourceFileNameCache.getIfPresent(key) != null) {
+        if (processedFileNameCache.getIfPresent(key) != null) {
             return true;
         }
         SourceFile alreadyProcessed = repository.findSourceFileByName(name);
@@ -170,7 +143,9 @@ public class DataStorageService {
         alreadyProcessed.setProcessed(isProcessed);
         repository.save(alreadyProcessed);
 
-        sourceFileNameCache.put(filename, filename);
+        if (isProcessed) {
+            processedFileNameCache.put(filename, filename);
+        }
     }
 
     public long findNextCreationNumber() {
