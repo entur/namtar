@@ -55,7 +55,7 @@ public class DatedServiceJourneyService {
     }
 
     public void updateNextCreationNumber() {
-        nextId = this.storageService.findNextCreationNumber();
+        nextId = this.storageService.findNextCreationNumber() + 1;
     }
 
     public DatedServiceJourney createDatedServiceJourney(DatedServiceJourney serviceJourney, LocalDateTime publicationTimestamp, String sourceFileName) {
