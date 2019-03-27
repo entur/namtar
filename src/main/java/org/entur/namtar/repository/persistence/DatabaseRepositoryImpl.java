@@ -21,11 +21,6 @@ import org.entur.namtar.model.DatedServiceJourney;
 import org.entur.namtar.model.SourceFile;
 
 import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.entur.namtar.repository.persistence.QueryHelper.getDepartureDateCacheLimit;
 
 public class DatabaseRepositoryImpl implements StorageRepository {
 
@@ -37,40 +32,14 @@ public class DatabaseRepositoryImpl implements StorageRepository {
         this.sourceFileRepository = sourceFileRepository;
     }
 
-
-    @Override
-    public Collection<DatedServiceJourney> getAllFutureDatedServiceJourneys(Date createdDate, int departureDateOffset) {
-        if (createdDate == null) {
-            String departureDateFrom = getDepartureDateCacheLimit(departureDateOffset);
-            String departureDateTo = getDepartureDateCacheLimit(1); //Preloading cache for first day
-            return datedServiceJourneyRepository.findDatedServiceJourneysByDepartureDateGreaterThanAndDepartureDateLessThan(departureDateFrom, departureDateTo);
-        }
-        return datedServiceJourneyRepository.findDatedServiceJourneysByCreatedDateAfter(createdDate);
-    }
-
-    @Override
-    public List<String> getAllDistinctSourceFileNames() {
-        return sourceFileRepository.findAll().stream().map(sourceFile -> sourceFile.getSourceFileName()).collect(Collectors.toList());
-    }
-
     @Override
     public void save(DatedServiceJourney journey) {
         datedServiceJourneyRepository.save(journey);
     }
 
     @Override
-    public void save(Collection<DatedServiceJourney> journeys) {
-        datedServiceJourneyRepository.save(journeys);
-    }
-
-    @Override
     public DatedServiceJourney findByServiceJourneyIdAndDate(String serviceJourneyId, String departureDate) {
         return datedServiceJourneyRepository.findByServiceJourneyIdAndDepartureDate(serviceJourneyId, departureDate);
-    }
-
-    @Override
-    public void deleteBySourceFileName(String sourceFileName) {
-
     }
 
     @Override

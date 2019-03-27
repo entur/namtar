@@ -21,22 +21,12 @@ import org.entur.namtar.model.DatedServiceJourney;
 import org.entur.namtar.model.SourceFile;
 
 import java.util.Collection;
-import java.util.Date;
-import java.util.List;
 
 public interface StorageRepository {
 
-    Collection<DatedServiceJourney> getAllFutureDatedServiceJourneys(Date createdDate, int departureDateOffset);
-
-    List<String> getAllDistinctSourceFileNames();
-
     void save(DatedServiceJourney journey);
 
-    void save(Collection<DatedServiceJourney> journeys);
-
     DatedServiceJourney findByServiceJourneyIdAndDate(String serviceJourneyId, String departureDate);
-
-    void deleteBySourceFileName(String sourceFileName);
 
     DatedServiceJourney findByDatedServiceJourneyId(String datedServiceJourneyId);
 
