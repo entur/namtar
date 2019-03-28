@@ -68,7 +68,7 @@ public class DatabaseRepositoryImpl implements StorageRepository {
     }
 
     @Override
-    public long findNextCreationNumber() {
+    public long findMaxCreationNumber() {
 
         return datedServiceJourneyRepository.findMaxCreationNumber();
     }

@@ -38,5 +38,5 @@ public interface StorageRepository {
 
     void save(SourceFile sourceFile);
 
-    long findNextCreationNumber();
+    long findMaxCreationNumber();
 }

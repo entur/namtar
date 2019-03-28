@@ -148,8 +148,11 @@ public class DataStorageService {
         }
     }
 
+    /*
+       Finds the largest creation number + 1
+     */
     public long findNextCreationNumber() {
-        return repository.findNextCreationNumber();
+        return repository.findMaxCreationNumber() + 1;
     }
 
 }
