@@ -152,15 +152,17 @@ public class NetexLoader {
                 DayType dayType = processor.dayTypeById.get(dayTypeRef.getValue().getRef());
                 DayTypeAssignment dayTypeAssignment = processor.dayTypeAssignmentByDayTypeId.get(dayType.getId());
 
-                String departureDate = dayTypeAssignment.getDate().format(dateFormatter);
+                if (dayTypeAssignment != null && dayTypeAssignment.getDate() != null) {
+                    String departureDate = dayTypeAssignment.getDate().format(dateFormatter);
 
-                DatedServiceJourney currentServiceJourney = new DatedServiceJourney(serviceJourneyId, version, privateCode, lineRef, departureDate, departureTime);
+                    DatedServiceJourney currentServiceJourney = new DatedServiceJourney(serviceJourneyId, version, privateCode, lineRef, departureDate, departureTime);
 
-                DatedServiceJourney datedServiceJourney = datedServiceJourneyService.createDatedServiceJourney(currentServiceJourney, processor.publicationTimestamp, sourceFileName);
-                if (datedServiceJourney != null) { // If null, it already exists and should not be added
-                    datedServiceJourneyService.getStorageService().addDatedServiceJourney(datedServiceJourney);
-                } else {
-                    ignoreCounter++;
+                    DatedServiceJourney datedServiceJourney = datedServiceJourneyService.createDatedServiceJourney(currentServiceJourney, processor.publicationTimestamp, sourceFileName);
+                    if (datedServiceJourney != null) { // If null, it already exists and should not be added
+                        datedServiceJourneyService.getStorageService().addDatedServiceJourney(datedServiceJourney);
+                    } else {
+                        ignoreCounter++;
+                    }
                 }
             }
         }
