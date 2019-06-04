@@ -43,6 +43,7 @@ public class LivenessRoute extends RestRouteBuilder {
         allowedInactivitySeconds = allowedInactivityHours*60*60;
 
         rest("/health")
+            .apiDocs(Boolean.FALSE)
             .get("/ready").to("direct:health.ready")
             .get("/up").to("direct:health.up")
         ;
