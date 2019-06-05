@@ -61,6 +61,7 @@ public class MappingRoute extends RestRouteBuilder {
          */
 
         rest("")
+                .tag("api")
                 .apiDocs(Boolean.TRUE)
                 .get("/{serviceJourneyId}/{version}/{date}").produces("text/json").to("direct:lookup.single.servicejourney.version.date")
                     .param().required(true).name("serviceJourneyId").type(RestParamType.path).description("The id of the serviceJourney to look up").dataType("string").endParam()
