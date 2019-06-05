@@ -51,28 +51,46 @@ public class MappingRoute extends RestRouteBuilder {
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
 
-        //TODO: Handle request for multiple DatedServiceJourneys
+        /*
+
+           Because of routing-rules - the REST endpoints have been duplicated as a hack to allow endpoints
+           in swagger-doc to be created correctly - i.e. without the "api"-prefix.
+
+           When routing rules are changed, the duplicated endpoint should be removed
+
+         */
+
+        rest("")
+                .apiDocs(Boolean.TRUE)
+                .get("/{serviceJourneyId}/{version}/{date}").produces("text/json").to("direct:lookup.single.servicejourney.version.date")
+                    .param().required(true).name("serviceJourneyId").type(RestParamType.path).description("The id of the serviceJourney to look up").dataType("string").endParam()
+                    .param().required(true).name("version").type(RestParamType.path).description("Specific version or `latest`").dataType("string").endParam()
+                    .param().required(true).name("date").type(RestParamType.path).description("Date").dataType("string").endParam()
+
+                .post("/query").type(ServiceJourneyParam[].class).consumes("text/json").produces("text/json")
+                    .param().name("body").type(RestParamType.body).description("The ServiceJourneys to look up").endParam()
+                    .to("direct:lookup.multiple.servicejourneys.version.date")
+
+                .get("/{datedServiceJourneyId}").produces("text/json").to("direct:lookup.single.datedservicejourney")
+                    .description("DEPRECATED: Use `/dated/{datedServiceJourneyId}`")
+                .get("/dated/{datedServiceJourneyId}").produces("text/json").to("direct:lookup.single.datedservicejourney")
+                    .param().required(true).name("datedServiceJourneyId").type(RestParamType.path).description("DatedServiceJourney to lookup").dataType("string").endParam()
+                .get("/original/{originalDatedServiceJourneyId}").produces("text/json").to("direct:lookup.original.datedservicejourney")
+                    .param().required(true).name("originalDatedServiceJourneyId").type(RestParamType.path).description("OriginalDatedServiceJourney to lookup").dataType("string").endParam()
+
+                .post("/reverse-query").type(DatedServiceJourneyParam[].class).consumes("text/json").produces("text/json")
+                    .param().name("body").type(RestParamType.body).description("The DatedServiceJourneys to look up").endParam()
+                    .to("direct:lookup.multiple.datedservicejourneys");
 
         rest("/api")
+            .apiDocs(Boolean.FALSE)
             .get("/{serviceJourneyId}/{version}/{date}").produces("text/json").to("direct:lookup.single.servicejourney.version.date")
-                .param().required(true).name("serviceJourneyId").type(RestParamType.path).description("The id of the serviceJourney to look up").dataType("string").endParam()
-                .param().required(true).name("version").type(RestParamType.path).description("Specific version or `latest`").dataType("string").endParam()
-                .param().required(true).name("date").type(RestParamType.path).description("Date").dataType("string").endParam()
-
-             .post("/query").type(ServiceJourneyParam[].class).consumes("application/json").produces("text/json")
-                .param().name("body").type(RestParamType.body).description("The ServiceJourneys to look up").endParam()
+            .post("/query").type(ServiceJourneyParam[].class).consumes("text/json").produces("text/json")
                 .to("direct:lookup.multiple.servicejourneys.version.date")
-
-
             .get("/{datedServiceJourneyId}").produces("text/json").to("direct:lookup.single.datedservicejourney")
-                .description("DEPRECATED: Use `/dated/{datedServiceJourneyId}`")
             .get("/dated/{datedServiceJourneyId}").produces("text/json").to("direct:lookup.single.datedservicejourney")
-                .param().required(true).name("datedServiceJourneyId").type(RestParamType.path).description("DatedServiceJourney to lookup").dataType("string").endParam()
             .get("/original/{originalDatedServiceJourneyId}").produces("text/json").to("direct:lookup.original.datedservicejourney")
-                .param().required(true).name("originalDatedServiceJourneyId").type(RestParamType.path).description("OriginalDatedServiceJourney to lookup").dataType("string").endParam()
-
-            .post("/reverse-query").type(DatedServiceJourneyParam[].class).consumes("application/json").produces("text/json")
-                .param().name("body").type(RestParamType.body).description("The DatedServiceJourneys to look up").endParam()
+            .post("/reverse-query").type(DatedServiceJourneyParam[].class).consumes("text/json").produces("text/json")
                 .to("direct:lookup.multiple.datedservicejourneys")
         ;
 

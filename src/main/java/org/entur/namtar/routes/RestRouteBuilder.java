@@ -32,6 +32,9 @@ public class RestRouteBuilder extends RouteBuilder {
     @Value("${namtar.incoming.port}")
     String incomingPort;
 
+    @Value("${namtar.swagger.host.url}")
+    String hostUrl;
+
     @Override
     public void configure() throws Exception {
         restConfiguration("jetty")
@@ -40,6 +43,7 @@ public class RestRouteBuilder extends RouteBuilder {
                     .apiProperty("api.title", "DatedServiceJourneys").apiProperty("api.version", "0.1")
                     // and enable CORS
                     .apiProperty("cors", "true")
+                .apiProperty("host", hostUrl)
         ;
     }
 
