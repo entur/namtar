@@ -39,12 +39,12 @@ public class RestRouteBuilder extends RouteBuilder {
     public void configure() throws Exception {
         restConfiguration("jetty")
                 .port(incomingPort)
-                .apiContextPath("api/api-doc")
+                .apiContextPath("api/api-doc/swagger.json")
                     .apiProperty("api.title", "DatedServiceJourneys").apiProperty("api.version", "0.1")
                     // and enable CORS
                     .apiProperty("cors", "true")
-                .apiProperty("host", hostUrl)
-                .apiProperty("schemes","https")
+                    .apiProperty("host", hostUrl)
+                    .apiProperty("schemes","https")
         ;
     }
 
