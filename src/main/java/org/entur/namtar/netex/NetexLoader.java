@@ -70,6 +70,7 @@ public class NetexLoader {
     public void loadNetexFromBlobStore(Iterator<Blob> blobIterator) throws IOException {
         if (!isLoadingData) {
             isLoadingData = true;
+            log.info("Loading netex-files");
             try {
                 int counter = 0;
                 long t1 = System.currentTimeMillis();
