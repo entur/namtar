@@ -44,6 +44,7 @@ public class RestRouteBuilder extends RouteBuilder {
                     // and enable CORS
                     .apiProperty("cors", "true")
                 .apiProperty("host", hostUrl)
+                .apiProperty("schemes","https")
         ;
     }
 
