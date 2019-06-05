@@ -73,7 +73,7 @@ public class MappingRoute extends RestRouteBuilder {
                     .to("direct:lookup.multiple.servicejourneys.version.date")
 
                 .get("/{datedServiceJourneyId}").produces("text/json").to("direct:lookup.single.datedservicejourney")
-                    .description("DEPRECATED: Use `/dated/{datedServiceJourneyId}`")
+                    .apiDocs(Boolean.FALSE) // Deprecated service endpoint - ignore this in swagger doc
                 .get("/dated/{datedServiceJourneyId}").produces("text/json").to("direct:lookup.single.datedservicejourney")
                     .param().required(true).name("datedServiceJourneyId").type(RestParamType.path).description("DatedServiceJourney to lookup").dataType("string").endParam()
                 .get("/original/{originalDatedServiceJourneyId}").produces("text/json").to("direct:lookup.original.datedservicejourney")
