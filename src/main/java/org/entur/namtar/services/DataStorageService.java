@@ -46,7 +46,9 @@ public class DataStorageService {
     private int searchCount;
 
     public DataStorageService(StorageRepository repository) {
+        logger.info("Initializing DataStorageService");
         this.repository = repository;
+        logger.info("Initializing DataStorageService - done");
     }
 
     private void addSourceFileToCache(String sourceFileName) {
