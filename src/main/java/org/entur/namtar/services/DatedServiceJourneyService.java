@@ -49,9 +49,11 @@ public class DatedServiceJourneyService {
 
     public DatedServiceJourneyService(@Autowired DataStorageService storageService,
                                       @Value("${namtar.generated.id.prefix}") String idPrefix) {
+        logger.info("Initializing DatedServiceJourneyService");
         this.storageService = storageService;
         GENERATED_ID_PREFIX = idPrefix;
         updateNextCreationNumber();
+        logger.info("Initializing DatedServiceJourneyService - done");
     }
 
     public void updateNextCreationNumber() {

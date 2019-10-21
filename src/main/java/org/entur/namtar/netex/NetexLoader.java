@@ -19,7 +19,14 @@ import com.google.cloud.storage.Blob;
 import org.entur.namtar.model.DatedServiceJourney;
 import org.entur.namtar.repository.blobstore.BlobStoreRepository;
 import org.entur.namtar.services.DatedServiceJourneyService;
-import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.DayType;
+import org.rutebanken.netex.model.DayTypeAssignment;
+import org.rutebanken.netex.model.DayTypeRefStructure;
+import org.rutebanken.netex.model.DayTypeRefs_RelStructure;
+import org.rutebanken.netex.model.JourneyPattern;
+import org.rutebanken.netex.model.LineRefStructure;
+import org.rutebanken.netex.model.Route;
+import org.rutebanken.netex.model.ServiceJourney;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +57,7 @@ public class NetexLoader {
     public NetexLoader(@Autowired DatedServiceJourneyService datedServiceJourneyService,
                        @Autowired BlobStoreRepository repository,
                        @Value("${namtar.tempfile.directory:/tmp}") String tmpFileDirectoryPath) {
+        log.info("Initializing NetexLoader");
         this.datedServiceJourneyService = datedServiceJourneyService;
         this.repository = repository;
         tmpFileDirectory = new File(tmpFileDirectoryPath);
@@ -60,6 +68,7 @@ public class NetexLoader {
             log.info("Using tmp-directory with path {}, already existed.", tmpFileDirectoryPath);
         }
         lastSuccessfulDataLoaded = Instant.now();
+        log.info("Initializing NetexLoader - done");
     }
 
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE;///ofPattern("yyyy-MM-dd");

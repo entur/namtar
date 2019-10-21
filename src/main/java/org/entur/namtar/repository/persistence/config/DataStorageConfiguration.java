@@ -34,6 +34,7 @@ public class DataStorageConfiguration {
     @Bean
     public DataStorageService createDatabaseStorageService(@Autowired DatedServiceJourneyRepository datedServiceJourneyRepository,
                                                            @Autowired SourceFileRepository sourceFileRepository) {
+        logger.info("Initializing DataStorageService with DatabaseRepositoryImpl");
         return new DataStorageService(new DatabaseRepositoryImpl(datedServiceJourneyRepository, sourceFileRepository));
     }
 }
