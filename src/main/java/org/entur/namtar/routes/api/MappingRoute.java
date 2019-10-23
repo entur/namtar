@@ -30,6 +30,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
+import java.util.Arrays;
 
 
 @Service
@@ -62,11 +63,17 @@ public class MappingRoute extends RestRouteBuilder {
 
          */
 
+        RestOperationResponseMsgDefinition notFoundResponse = new RestOperationResponseMsgDefinition();
+        notFoundResponse.setMessage("Not found");
+        notFoundResponse.code(404);
+
         RestOperationResponseMsgDefinition dsjResponse = new RestOperationResponseMsgDefinition();
         dsjResponse.responseModel(DatedServiceJourney.class);
+        dsjResponse.code(200);
 
         RestOperationResponseMsgDefinition dsjResponseArray = new RestOperationResponseMsgDefinition();
         dsjResponseArray.responseModel(DatedServiceJourney[].class);
+        dsjResponseArray.code(200);
 
         rest("")
                 .tag("api")
@@ -75,7 +82,7 @@ public class MappingRoute extends RestRouteBuilder {
                     .param().required(true).name("serviceJourneyId").type(RestParamType.path).description("The id of the serviceJourney to look up").dataType("string").endParam()
                     .param().required(true).name("version").type(RestParamType.path).description("Specific version or `latest`").dataType("string").endParam()
                     .param().required(true).name("date").type(RestParamType.path).description("Date").dataType("string").endParam()
-                    .responseMessage(dsjResponse)
+                    .responseMessages(Arrays.asList(notFoundResponse, dsjResponse))
 
                 .post("/query").type(ServiceJourneyParam[].class).consumes("text/json").produces("text/json")
                     .param().name("body").type(RestParamType.body).description("The ServiceJourneys to look up").endParam()
@@ -86,7 +93,7 @@ public class MappingRoute extends RestRouteBuilder {
                     .apiDocs(Boolean.FALSE) // Deprecated service endpoint - ignore this in swagger doc
                 .get("/dated/{datedServiceJourneyId}").produces("text/json").to("direct:lookup.single.datedservicejourney")
                     .param().required(true).name("datedServiceJourneyId").type(RestParamType.path).description("DatedServiceJourney to lookup").dataType("string").endParam()
-                    .responseMessage(dsjResponse)
+                    .responseMessages(Arrays.asList(notFoundResponse, dsjResponse))
 
                 .get("/original/{originalDatedServiceJourneyId}").produces("text/json").to("direct:lookup.original.datedservicejourney")
                     .param().required(true).name("originalDatedServiceJourneyId").type(RestParamType.path).description("OriginalDatedServiceJourney to lookup").dataType("string").endParam()
