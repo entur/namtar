@@ -20,7 +20,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import org.apache.camel.Exchange;
+import org.apache.camel.model.rest.RestOperationResponseMsgDefinition;
 import org.apache.camel.model.rest.RestParamType;
+import org.entur.namtar.model.DatedServiceJourney;
 import org.entur.namtar.routes.RestRouteBuilder;
 import org.entur.namtar.services.DatedServiceJourneyService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +62,12 @@ public class MappingRoute extends RestRouteBuilder {
 
          */
 
+        RestOperationResponseMsgDefinition dsjResponse = new RestOperationResponseMsgDefinition();
+        dsjResponse.responseModel(DatedServiceJourney.class);
+
+        RestOperationResponseMsgDefinition dsjResponseArray = new RestOperationResponseMsgDefinition();
+        dsjResponseArray.responseModel(DatedServiceJourney[].class);
+
         rest("")
                 .tag("api")
                 .apiDocs(Boolean.TRUE)
@@ -67,20 +75,26 @@ public class MappingRoute extends RestRouteBuilder {
                     .param().required(true).name("serviceJourneyId").type(RestParamType.path).description("The id of the serviceJourney to look up").dataType("string").endParam()
                     .param().required(true).name("version").type(RestParamType.path).description("Specific version or `latest`").dataType("string").endParam()
                     .param().required(true).name("date").type(RestParamType.path).description("Date").dataType("string").endParam()
+                    .responseMessage(dsjResponse)
 
                 .post("/query").type(ServiceJourneyParam[].class).consumes("text/json").produces("text/json")
                     .param().name("body").type(RestParamType.body).description("The ServiceJourneys to look up").endParam()
+                    .responseMessage(dsjResponseArray)
                     .to("direct:lookup.multiple.servicejourneys.version.date")
 
                 .get("/{datedServiceJourneyId}").produces("text/json").to("direct:lookup.single.datedservicejourney")
                     .apiDocs(Boolean.FALSE) // Deprecated service endpoint - ignore this in swagger doc
                 .get("/dated/{datedServiceJourneyId}").produces("text/json").to("direct:lookup.single.datedservicejourney")
                     .param().required(true).name("datedServiceJourneyId").type(RestParamType.path).description("DatedServiceJourney to lookup").dataType("string").endParam()
+                    .responseMessage(dsjResponse)
+
                 .get("/original/{originalDatedServiceJourneyId}").produces("text/json").to("direct:lookup.original.datedservicejourney")
                     .param().required(true).name("originalDatedServiceJourneyId").type(RestParamType.path).description("OriginalDatedServiceJourney to lookup").dataType("string").endParam()
+                    .responseMessage(dsjResponseArray)
 
                 .post("/reverse-query").type(DatedServiceJourneyParam[].class).consumes("text/json").produces("text/json")
                     .param().name("body").type(RestParamType.body).description("The DatedServiceJourneys to look up").endParam()
+                    .responseMessage(dsjResponseArray)
                     .to("direct:lookup.multiple.datedservicejourneys");
 
         rest("/api")
