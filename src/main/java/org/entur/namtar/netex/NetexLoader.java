@@ -139,41 +139,45 @@ public class NetexLoader {
         int ignoreCounter = 0;
         for (org.rutebanken.netex.model.ServiceJourney serviceJourney : processor.serviceJourneys) {
 
-            String serviceJourneyId = serviceJourney.getId();
-            Integer version = Integer.parseInt(serviceJourney.getVersion());
+            try {
+                String serviceJourneyId = serviceJourney.getId();
+                Integer version = Integer.parseInt(serviceJourney.getVersion());
 
-            String lineRef = resolveLineRef(processor, serviceJourney);
+                String lineRef = resolveLineRef(processor, serviceJourney);
 
-            String departureTime = serviceJourney.getPassingTimes().getTimetabledPassingTime().get(0).getDepartureTime().format(timeFormatter);
+                String departureTime = serviceJourney.getPassingTimes().getTimetabledPassingTime().get(0).getDepartureTime().format(timeFormatter);
 
-            // TODO: Future support for more operators should rely on requirement and usage of ExternalVehicleJourneyRef - not PrivateCode
-            // e.g. serviceJourney.getExternalVehicleJourneyRef().getRef();
+                // TODO: Future support for more operators should rely on requirement and usage of ExternalVehicleJourneyRef - not PrivateCode
+                // e.g. serviceJourney.getExternalVehicleJourneyRef().getRef();
 
-            if (serviceJourney.getPrivateCode() == null) {
-                continue;
-            }
+                if (serviceJourney.getPrivateCode() == null) {
+                    continue;
+                }
 
-            String privateCode = serviceJourney.getPrivateCode().getValue();
+                String privateCode = serviceJourney.getPrivateCode().getValue();
 
-            DayTypeRefs_RelStructure dayTypes = serviceJourney.getDayTypes();
-            departureCounter += dayTypes.getDayTypeRef().size();
-            for (JAXBElement<? extends DayTypeRefStructure> dayTypeRef : dayTypes.getDayTypeRef()) {
+                DayTypeRefs_RelStructure dayTypes = serviceJourney.getDayTypes();
+                departureCounter += dayTypes.getDayTypeRef().size();
+                for (JAXBElement<? extends DayTypeRefStructure> dayTypeRef : dayTypes.getDayTypeRef()) {
 
-                DayType dayType = processor.dayTypeById.get(dayTypeRef.getValue().getRef());
-                DayTypeAssignment dayTypeAssignment = processor.dayTypeAssignmentByDayTypeId.get(dayType.getId());
+                    DayType dayType = processor.dayTypeById.get(dayTypeRef.getValue().getRef());
+                    DayTypeAssignment dayTypeAssignment = processor.dayTypeAssignmentByDayTypeId.get(dayType.getId());
 
-                if (dayTypeAssignment != null && dayTypeAssignment.getDate() != null) {
-                    String departureDate = dayTypeAssignment.getDate().format(dateFormatter);
+                    if (dayTypeAssignment != null && dayTypeAssignment.getDate() != null) {
+                        String departureDate = dayTypeAssignment.getDate().format(dateFormatter);
 
-                    DatedServiceJourney currentServiceJourney = new DatedServiceJourney(serviceJourneyId, version, privateCode, lineRef, departureDate, departureTime);
+                        DatedServiceJourney currentServiceJourney = new DatedServiceJourney(serviceJourneyId, version, privateCode, lineRef, departureDate, departureTime);
 
-                    DatedServiceJourney datedServiceJourney = datedServiceJourneyService.createDatedServiceJourney(currentServiceJourney, processor.publicationTimestamp, sourceFileName);
-                    if (datedServiceJourney != null) { // If null, it already exists and should not be added
-                        datedServiceJourneyService.getStorageService().addDatedServiceJourney(datedServiceJourney);
-                    } else {
-                        ignoreCounter++;
+                        DatedServiceJourney datedServiceJourney = datedServiceJourneyService.createDatedServiceJourney(currentServiceJourney, processor.publicationTimestamp, sourceFileName);
+                        if (datedServiceJourney != null) { // If null, it already exists and should not be added
+                            datedServiceJourneyService.getStorageService().addDatedServiceJourney(datedServiceJourney);
+                        } else {
+                            ignoreCounter++;
+                        }
                     }
                 }
+            } catch (NullPointerException npe) {
+                log.warn("Caught NullPointerException for ServiceJourney {} from file {}, continuing", serviceJourney.getId(), sourceFileName);
             }
         }
 
