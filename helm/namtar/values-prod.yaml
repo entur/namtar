@@ -1,0 +1,14 @@
+env: production
+
+replicas: 2
+
+sql:
+  instance: neon-1287:europe-west1:namtar-db-1=tcp:5432
+
+configMap:
+  projectId: neon-1287
+  gcsBucketName: marduk-exchange-production
+  kafkaBrokers: https://kafka-0.entur.io:9094,https://kafka-1.entur.io:9094,https://kafka-2.entur.io:9094
+  registryUrl: http://schema-registry.entur.io:8001
+  kafkaEenabled: true
+  topicName: dated-service-journeys-production
