@@ -12,9 +12,14 @@ data:
     blobstore.gcs.subfolder=outbound/dated
     blobstore.gcs.credential.path={{ .Values.secretMount.mountPath }}
 
+    rutebanken.kubernetes.namespace={{ .Release.Namespace }}
+    rutebanken.kubernetes.enabled=true
+
     namtar.incoming.port={{ .Values.service.http.internalPort }}
     namtar.generated.id.prefix=ENT:DatedServiceJourney:
+
     namtar.blobstore.polling.cron.expression=0 0/5 * ? * * *
+
     namtar.kafka.enabled={{.Values.configMap.kafkaEenabled}}
     namtar.kafka.topic.name={{.Values.configMap.topicName}}
     {{- if eq .Values.configMap.kafkaEenabled true }}
