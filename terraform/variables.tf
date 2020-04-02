@@ -32,6 +32,11 @@ variable "service_account_bucket_role" {
   default     = "roles/storage.objectViewer"
 }
 
+variable "service_account_cloudsql_role" {
+  description = "Role of the Service Account - more about roles https://cloud.google.com/pubsub/docs/access-control"
+  default     = "roles/cloudsql.client"
+}
+
 variable "ror-namtar-kafka-credentials" {
   description = "Namtar kafka ssl credentials"
 }
