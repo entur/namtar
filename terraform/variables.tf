@@ -32,18 +32,19 @@ variable "service_account_bucket_role" {
   default     = "roles/storage.objectViewer"
 }
 
-variable ror-namtar-kafka-credentials {
+variable "ror-namtar-kafka-credentials" {
   description = "Namtar kafka ssl credentials"
 }
 
-variable  ror-namtar-kafka-user-name {
-  description = "Namtar kafka user name"}
+variable  "ror-namtar-kafka-user-name" {
+  description = "Namtar kafka user name"
+}
 
-variable ror-namtar-kafka-user-password {
+variable "ror-namtar-kafka-user-password" {
   description = "Namtar kafka user password"
 }
 
-variable ror-namtar-db-password {
+variable "ror-namtar-db-password" {
   description = "Namtar database password"
 }
 
