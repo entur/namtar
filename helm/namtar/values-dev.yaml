@@ -1,0 +1,10 @@
+env: dev
+
+sql:
+  instance: carbon-1287:europe-west1:namtar-db-1=tcp:5432
+
+configMap:
+  projectId: carbon-1287
+  gcsBucketName: marduk-exchange
+  kafkaEenabled: false
+  topicName: dated-service-journeys-dev
