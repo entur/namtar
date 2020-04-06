@@ -33,11 +33,12 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- versions for use in mvn plugins as we cannot inherit them from a BOM -->
-        <fabric8.version>2.3.7</fabric8.version>
-        <spring-boot-plugin.version>1.5.13.RELEASE</spring-boot-plugin.version>
-        <spring-boot.version>1.5.13.RELEASE</spring-boot.version>
+        <spring-boot-plugin.version>2.2.6.RELEASE</spring-boot-plugin.version>
+        <spring-boot.version>2.2.6.RELEASE</spring-boot.version>
 
+        <camel-version>2.24.3</camel-version>
     </properties>
+
     <repositories>
         <repository>
             <id>confluent</id>
@@ -55,19 +56,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <dependency>
-                <groupId>io.fabric8</groupId>
-                <artifactId>fabric8-project</artifactId>
-                <version>${fabric8.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <!-- Need to add this explicitly, to avoid old dep. Problem with either maven or nexus... -->
-            <dependency>
-                <groupId>io.fabric8</groupId>
-                <artifactId>kubernetes-client</artifactId>
-                <version>2.6.1</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -81,47 +69,56 @@
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-core</artifactId>
+            <version>${camel-version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-jetty</artifactId>
+            <version>${camel-version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-spring-boot</artifactId>
+            <version>${camel-version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-bean-validator</artifactId>
+            <version>${camel-version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-spring</artifactId>
+            <version>${camel-version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-jackson</artifactId>
+            <version>${camel-version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-swagger-java</artifactId>
+            <version>${camel-version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-hazelcast</artifactId>
+            <version>${camel-version}</version>
         </dependency>
 
 
         <dependency>
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-kafka</artifactId>
+            <version>${camel-version}</version>
         </dependency>
 
 
@@ -152,7 +149,7 @@
         <dependency>
             <groupId>javax.el</groupId>
             <artifactId>javax.el-api</artifactId>
-            <version>2.2.5</version>
+            <version>3.0.0</version>
             <scope>provided</scope>
         </dependency>
 
@@ -314,9 +311,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -328,6 +326,7 @@
                     <excludes>
                         <exclude>**/*KT.java</exclude>
                     </excludes>
+                    <argLine>-Xmx1024m</argLine>
                 </configuration>
             </plugin>
 

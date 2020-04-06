@@ -37,7 +37,7 @@ aliases:
 jobs:
   build:
     docker:
-      - image: eu.gcr.io/entur-system-1287/circleci-toolbox-image
+      - image: eu.gcr.io/entur-system-1287/circleci-toolbox-image-java11
         auth:
           username: _json_key
           password: $DOCKER_PASSWORD
@@ -77,7 +77,7 @@ jobs:
             - ./version
   deploy-docker:
     docker:
-      - image: eu.gcr.io/entur-system-1287/circleci-toolbox-image
+      - image: eu.gcr.io/entur-system-1287/circleci-toolbox-image-java11
         auth:
           username: _json_key
           password: $DOCKER_PASSWORD
