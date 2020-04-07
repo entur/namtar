@@ -36,7 +36,7 @@
         <spring-boot-plugin.version>2.2.6.RELEASE</spring-boot-plugin.version>
         <spring-boot.version>2.2.6.RELEASE</spring-boot.version>
 
-        <camel-version>2.24.3</camel-version>
+        <camel-version>3.0.1</camel-version>
     </properties>
 
     <repositories>
@@ -159,15 +159,17 @@
             <version>1.0.9-SNAPSHOT</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter</artifactId>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-configuration-processor</artifactId>-->
+<!--            <version>${spring-boot.version}</version>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>org.entur.helpers</groupId>

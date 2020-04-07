@@ -48,6 +48,7 @@
 package org.entur.namtar.routes.policy;
 
 import org.apache.camel.CamelContext;
+import org.apache.camel.NamedNode;
 import org.apache.camel.component.hazelcast.policy.HazelcastRoutePolicy;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.camel.spi.RoutePolicy;
@@ -88,9 +89,10 @@ public class SingletonRoutePolicyFactory extends HazelCastService implements Rou
     }
 
     @Override
-    public RoutePolicy createRoutePolicy(CamelContext camelContext, String routeId, RouteDefinition routeDefinition) {
+    public RoutePolicy createRoutePolicy(CamelContext camelContext, String routeId, NamedNode namedNode) {
         try {
-            if (SINGLETON_ROUTE_DEFINITION_GROUP_NAME.equals(routeDefinition.getGroup())) {
+            if (namedNode instanceof RouteDefinition
+                    && SINGLETON_ROUTE_DEFINITION_GROUP_NAME.equals(((RouteDefinition) namedNode).getGroup())) {
                 return build(routeId);
             }
         } catch (Exception e) {
