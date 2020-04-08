@@ -44,13 +44,14 @@ public class DatedServiceJourneyService {
 
     private long nextId;
 
-    @Autowired
     private KafkaPublisher kafkaNotifier;
 
     public DatedServiceJourneyService(@Autowired DataStorageService storageService,
+                                      @Autowired KafkaPublisher kafkaNotifier,
                                       @Value("${namtar.generated.id.prefix}") String idPrefix) {
         logger.info("Initializing DatedServiceJourneyService");
         this.storageService = storageService;
+        this.kafkaNotifier = kafkaNotifier;
         GENERATED_ID_PREFIX = idPrefix;
         updateNextCreationNumber();
         logger.info("Initializing DatedServiceJourneyService - done");
@@ -77,7 +78,7 @@ public class DatedServiceJourneyService {
         DatedServiceJourney datedServiceJourney = storageService.findByPrivateCodeDepartureDate(serviceJourney.getPrivateCode(), serviceJourney.getDepartureDate());
         long t3 = System.currentTimeMillis();
 
-        if (((t2-t1) > 10) & (t3-t2 > 10)) {
+        if (((t2-t1) > 10) && (t3-t2 > 10)) {
             logger.info("Check existing: serviceJourneyId: {} ms, privateCode: {} ms", (t2 - t1), (t3 - t2));
         }
         long creationNumber = nextId++;
@@ -142,9 +143,7 @@ public class DatedServiceJourneyService {
 
         //TODO: Handle versions
 
-        DatedServiceJourney datedServiceJourney = storageService.findByServiceJourneyIdAndDate(serviceJourneyId, departureDate);
-
-        return datedServiceJourney;
+        return storageService.findByServiceJourneyIdAndDate(serviceJourneyId, departureDate);
     }
 
     public List<DatedServiceJourney> findDatedServiceJourneys(ServiceJourneyParam... serviceJourneyParams) {

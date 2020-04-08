@@ -16,7 +16,28 @@
 package org.entur.namtar.netex;
 
 import org.apache.commons.io.IOUtils;
-import org.rutebanken.netex.model.*;
+import org.rutebanken.netex.model.Common_VersionFrameStructure;
+import org.rutebanken.netex.model.CompositeFrame;
+import org.rutebanken.netex.model.DataManagedObjectStructure;
+import org.rutebanken.netex.model.DayType;
+import org.rutebanken.netex.model.DayTypeAssignment;
+import org.rutebanken.netex.model.DayTypes_RelStructure;
+import org.rutebanken.netex.model.JourneyPattern;
+import org.rutebanken.netex.model.JourneyPatternsInFrame_RelStructure;
+import org.rutebanken.netex.model.Journey_VersionStructure;
+import org.rutebanken.netex.model.JourneysInFrame_RelStructure;
+import org.rutebanken.netex.model.LinkSequence_VersionStructure;
+import org.rutebanken.netex.model.OperatingPeriod;
+import org.rutebanken.netex.model.PublicationDeliveryStructure;
+import org.rutebanken.netex.model.Route;
+import org.rutebanken.netex.model.RoutesInFrame_RelStructure;
+import org.rutebanken.netex.model.ServiceCalendarFrame;
+import org.rutebanken.netex.model.ServiceFrame;
+import org.rutebanken.netex.model.ServiceJourney;
+import org.rutebanken.netex.model.TimetableFrame;
+import org.rutebanken.netex.model.VersionFrameDefaultsStructure;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -34,6 +55,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 class NetexProcessor {
+
+    private static final Logger logger = LoggerFactory.getLogger(NetexProcessor.class);
 
     private static JAXBContext jaxbContext;
     private String timeZone;
@@ -55,7 +78,7 @@ class NetexProcessor {
             try {
                 jaxbContext = JAXBContext.newInstance(PublicationDeliveryStructure.class);
             } catch (JAXBException e) {
-                e.printStackTrace();
+                logger.error("Could not initialize NetexProcessor", e);
             }
         }
     }
@@ -104,13 +127,13 @@ class NetexProcessor {
                 if (frame.getValue() instanceof CompositeFrame) {
                     CompositeFrame cf = (CompositeFrame) frame.getValue();
                     VersionFrameDefaultsStructure frameDefaults = cf.getFrameDefaults();
-                    String timeZone = "GMT";
+                    String fileTimeZone = "GMT";
                     if (frameDefaults != null && frameDefaults.getDefaultLocale() != null
                             && frameDefaults.getDefaultLocale().getTimeZone() != null) {
-                        timeZone = frameDefaults.getDefaultLocale().getTimeZone();
+                        fileTimeZone = frameDefaults.getDefaultLocale().getTimeZone();
                     }
 
-                    setTimeZone(timeZone);
+                    setTimeZone(fileTimeZone);
 
                     List<JAXBElement<? extends Common_VersionFrameStructure>> commonFrames = cf
                             .getFrames().getCommonFrame();
@@ -171,10 +194,7 @@ class NetexProcessor {
             if (scf.getServiceCalendar() != null) {
                 DayTypes_RelStructure dayTypes = scf.getServiceCalendar().getDayTypes();
                 for (JAXBElement dt : dayTypes.getDayTypeRefOrDayType_()) {
-                    if (dt.getValue() instanceof DayType) {
-                        DayType dayType = (DayType) dt.getValue();
-                        dayTypeById.put(dayType.getId(), dayType);
-                    }
+                    loadDayType(dt);
                 }
             }
 
@@ -182,10 +202,7 @@ class NetexProcessor {
                 List<JAXBElement<? extends DataManagedObjectStructure>> dayTypes = scf.getDayTypes()
                         .getDayType_();
                 for (JAXBElement dt : dayTypes) {
-                    if (dt.getValue() instanceof DayType) {
-                        DayType dayType = (DayType) dt.getValue();
-                        dayTypeById.put(dayType.getId(), dayType);
-                    }
+                    loadDayType(dt);
                 }
             }
 
@@ -199,6 +216,13 @@ class NetexProcessor {
         }
     }
 
+    private void loadDayType(JAXBElement dt) {
+        if (dt.getValue() instanceof DayType) {
+            DayType dayType = (DayType) dt.getValue();
+            dayTypeById.put(dayType.getId(), dayType);
+        }
+    }
+
     private void loadServiceFrames(JAXBElement commonFrame) {
         if (commonFrame.getValue() instanceof ServiceFrame) {
             ServiceFrame sf = (ServiceFrame) commonFrame.getValue();
@@ -206,9 +230,9 @@ class NetexProcessor {
             //journeyPatterns
             JourneyPatternsInFrame_RelStructure journeyPatterns = sf.getJourneyPatterns();
             if (journeyPatterns != null) {
-                List<JAXBElement<?>> journeyPattern_orJourneyPatternView = journeyPatterns
+                List<JAXBElement<?>> journeyPatternOrJourneyPatternView = journeyPatterns
                         .getJourneyPattern_OrJourneyPatternView();
-                for (JAXBElement pattern : journeyPattern_orJourneyPatternView) {
+                for (JAXBElement pattern : journeyPatternOrJourneyPatternView) {
                     if (pattern.getValue() instanceof JourneyPattern) {
                         JourneyPattern journeyPattern = (JourneyPattern) pattern.getValue();
                         journeyPatternsById.put(journeyPattern.getId(), journeyPattern);
@@ -224,9 +248,9 @@ class NetexProcessor {
             ServiceFrame sf = (ServiceFrame) commonFrame.getValue();
 
             //Routes
-            RoutesInFrame_RelStructure routesInFrame_relStructure = sf.getRoutes();
-            if (routesInFrame_relStructure != null) {
-                List<JAXBElement<? extends LinkSequence_VersionStructure>> routesList = routesInFrame_relStructure.getRoute_();
+            RoutesInFrame_RelStructure routesInFrameRelStructure = sf.getRoutes();
+            if (routesInFrameRelStructure != null) {
+                List<JAXBElement<? extends LinkSequence_VersionStructure>> routesList = routesInFrameRelStructure.getRoute_();
                 for (JAXBElement element : routesList) {
                     if (element.getValue() instanceof Route) {
                         Route route = (Route) element.getValue();

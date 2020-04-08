@@ -54,17 +54,19 @@ public class BlobStoreRoute extends RestRouteBuilder {
         // TODO: If successful, delete/move file from bucket
 
 
+        final String logParams = "?level=DEBUG&showAll=true&multiline=true";
+
         from("direct:getAllBlobs")
-                .to("log:" + getClass().getName() + "?level=DEBUG&showAll=true&multiline=true")
+                .to("log:" + getClass().getName() + logParams)
                 .bean("blobStoreService", "getAllBlobs")
-                .to("log:" + getClass().getName() + "?level=DEBUG&showAll=true&multiline=true")
+                .to("log:" + getClass().getName() + logParams)
                 .routeId("blobstore-list")
         ;
 
         from("direct:loadBlobs")
-                .to("log:" + getClass().getName() + "?level=DEBUG&showAll=true&multiline=true")
+                .to("log:" + getClass().getName() + logParams)
                 .bean(netexLoader, "loadNetexFromBlobStore")
-                .to("log:" + getClass().getName() + "?level=DEBUG&showAll=true&multiline=true")
+                .to("log:" + getClass().getName() + logParams)
                 .routeId("blobstore-load")
         ;
     }

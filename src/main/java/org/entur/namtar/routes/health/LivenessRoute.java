@@ -40,7 +40,7 @@ public class LivenessRoute extends RestRouteBuilder {
     public void configure() throws Exception {
         super.configure();
 
-        allowedInactivitySeconds = allowedInactivityHours*60*60;
+        int allowedInactivitySeconds = allowedInactivityHours*60*60;
 
         rest("/health")
             .tag("api") //Setting fake tag to remove automatically generated "health"-tag

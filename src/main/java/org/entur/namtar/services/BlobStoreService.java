@@ -37,17 +37,22 @@ public class BlobStoreService {
 
 	private final Logger log = LoggerFactory.getLogger(BlobStoreService.class);
 
-	@Autowired
 	BlobStoreRepository repository;
 
-	@Autowired
 	Storage storage;
 
-	@Value("${blobstore.gcs.container.name}")
 	String containerName;
 
-	@Value("${blobstore.gcs.subfolder}")
 	String subFolder;
+
+	public BlobStoreService(@Autowired BlobStoreRepository repository, @Autowired Storage storage,
+							@Value("${blobstore.gcs.container.name}") String containerName,
+							@Value("${blobstore.gcs.subfolder}") String subFolder) {
+		this.repository = repository;
+		this.storage = storage;
+		this.containerName = containerName;
+		this.subFolder = subFolder;
+	}
 
 	@PostConstruct
 	public void init() {
@@ -61,7 +66,7 @@ public class BlobStoreService {
 		long t1 = System.currentTimeMillis();
         Iterator<Blob> blobIterator = repository.listBlobs(subFolder);
         List<Blob> blobs = new ArrayList<>();
-        blobIterator.forEachRemaining(blob -> blobs.add(blob));
+        blobIterator.forEachRemaining(blobs::add);
 
         blobs.sort(Comparator.comparing(Blob::getUpdateTime));
 

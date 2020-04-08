@@ -80,8 +80,8 @@ public class KafkaPublisher {
 
         Properties properties = config.createProducerProperties();
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers);
-//        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, new KafkaAvroSerializer().getClass().getName());
-        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, new KafkaAvroSerializer().getClass().getName());
+
+        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class.getName());
 
         properties.put("schema.registry.url",schemaRegistryUrl);
 
@@ -89,9 +89,9 @@ public class KafkaPublisher {
         properties.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, securityProtocol);
 
         properties.put(SaslConfigs.SASL_MECHANISM, saslMechanism);
-        String jaas_config_contents = "org.apache.kafka.common.security.scram.ScramLoginModule required\nusername=\"%s\"\npassword=\"%s\";";
+        String jaasConfigContents = "org.apache.kafka.common.security.scram.ScramLoginModule required\nusername=\"%s\"\npassword=\"%s\";";
         properties.put(SaslConfigs.SASL_JAAS_CONFIG,
-                String.format(jaas_config_contents, saslUsername.trim(), saslPassword.trim())
+                String.format(jaasConfigContents, saslUsername.trim(), saslPassword.trim())
         );
 
         properties.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, truststoreLocation);

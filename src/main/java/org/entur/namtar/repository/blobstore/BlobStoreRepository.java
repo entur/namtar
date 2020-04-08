@@ -23,8 +23,6 @@ import java.util.Iterator;
 
 public interface BlobStoreRepository {
 
-//    boolean delete(BlobId blobId);
-
     Iterator<Blob> listBlobs(String prefix);
 
     InputStream getBlob(String objectName);

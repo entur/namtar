@@ -71,10 +71,10 @@ public class NetexLoader {
         log.info("Initializing NetexLoader - done");
     }
 
-    private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE;///ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
     private static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
-    private static boolean isLoadingData;
+    private boolean isLoadingData;
 
     public void loadNetexFromBlobStore(Iterator<Blob> blobIterator) throws IOException {
         if (!isLoadingData) {
@@ -86,7 +86,7 @@ public class NetexLoader {
                 while (blobIterator.hasNext()) {
                     Blob next = blobIterator.next();
                     String name = next.getName();
-                    String filename = name.substring(name.lastIndexOf("/") + 1);
+                    String filename = name.substring(name.lastIndexOf('/') + 1);
 
                     if (!datedServiceJourneyService.getStorageService().isAlreadyProcessed(filename)) {
 
@@ -96,7 +96,7 @@ public class NetexLoader {
                             datedServiceJourneyService.getStorageService().setFileStatus(filename, false);
 
                             long download = System.currentTimeMillis();
-                            String absolutePath = getFileFromInputStream(repository.getBlob(name), filename);
+                            String absolutePath = getFileFromInputStream(repository.getBlob(name), filename, true);
                             long process = System.currentTimeMillis();
                             processNetexFile(absolutePath, filename);
                             long done = System.currentTimeMillis();
@@ -181,10 +181,7 @@ public class NetexLoader {
             }
         }
 
-//        datedServiceJourneyService.getStorageService().addDatedServiceJourneys(datedServiceJourneys);
-
         log.info("Added {} ServiceJourneys with {} departures in {} ms. {} already existed.", processor.serviceJourneys.size(), departureCounter, (System.currentTimeMillis()-t1), ignoreCounter);
-        log.info(datedServiceJourneyService.toString());
     }
 
     private String resolveLineRef(NetexProcessor processor, ServiceJourney serviceJourney) {
@@ -200,28 +197,31 @@ public class NetexLoader {
                 JAXBElement<? extends LineRefStructure> lineRef = route.getLineRef();
                 return lineRef.getValue().getRef();
             }
-
+            log.warn("Unable to find LineRef from ServiceJourney with id [{}]", serviceJourney.getId());
         }
-        log.warn("Unable to find LineRef from ServiceJourney with id [{}]", serviceJourney.getId());
+        log.info("ServiceJourney was null in file {}", processor.zipFile.getName());
         return null;
     }
 
-    private String getFileFromInputStream(InputStream inputStream, String fileName) throws IOException {
+    private String getFileFromInputStream(InputStream inputStream, String fileName, boolean closeInputStreamWhenRead) throws IOException {
         File file = new File(tmpFileDirectory, fileName);
         if (file.exists() && file.length() > 0) {
             return file.getAbsolutePath();
         }
         // opens an output stream to createDatedServiceJourney into file
-        FileOutputStream outputStream = new FileOutputStream(file);
+        try (FileOutputStream outputStream = new FileOutputStream(file)) {
 
-        int bytesRead;
-        byte[] buffer = new byte[2048];
-        while ((bytesRead = inputStream.read(buffer)) != -1) {
-            outputStream.write(buffer, 0, bytesRead);
+            int bytesRead;
+            byte[] buffer = new byte[2048];
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+
+            if (closeInputStreamWhenRead) {
+                inputStream.close();
+            }
         }
 
-        outputStream.close();
-        inputStream.close();
         return file.getAbsolutePath();
     }
 }

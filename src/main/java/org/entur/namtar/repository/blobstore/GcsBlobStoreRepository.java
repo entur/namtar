@@ -18,8 +18,6 @@ package org.entur.namtar.repository.blobstore;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Storage;
 import org.rutebanken.helper.gcp.BlobStoreHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
@@ -30,8 +28,6 @@ import java.util.Iterator;
 @Repository
 @Profile("gcs-blobstore")
 public class GcsBlobStoreRepository implements BlobStoreRepository {
-
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private Storage storage;
 
