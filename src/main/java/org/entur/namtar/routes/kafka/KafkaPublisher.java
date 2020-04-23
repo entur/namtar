@@ -23,7 +23,6 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.config.SaslConfigs;
-import org.apache.kafka.common.config.SslConfigs;
 import org.entur.namtar.model.avro.DatedServiceJourney;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +37,7 @@ import java.util.concurrent.Future;
 public class KafkaPublisher {
     private final Logger log = LoggerFactory.getLogger(KafkaPublisher.class);
 
-    @Value("${namtar.kafka.enabled:true}")
+    @Value("${namtar.kafka.enabled:false}")
     private boolean kafkaEnabled;
 
     @Value("${namtar.kafka.topic.name:test}")
@@ -56,12 +55,6 @@ public class KafkaPublisher {
 
     @Value("${namtar.kafka.sasl.password}")
     private String saslPassword;
-
-    @Value("${namtar.kafka.ssl.truststore.location}")
-    private String truststoreLocation;
-
-    @Value("${namtar.kafka.ssl.truststore.password}")
-    private String truststorePassword;
 
     @Value("${namtar.kafka.schema.registry.url}")
     private String schemaRegistryUrl;
@@ -93,10 +86,6 @@ public class KafkaPublisher {
         properties.put(SaslConfigs.SASL_JAAS_CONFIG,
                 String.format(jaasConfigContents, saslUsername.trim(), saslPassword.trim())
         );
-
-        properties.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG, truststoreLocation);
-        properties.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, truststorePassword);
-
 
         producer = new KafkaProducer(properties);
 
