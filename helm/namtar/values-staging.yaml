@@ -8,5 +8,7 @@ sql:
 configMap:
   projectId: radon-1287
   gcsBucketName: marduk-exchange-stage
-  kafkaEenabled: false
+  kafkaBrokers: bootstrap.test-ext.kafka.entur.io:9095
+  registryUrl: http://schema-registry.test-ext.kafka.entur.io:8001
+  kafkaEnabled: true
   topicName: dated-service-journeys-staging

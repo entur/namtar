@@ -8,7 +8,7 @@ sql:
 configMap:
   projectId: neon-1287
   gcsBucketName: marduk-exchange-production
-  kafkaBrokers: https://kafka-0.entur.io:9094,https://kafka-1.entur.io:9094,https://kafka-2.entur.io:9094
-  registryUrl: http://schema-registry.entur.io:8001
-  kafkaEenabled: true
+  kafkaBrokers: bootstrap.prod-ext.kafka.entur.io:9095
+  registryUrl: http://schema-registry.prod-ext.kafka.entur.io:8001
+  kafkaEnabled: true
   topicName: dated-service-journeys-production

@@ -20,9 +20,9 @@ data:
 
     namtar.blobstore.polling.cron.expression=0 0/5 * ? * * *
 
-    namtar.kafka.enabled={{.Values.configMap.kafkaEenabled}}
+    namtar.kafka.enabled={{.Values.configMap.kafkaEnabled}}
     namtar.kafka.topic.name={{.Values.configMap.topicName}}
-    {{- if eq .Values.configMap.kafkaEenabled true }}
+    {{- if eq .Values.configMap.kafkaEnabled true }}
     namtar.kafka.brokers={{.Values.configMap.kafkaBrokers}}
     namtar.kafka.schema.registry.url={{.Values.configMap.registryUrl}}
     {{- end }}
