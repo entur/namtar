@@ -15,6 +15,7 @@
 
 package org.entur.namtar.services;
 
+import org.entur.namtar.metrics.PrometheusMetricsService;
 import org.entur.namtar.model.DatedServiceJourney;
 import org.entur.namtar.routes.api.DatedServiceJourneyParam;
 import org.entur.namtar.routes.api.ServiceJourneyParam;
@@ -32,6 +33,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static org.entur.namtar.metrics.SearchType.DATED_SERVICE_JOURNEY;
+import static org.entur.namtar.metrics.SearchType.ORIGINAL_DATED_SERVICE_JOURNEY;
+import static org.entur.namtar.metrics.SearchType.SERVICE_JOURNEY_ID_DATE;
+
 @Service
 public class DatedServiceJourneyService {
 
@@ -39,6 +44,8 @@ public class DatedServiceJourneyService {
 
 
     private final DataStorageService storageService;
+
+    private final PrometheusMetricsService metricsService;
 
     private final String GENERATED_ID_PREFIX;
 
@@ -48,11 +55,13 @@ public class DatedServiceJourneyService {
 
     public DatedServiceJourneyService(@Autowired DataStorageService storageService,
                                       @Autowired KafkaPublisher kafkaNotifier,
-                                      @Value("${namtar.generated.id.prefix}") String idPrefix) {
+                                      @Value("${namtar.generated.id.prefix}") String idPrefix,
+                                      @Autowired PrometheusMetricsService metricsService) {
         logger.info("Initializing DatedServiceJourneyService");
         this.storageService = storageService;
         this.kafkaNotifier = kafkaNotifier;
         GENERATED_ID_PREFIX = idPrefix;
+        this.metricsService = metricsService;
         updateNextCreationNumber();
         logger.info("Initializing DatedServiceJourneyService - done");
     }
@@ -112,25 +121,26 @@ public class DatedServiceJourneyService {
 
         if (createdNewOriginalDatedServiceJourney) {
             kafkaNotifier.publishToKafka(storageDatedServiceJourney);
-
         }
+        metricsService.markNewDSJ(createdNewOriginalDatedServiceJourney);
         return storageDatedServiceJourney;
     }
 
     public DatedServiceJourney findServiceJourneyByDatedServiceJourney(String datedServiceJourneyId) {
+        metricsService.markLookup(DATED_SERVICE_JOURNEY);
         return storageService.findByDatedServiceJourneyId(datedServiceJourneyId);
     }
 
 
     public Collection<DatedServiceJourney> findServiceJourneysByOriginalDatedServiceJourney(String datedServiceJourneyId) {
+        metricsService.markLookup(ORIGINAL_DATED_SERVICE_JOURNEY);
         return storageService.findByOriginalDatedServiceJourneyId(datedServiceJourneyId);
     }
 
     public List<DatedServiceJourney> findServiceJourneysByDatedServiceJourneys(DatedServiceJourneyParam... datedServiceJourneyParams) {
-
         List<DatedServiceJourney> result = new ArrayList<>();
         for (DatedServiceJourneyParam datedServiceJourneyParam : datedServiceJourneyParams) {
-            DatedServiceJourney serviceJourney = storageService.findByDatedServiceJourneyId(datedServiceJourneyParam.datedServiceJourneyId);
+            DatedServiceJourney serviceJourney = findServiceJourneyByDatedServiceJourney(datedServiceJourneyParam.datedServiceJourneyId);
             if (serviceJourney != null) {
                 result.add(serviceJourney);
             }
@@ -140,6 +150,7 @@ public class DatedServiceJourneyService {
     }
 
     public DatedServiceJourney findDatedServiceJourney(String serviceJourneyId, String version, String departureDate) {
+        metricsService.markLookup(SERVICE_JOURNEY_ID_DATE);
 
         //TODO: Handle versions
 
@@ -149,7 +160,7 @@ public class DatedServiceJourneyService {
     public List<DatedServiceJourney> findDatedServiceJourneys(ServiceJourneyParam... serviceJourneyParams) {
         List<DatedServiceJourney> result = new ArrayList<>();
         for (ServiceJourneyParam serviceJourneyParam : serviceJourneyParams) {
-            DatedServiceJourney datedServiceJourney = storageService.findByServiceJourneyIdAndDate(serviceJourneyParam.serviceJourneyId, serviceJourneyParam.departureDate);
+            DatedServiceJourney datedServiceJourney = findDatedServiceJourney(serviceJourneyParam.serviceJourneyId, null, serviceJourneyParam.departureDate);
             if (datedServiceJourney != null) {
                 result.add(datedServiceJourney);
             }

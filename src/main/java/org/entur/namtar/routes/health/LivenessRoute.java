@@ -17,6 +17,7 @@ package org.entur.namtar.routes.health;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
+import org.entur.namtar.metrics.PrometheusMetricsService;
 import org.entur.namtar.netex.NetexLoader;
 import org.entur.namtar.routes.RestRouteBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,9 @@ public class LivenessRoute extends RestRouteBuilder {
     private int allowedInactivityHours;
     private int allowedInactivitySeconds;
 
+    @Autowired
+    PrometheusMetricsService prometheusRegistry;
+
     @Override
     public void configure() throws Exception {
         super.configure();
@@ -47,6 +51,7 @@ public class LivenessRoute extends RestRouteBuilder {
             .apiDocs(Boolean.FALSE)
             .get("/ready").to("direct:health.ready")
             .get("/up").to("direct:health.up")
+            .get("/scrape").to("direct:metrics.scrape")
         ;
 
         from("direct:health.ready")
@@ -65,5 +70,15 @@ public class LivenessRoute extends RestRouteBuilder {
                     .setBody(constant("OK"))
                 .endChoice()
                 .routeId("health.up");
+
+        from("direct:metrics.scrape")
+                .process(p -> {
+                    if (prometheusRegistry != null) {
+                        p.getMessage().setBody(prometheusRegistry.scrape());
+                    }
+                })
+                .setHeader(Exchange.CONTENT_TYPE, constant("text/plain"))
+                .setHeader(Exchange.HTTP_RESPONSE_CODE, constant("200"))
+                .routeId("metrics.scrape");
     }
 }
