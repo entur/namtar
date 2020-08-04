@@ -9,9 +9,9 @@ rollingUpdate:
 
 resources:
   cpuLimit: 7500m
-  memLimit: 5500Mi
+  memLimit: 6000Mi
   cpuRequest: 500m
-  memRequest: 5000Mi
+  memRequest: 2000Mi
   xmx: 4500m
 
 secretMount:
