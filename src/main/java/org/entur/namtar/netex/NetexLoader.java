@@ -25,6 +25,8 @@ import org.rutebanken.netex.model.DayTypeRefStructure;
 import org.rutebanken.netex.model.DayTypeRefs_RelStructure;
 import org.rutebanken.netex.model.JourneyPattern;
 import org.rutebanken.netex.model.LineRefStructure;
+import org.rutebanken.netex.model.OperatingDay;
+import org.rutebanken.netex.model.OperatingDayRefStructure;
 import org.rutebanken.netex.model.Route;
 import org.rutebanken.netex.model.ServiceJourney;
 import org.slf4j.Logger;
@@ -39,8 +41,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 @Service
 public class NetexLoader {
@@ -156,24 +162,44 @@ public class NetexLoader {
 
                 String privateCode = serviceJourney.getPrivateCode().getValue();
 
-                DayTypeRefs_RelStructure dayTypes = serviceJourney.getDayTypes();
-                departureCounter += dayTypes.getDayTypeRef().size();
-                for (JAXBElement<? extends DayTypeRefStructure> dayTypeRef : dayTypes.getDayTypeRef()) {
+                List<LocalDateTime> departureDates = new ArrayList<>();
+                if (serviceJourney.getDayTypes() != null) {
+                    DayTypeRefs_RelStructure dayTypes = serviceJourney.getDayTypes();
+                    departureCounter += dayTypes.getDayTypeRef().size();
+                    for (JAXBElement<? extends DayTypeRefStructure> dayTypeRef : dayTypes.getDayTypeRef()) {
 
-                    DayType dayType = processor.dayTypeById.get(dayTypeRef.getValue().getRef());
-                    DayTypeAssignment dayTypeAssignment = processor.dayTypeAssignmentByDayTypeId.get(dayType.getId());
+                        DayType dayType = processor.dayTypeById.get(dayTypeRef.getValue().getRef());
+                        DayTypeAssignment dayTypeAssignment = processor.dayTypeAssignmentByDayTypeId.get(dayType.getId());
 
-                    if (dayTypeAssignment != null && dayTypeAssignment.getDate() != null) {
-                        String departureDate = dayTypeAssignment.getDate().format(dateFormatter);
-
-                        DatedServiceJourney currentServiceJourney = new DatedServiceJourney(serviceJourneyId, version, privateCode, lineRef, departureDate, departureTime);
-
-                        DatedServiceJourney datedServiceJourney = datedServiceJourneyService.createDatedServiceJourney(currentServiceJourney, processor.publicationTimestamp, sourceFileName);
-                        if (datedServiceJourney != null) { // If null, it already exists and should not be added
-                            datedServiceJourneyService.getStorageService().addDatedServiceJourney(datedServiceJourney);
-                        } else {
-                            ignoreCounter++;
+                        if (dayTypeAssignment != null && dayTypeAssignment.getDate() != null) {
+                            LocalDateTime departureDate = dayTypeAssignment.getDate();
+                            departureDates.add(departureDate);
                         }
+                    }
+                } else {
+                    final Set<org.rutebanken.netex.model.DatedServiceJourney> datedServiceJourneys = processor.datedServiceJourneysByServiceJourney.get(serviceJourneyId);
+                    for (org.rutebanken.netex.model.DatedServiceJourney datedServiceJourney : datedServiceJourneys) {
+                        final OperatingDayRefStructure operatingDayRef = datedServiceJourney.getOperatingDayRef();
+                        final OperatingDay operatingDay = processor.operatingDayByOperatingDayId.get(operatingDayRef.getRef());
+                        final LocalDateTime departureDate = operatingDay.getCalendarDate();
+                        departureDates.add(departureDate);
+
+                    }
+                }
+
+                for (LocalDateTime departureDateTime : departureDates) {
+                    final String datedServiceJourneyId = processor.getDatedServiceJourneyId(departureDateTime, serviceJourneyId);
+
+                    final String departureDate = departureDateTime.format(dateFormatter);
+
+                    DatedServiceJourney currentServiceJourney = new DatedServiceJourney(datedServiceJourneyId, serviceJourneyId, version, privateCode, lineRef, departureDate, departureTime);
+
+
+                    DatedServiceJourney datedServiceJourney = datedServiceJourneyService.createDatedServiceJourney(currentServiceJourney, processor.publicationTimestamp, sourceFileName);
+                    if (datedServiceJourney != null) { // If null, it already exists and should not be added
+                        datedServiceJourneyService.getStorageService().addDatedServiceJourney(datedServiceJourney);
+                    } else {
+                        ignoreCounter++;
                     }
                 }
             } catch (NullPointerException npe) {

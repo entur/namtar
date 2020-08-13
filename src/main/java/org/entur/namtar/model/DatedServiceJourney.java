@@ -19,7 +19,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.sql.Timestamp;
 
 @Entity
@@ -66,6 +71,10 @@ public class DatedServiceJourney {
     }
 
     public DatedServiceJourney(String serviceJourneyId, Integer version, String privateCode, String lineRef, String departureDate, String departureTime) {
+        this(null, serviceJourneyId, version, privateCode, lineRef, departureDate, departureTime);
+    }
+    public DatedServiceJourney(String datedServiceJourneyId, String serviceJourneyId, Integer version, String privateCode, String lineRef, String departureDate, String departureTime) {
+        this.datedServiceJourneyId = datedServiceJourneyId;
         this.serviceJourneyId = serviceJourneyId;
         this.version = version;
         this.privateCode = privateCode;

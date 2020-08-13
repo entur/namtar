@@ -19,18 +19,22 @@ import org.apache.commons.io.IOUtils;
 import org.rutebanken.netex.model.Common_VersionFrameStructure;
 import org.rutebanken.netex.model.CompositeFrame;
 import org.rutebanken.netex.model.DataManagedObjectStructure;
+import org.rutebanken.netex.model.DatedServiceJourney;
 import org.rutebanken.netex.model.DayType;
 import org.rutebanken.netex.model.DayTypeAssignment;
 import org.rutebanken.netex.model.DayTypes_RelStructure;
 import org.rutebanken.netex.model.JourneyPattern;
 import org.rutebanken.netex.model.JourneyPatternsInFrame_RelStructure;
+import org.rutebanken.netex.model.JourneyRefStructure;
 import org.rutebanken.netex.model.Journey_VersionStructure;
 import org.rutebanken.netex.model.JourneysInFrame_RelStructure;
 import org.rutebanken.netex.model.LinkSequence_VersionStructure;
+import org.rutebanken.netex.model.OperatingDay;
 import org.rutebanken.netex.model.OperatingPeriod;
 import org.rutebanken.netex.model.PublicationDeliveryStructure;
 import org.rutebanken.netex.model.Route;
 import org.rutebanken.netex.model.RoutesInFrame_RelStructure;
+import org.rutebanken.netex.model.ServiceAlterationEnumeration;
 import org.rutebanken.netex.model.ServiceCalendarFrame;
 import org.rutebanken.netex.model.ServiceFrame;
 import org.rutebanken.netex.model.ServiceJourney;
@@ -47,10 +51,13 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -61,13 +68,21 @@ class NetexProcessor {
     private static JAXBContext jaxbContext;
     private String timeZone;
 
+    static DateTimeFormatter dateFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
+    static DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+
     LocalDateTime publicationTimestamp;
 
     Map<String, JourneyPattern> journeyPatternsById;
     Map<String, Route> routesById;
     List<ServiceJourney> serviceJourneys;
+    Map<String, String> serviceJourneyDateToDatedServiceJourney;
+
+    Map<String, Set<DatedServiceJourney>> datedServiceJourneysByServiceJourney;
+
     Map<String, DayType> dayTypeById;
     Map<String, DayTypeAssignment> dayTypeAssignmentByDayTypeId;
+    Map<String, OperatingDay> operatingDayByOperatingDayId;
     Map<String, OperatingPeriod> operatingPeriodById;
     Map<String, Boolean> dayTypeAvailable;
 
@@ -88,20 +103,29 @@ class NetexProcessor {
         journeyPatternsById = new HashMap<>();
         routesById = new HashMap<>();
         serviceJourneys = new ArrayList<>();
+        serviceJourneyDateToDatedServiceJourney = new HashMap<>();
+        datedServiceJourneysByServiceJourney = new HashMap<>();
         dayTypeById = new HashMap<>();
         dayTypeAssignmentByDayTypeId = new HashMap<>();
+        operatingDayByOperatingDayId = new HashMap<>();
         operatingPeriodById = new HashMap<>();
         dayTypeAvailable = new HashMap<>();
     }
-
-
 
     private Unmarshaller createUnmarshaller() throws JAXBException {
         return jaxbContext.createUnmarshaller();
     }
 
     void loadFiles() {
-        zipFile.stream().forEach(entry -> loadFile(entry, zipFile));
+
+        // Ensuring all "_[...]_shared_data.xml"-files are processed first
+        zipFile.stream()
+                .filter(entry -> entry.getName().startsWith("_"))
+                .forEach(entry -> loadFile(entry, zipFile));
+
+        zipFile.stream()
+                .filter(entry -> !entry.getName().startsWith("_"))
+                .forEach(entry -> loadFile(entry, zipFile));
     }
 
     private byte[] entryAsBytes(ZipFile zipFile, ZipEntry entry) {
@@ -166,7 +190,8 @@ class NetexProcessor {
 
             JourneysInFrame_RelStructure vehicleJourneys = timetableFrame.getVehicleJourneys();
             List<Journey_VersionStructure> datedServiceJourneyOrDeadRunOrServiceJourney = vehicleJourneys
-                    .getDatedServiceJourneyOrDeadRunOrServiceJourney();
+                    .getVehicleJourneyOrDatedVehicleJourneyOrNormalDatedVehicleJourney();
+
             for (Journey_VersionStructure jStructure : datedServiceJourneyOrDeadRunOrServiceJourney) {
                 if (jStructure instanceof ServiceJourney) {
                     ServiceJourney sj = (ServiceJourney) jStructure;
@@ -182,8 +207,44 @@ class NetexProcessor {
                         }
                     }
                 }
+                if (jStructure instanceof DatedServiceJourney) {
+                    DatedServiceJourney dsj = (DatedServiceJourney) jStructure;
+                    final String id = dsj.getId();
+                    final ServiceAlterationEnumeration serviceAlteration = dsj.getServiceAlteration();
+
+
+                    if (dsj.getJourneyRef() != null) {
+
+                        final OperatingDay operatingDay = operatingDayByOperatingDayId.get(dsj.getOperatingDayRef().getRef());
+
+                        final LocalDateTime date = operatingDay.getCalendarDate();//.format(dateFormatter);
+
+                        final List<JAXBElement<? extends JourneyRefStructure>> serviceJourneyRefs = dsj.getJourneyRef();
+                        for (JAXBElement<? extends JourneyRefStructure> serviceJourneyRef : serviceJourneyRefs) {
+                            final JourneyRefStructure serviceJourneyRefValue = serviceJourneyRef.getValue();
+
+                            final String serviceJourneyId = serviceJourneyRefValue.getRef();
+
+                            serviceJourneyDateToDatedServiceJourney.put(getKey(date, serviceJourneyId), id);
+
+                            final Set<DatedServiceJourney> datedServiceJourneys = datedServiceJourneysByServiceJourney.getOrDefault(serviceJourneyId, new HashSet<>());
+                            datedServiceJourneys.add(dsj);
+                            datedServiceJourneysByServiceJourney.put(serviceJourneyId, datedServiceJourneys);
+                        }
+                    }
+
+                }
             }
         }
+    }
+
+    private String getKey(LocalDateTime date, String serviceJourneyId) {
+        return date.format(dateFormatter) + ":" + serviceJourneyId;
+    }
+
+
+    public String getDatedServiceJourneyId(LocalDateTime departureDate, String serviceJourneyId) {
+        return serviceJourneyDateToDatedServiceJourney.get(getKey(departureDate, serviceJourneyId));
     }
 
     // ServiceCalendar
@@ -206,12 +267,26 @@ class NetexProcessor {
                 }
             }
 
-            List<DayTypeAssignment> dayTypeAssignments = scf.getDayTypeAssignments().getDayTypeAssignment();
+            if (scf.getDayTypeAssignments() != null) {
+                List<DayTypeAssignment> dayTypeAssignments = scf.getDayTypeAssignments().getDayTypeAssignment();
 
-            for (DayTypeAssignment dayTypeAssignment : dayTypeAssignments) {
-                String ref = dayTypeAssignment.getDayTypeRef().getValue().getRef();
+                for (DayTypeAssignment dayTypeAssignment : dayTypeAssignments) {
+                    String ref = dayTypeAssignment.getDayTypeRef().getValue().getRef();
 
-                dayTypeAssignmentByDayTypeId.put(ref, dayTypeAssignment);
+                    dayTypeAssignmentByDayTypeId.put(ref, dayTypeAssignment);
+                }
+            }
+
+            if (scf.getOperatingDays() != null) {
+                final List<OperatingDay> operatingDays = scf.getOperatingDays().getOperatingDay();
+
+                for (OperatingDay operatingDay : operatingDays) {
+                    String id = operatingDay.getId();
+                    if (operatingDay.getServiceCalendarRef() != null) {
+                        id = operatingDay.getServiceCalendarRef().getRef();
+                    }
+                    operatingDayByOperatingDayId.put(id, operatingDay);
+                }
             }
         }
     }

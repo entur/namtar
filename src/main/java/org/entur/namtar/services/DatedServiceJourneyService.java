@@ -94,14 +94,17 @@ public class DatedServiceJourneyService {
 
         boolean createdNewOriginalDatedServiceJourney = false;
 
-        String datedServiceJourneyId = generateDatedServiceJourneyId(creationNumber);
+        if (serviceJourney.getDatedServiceJourneyId() == null || serviceJourney.getDatedServiceJourneyId().isEmpty()) {
+            serviceJourney.setDatedServiceJourneyId(generateDatedServiceJourneyId(creationNumber));
+        }
+
         String originalDatedServiceJourney;
         if (datedServiceJourney != null) {
             // ...exists - set original Id
             originalDatedServiceJourney = datedServiceJourney.getOriginalDatedServiceJourneyId();
         } else {
             // ...does not exist - use current as original Id
-            originalDatedServiceJourney = datedServiceJourneyId;
+            originalDatedServiceJourney = serviceJourney.getDatedServiceJourneyId();
             createdNewOriginalDatedServiceJourney = true;
         }
 
@@ -113,7 +116,7 @@ public class DatedServiceJourneyService {
         storageDatedServiceJourney.setPrivateCode(serviceJourney.getPrivateCode());
         storageDatedServiceJourney.setLineRef(serviceJourney.getLineRef());
         storageDatedServiceJourney.setVersion(serviceJourney.getVersion());
-        storageDatedServiceJourney.setDatedServiceJourneyId(datedServiceJourneyId);
+        storageDatedServiceJourney.setDatedServiceJourneyId(serviceJourney.getDatedServiceJourneyId());
         storageDatedServiceJourney.setCreationNumber(creationNumber);
         storageDatedServiceJourney.setOriginalDatedServiceJourneyId(originalDatedServiceJourney);
         storageDatedServiceJourney.setPublicationTimestamp(publicationTimestamp.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
