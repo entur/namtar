@@ -93,7 +93,7 @@ public class KafkaPublisher {
 
     public void publishToKafka(org.entur.namtar.model.DatedServiceJourney dsj) {
         if (!kafkaEnabled) {
-            log.info("Push to Kafka is disabled, should have pushed [{}]", dsj);
+            log.debug("Push to Kafka is disabled, should have pushed [{}]", dsj);
             return;
         }
 
