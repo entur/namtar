@@ -111,11 +111,12 @@ public class TestIdMappingService {
 
         String serviceJourneyId = "NSB:ServiceJourney:" + getRandomId() + ""+ service.getStorageService().findNextCreationNumber();
 
-        DatedServiceJourney serviceJourney = new DatedServiceJourney(serviceJourneyId, 0,  "812", "NSB:Line:L1", "2018-01-01", "12:00");
+        final String privateCode = getRandomId();
+        DatedServiceJourney serviceJourney = new DatedServiceJourney(serviceJourneyId, 0, privateCode, "NSB:Line:L1", "2018-01-01", "12:00");
         service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(serviceJourney, publicationTimestamp, sourceFileName));
 
         // Add ServiceJourney with same serviceJourneyId, that should not match
-        DatedServiceJourney serviceJourney2 = new DatedServiceJourney(serviceJourneyId, 0, "812", "NSB:Line:L1", "2018-01-02", "12:00");
+        DatedServiceJourney serviceJourney2 = new DatedServiceJourney(serviceJourneyId, 0, privateCode, "NSB:Line:L1", "2018-01-02", "12:00");
         service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(serviceJourney2, publicationTimestamp, sourceFileName));
 
         DatedServiceJourney matches = service.findDatedServiceJourney(serviceJourneyId, "latest", "2018-01-01");
@@ -134,12 +135,13 @@ public class TestIdMappingService {
         String serviceJourneyId = "NSB:ServiceJourney:" + getRandomId() + ""+ service.getStorageService().findNextCreationNumber();
 
         final String datedServiceJourneyId = "NSB:DatedServiceJourney:"+getRandomId();
-        DatedServiceJourney serviceJourney = new DatedServiceJourney(datedServiceJourneyId, serviceJourneyId, 0,  "123", "NSB:Line:L1", "2018-01-01", "12:00");
+        final String privateCode = getRandomId();
+        DatedServiceJourney serviceJourney = new DatedServiceJourney(datedServiceJourneyId, serviceJourneyId, 0, privateCode, "NSB:Line:L1", "2018-01-01", "12:00");
 
         service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(serviceJourney, publicationTimestamp, sourceFileName));
 
         // Add ServiceJourney with same serviceJourneyId, that should not match
-        DatedServiceJourney serviceJourney2 = new DatedServiceJourney(serviceJourneyId, 0, "123", "NSB:Line:L1", "2018-01-02", "12:00");
+        DatedServiceJourney serviceJourney2 = new DatedServiceJourney(serviceJourneyId, 0, privateCode, "NSB:Line:L1", "2018-01-02", "12:00");
         service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(serviceJourney2, publicationTimestamp, sourceFileName));
 
         DatedServiceJourney matches = service.findDatedServiceJourney(serviceJourneyId, "latest", "2018-01-01");
@@ -163,12 +165,13 @@ public class TestIdMappingService {
         String serviceJourneyId_2 = "NSB:ServiceJourney:" + getRandomId() + ""+ service.getStorageService().findNextCreationNumber();
 
         final String datedServiceJourneyId = "NSB:DatedServiceJourney:"+getRandomId();
-        DatedServiceJourney serviceJourney = new DatedServiceJourney(datedServiceJourneyId, serviceJourneyId, 0,  "123", "NSB:Line:L1", "2018-01-01", "12:00");
+        final String privateCode = getRandomId();
+        DatedServiceJourney serviceJourney = new DatedServiceJourney(datedServiceJourneyId, serviceJourneyId, 0, privateCode, "NSB:Line:L1", "2018-01-01", "12:00");
 
         service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(serviceJourney, publicationTimestamp, sourceFileName));
 
         // Add ServiceJourney with same serviceJourneyId, that should not match
-        DatedServiceJourney serviceJourney2 = new DatedServiceJourney(datedServiceJourneyId, serviceJourneyId_2, 0, "123", "NSB:Line:L1", "2018-01-01", "12:00");
+        DatedServiceJourney serviceJourney2 = new DatedServiceJourney(datedServiceJourneyId, serviceJourneyId_2, 0, privateCode, "NSB:Line:L1", "2018-01-01", "12:00");
         service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(serviceJourney2, publicationTimestamp, sourceFileName));
 
         DatedServiceJourney serviceJourneyByDatedServiceJourney = service.findServiceJourneyByDatedServiceJourney(datedServiceJourneyId);
@@ -205,7 +208,8 @@ public class TestIdMappingService {
 
         String serviceJourneyId = "NSB:ServiceJourney:" + getRandomId();
 
-        DatedServiceJourney serviceJourney = new DatedServiceJourney(serviceJourneyId, 0,  "234", "NSB:Line:L1", "2018-01-01", "12:00");
+        final String privateCode = getRandomId();
+        DatedServiceJourney serviceJourney = new DatedServiceJourney(serviceJourneyId, 0, privateCode, "NSB:Line:L1", "2018-01-01", "12:00");
 
         service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(serviceJourney, publicationTimestamp, sourceFileName));
 
@@ -214,7 +218,7 @@ public class TestIdMappingService {
         // Add ServiceJourney with provided datedServiceJourneyId,  new serviceJourneyId and same privateCode/date
         final String serviceJourneyId2 = "NSB:ServiceJourney:" + getRandomId();
 
-        DatedServiceJourney serviceJourney2 = new DatedServiceJourney(datedServiceJourneyId, serviceJourneyId2, 0, "234", "NSB:Line:L1", "2018-01-01", "12:00");
+        DatedServiceJourney serviceJourney2 = new DatedServiceJourney(datedServiceJourneyId, serviceJourneyId2, 0, privateCode, "NSB:Line:L1", "2018-01-01", "12:00");
         service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(serviceJourney2, publicationTimestamp, sourceFileName));
 
         DatedServiceJourney matches = service.findDatedServiceJourney(serviceJourneyId, "latest", "2018-01-01");
@@ -311,13 +315,14 @@ public class TestIdMappingService {
         LocalDateTime publicationTimestamp = this.publicationTimestamp.minusDays(1);
         final String datedServiceJourneyId = "NSB:DatedServiceJourney:1234-1234-1234";
 
-        final DatedServiceJourney datedServiceJourney = new DatedServiceJourney(datedServiceJourneyId, "NSB:ServiceJourney:" + getRandomId() + "1111", 0, "812", "NSB:Line:L1", "2018-01-01", "12:00");
+        final String privateCode = getRandomId();
+        final DatedServiceJourney datedServiceJourney = new DatedServiceJourney(datedServiceJourneyId, "NSB:ServiceJourney:" + getRandomId() + "1111", 0, privateCode, "NSB:Line:L1", "2018-01-01", "12:00");
         DatedServiceJourney datedServiceJourney_1 = service.createDatedServiceJourney(datedServiceJourney, publicationTimestamp, sourceFileName);
         service.getStorageService().addDatedServiceJourney(datedServiceJourney_1);
 
         String originalDatedServiceJourneyId = datedServiceJourney_1.getOriginalDatedServiceJourneyId();
 
-        final DatedServiceJourney datedServiceJourney2 = new DatedServiceJourney(datedServiceJourneyId, "NSB:ServiceJourney:" + getRandomId() + "2222", 0, "812", "NSB:Line:L1", "2018-01-01", "12:00");
+        final DatedServiceJourney datedServiceJourney2 = new DatedServiceJourney(datedServiceJourneyId, "NSB:ServiceJourney:" + getRandomId() + "2222", 0, privateCode, "NSB:Line:L1", "2018-01-01", "12:00");
         DatedServiceJourney datedServiceJourney_2 = service.createDatedServiceJourney(datedServiceJourney2, publicationTimestamp, sourceFileName);
         service.getStorageService().addDatedServiceJourney(datedServiceJourney_2);
 
