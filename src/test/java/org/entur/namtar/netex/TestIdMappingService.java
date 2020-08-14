@@ -156,6 +156,49 @@ public class TestIdMappingService {
         assertNotSame(datedServiceJourneyId, matches_2.getDatedServiceJourneyId());
     }
 
+    @Test
+    public void testAddNewServiceJourneyWitSamedDatedServiceJourneyId() {
+
+        String serviceJourneyId = "NSB:ServiceJourney:" + getRandomId() + ""+ service.getStorageService().findNextCreationNumber();
+        String serviceJourneyId_2 = "NSB:ServiceJourney:" + getRandomId() + ""+ service.getStorageService().findNextCreationNumber();
+
+        final String datedServiceJourneyId = "NSB:DatedServiceJourney:"+getRandomId();
+        DatedServiceJourney serviceJourney = new DatedServiceJourney(datedServiceJourneyId, serviceJourneyId, 0,  "123", "NSB:Line:L1", "2018-01-01", "12:00");
+
+        service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(serviceJourney, publicationTimestamp, sourceFileName));
+
+        // Add ServiceJourney with same serviceJourneyId, that should not match
+        DatedServiceJourney serviceJourney2 = new DatedServiceJourney(datedServiceJourneyId, serviceJourneyId_2, 0, "123", "NSB:Line:L1", "2018-01-01", "12:00");
+        service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(serviceJourney2, publicationTimestamp, sourceFileName));
+
+        DatedServiceJourney serviceJourneyByDatedServiceJourney = service.findServiceJourneyByDatedServiceJourney(datedServiceJourneyId);
+        DatedServiceJourney matches = service.findDatedServiceJourney(serviceJourneyId, "latest", "2018-01-01");
+        DatedServiceJourney matches_2 = service.findDatedServiceJourney(serviceJourneyId_2, "latest", "2018-01-01");
+
+        final Collection<DatedServiceJourney> serviceJourneysByOriginalDatedServiceJourney = service.findServiceJourneysByOriginalDatedServiceJourney(serviceJourneyByDatedServiceJourney.getOriginalDatedServiceJourneyId());
+
+        assertNotNull(matches);
+        assertNotNull(matches_2);
+        assertNotNull(serviceJourneyByDatedServiceJourney);
+
+        assertFalse("Should have gotten different ids from different versions", matches.equals(matches_2));
+
+        assertTrue(serviceJourneysByOriginalDatedServiceJourney.contains(matches));
+        assertTrue(serviceJourneysByOriginalDatedServiceJourney.contains(matches_2));
+
+        assertEquals(serviceJourneyId, matches.getServiceJourneyId());
+        assertEquals(datedServiceJourneyId, matches.getDatedServiceJourneyId());
+        assertEquals(datedServiceJourneyId, matches.getOriginalDatedServiceJourneyId());
+
+        assertEquals(serviceJourneyId_2, matches_2.getServiceJourneyId());
+        assertEquals(datedServiceJourneyId, matches_2.getDatedServiceJourneyId());
+        assertEquals(datedServiceJourneyId, matches_2.getOriginalDatedServiceJourneyId());
+
+        assertEquals(serviceJourneyId_2, serviceJourneyByDatedServiceJourney.getServiceJourneyId());
+        assertEquals(datedServiceJourneyId, serviceJourneyByDatedServiceJourney.getDatedServiceJourneyId());
+        assertEquals(datedServiceJourneyId, serviceJourneyByDatedServiceJourney.getOriginalDatedServiceJourneyId());
+    }
+
 
     @Test
     public void testUpdateServiceJourneyWithProvidedDatedServiceJourneyId() {
