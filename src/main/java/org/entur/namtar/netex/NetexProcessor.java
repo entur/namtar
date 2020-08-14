@@ -121,10 +121,12 @@ class NetexProcessor {
         // Ensuring all "_[...]_shared_data.xml"-files are processed first
         zipFile.stream()
                 .filter(entry -> entry.getName().startsWith("_"))
+                .filter(entry -> entry.getName().endsWith(  ".xml"))
                 .forEach(entry -> loadFile(entry, zipFile));
 
         zipFile.stream()
                 .filter(entry -> !entry.getName().startsWith("_"))
+                .filter(entry -> entry.getName().endsWith(  ".xml"))
                 .forEach(entry -> loadFile(entry, zipFile));
     }
 
@@ -170,7 +172,7 @@ class NetexProcessor {
                 }
             }
         } catch (JAXBException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            throw new RuntimeException("Caught exception when processing file '" + entry + "'", e);
         }
     }
 
