@@ -24,6 +24,6 @@
     </PreFlow>
     <HTTPTargetConnection>
         <Properties/>
-        <URL>https://timetable-v1-dated-service-journeys-NAMESPACE.INGRESS_ENVIRONMENT/api</URL>
+        <URL>https://timetable-v1-dated-service-journeys.INGRESS_ENVIRONMENT/api</URL>
     </HTTPTargetConnection>
 </TargetEndpoint>
