@@ -1,0 +1,17 @@
+replicas: 2
+
+sql:
+  instance: neon-1287:europe-west1:namtar-db-1=tcp:5432
+
+configMap:
+  projectId: neon-1287
+  gcsBucketName: marduk-exchange-production
+  kafkaBrokers: bootstrap.prod-ext.kafka.entur.io:9095
+  registryUrl: http://schema-registry.prod-ext.kafka.entur.io:8001
+  kafkaEnabled: true
+  topicName: dated-service-journeys-production
+
+ingress:
+  enabled: true
+  loadBalancerIP: 35.205.233.237
+  domainName: .entur.io

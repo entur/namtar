@@ -1,5 +1,3 @@
-env: production
-
 replicas: 2
 
 sql:
@@ -12,3 +10,8 @@ configMap:
   registryUrl: http://schema-registry.prod-ext.kafka.entur.io:8001
   kafkaEnabled: true
   topicName: dated-service-journeys-production
+
+ingress:
+  enabled: true
+  loadBalancerIP: 35.187.15.14
+  domainName: -production.entur.io

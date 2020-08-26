@@ -1,5 +1,3 @@
-env: staging
-
 replicas: 2
 
 sql:
@@ -12,3 +10,8 @@ configMap:
   registryUrl: http://schema-registry.test-ext.kafka.entur.io:8001
   kafkaEnabled: true
   topicName: dated-service-journeys-staging
+
+ingress:
+  enabled: true
+  loadBalancerIP: 130.211.80.129
+  domainName: .staging.entur.io

@@ -1,0 +1,17 @@
+replicas: 2
+
+sql:
+  instance: radon-1287:europe-west1:namtar-db-2=tcp:5432
+
+configMap:
+  projectId: radon-1287
+  gcsBucketName: marduk-exchange-stage
+  kafkaBrokers: bootstrap.test-ext.kafka.entur.io:9095
+  registryUrl: http://schema-registry.test-ext.kafka.entur.io:8001
+  kafkaEnabled: true
+  topicName: dated-service-journeys-staging
+
+ingress:
+  enabled: true
+  loadBalancerIP: 35.195.146.93
+  domainName: -staging.staging.entur.io
