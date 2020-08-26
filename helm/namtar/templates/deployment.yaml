@@ -117,6 +117,10 @@ spec:
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
+      {{- if .Values.rbac.enabled }}
+      serviceAccount: namtar-service-account
+      serviceAccountName: namtar-service-account
+      {{- end }}
       terminationGracePeriodSeconds: 31
       volumes:
         - name: {{ .Values.secretMount.name }}
