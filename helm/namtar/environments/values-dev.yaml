@@ -1,5 +1,5 @@
 sql:
-  instance: carbon-1287:europe-west1:namtar-db-1=tcp:5432
+  instance: entur-ror-dev:europe-west1:namtar-db-1=tcp:5432
 
 configMap:
   projectId: carbon-1287
