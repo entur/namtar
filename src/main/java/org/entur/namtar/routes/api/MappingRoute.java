@@ -81,7 +81,7 @@ public class MappingRoute extends RestRouteBuilder {
                 .get("/{serviceJourneyId}/{version}/{date}").produces("text/json").to("direct:lookup.single.servicejourney.version.date")
                     .param().required(true).name("serviceJourneyId").type(RestParamType.path).description("The id of the serviceJourney to look up").dataType("string").endParam()
                     .param().required(true).name("version").type(RestParamType.path).description("Specific version or `latest`").dataType("string").endParam()
-                    .param().required(true).name("date").type(RestParamType.path).description("Date").dataType("string").endParam()
+                    .param().required(true).name("date").type(RestParamType.path).description("Date - format YYYY-MM-DD").dataType("string").endParam()
                     .responseMessages(Arrays.asList(notFoundResponse, dsjResponse))
 
                 .post("/query").type(ServiceJourneyParam[].class).consumes("text/json").produces("text/json")
@@ -99,6 +99,11 @@ public class MappingRoute extends RestRouteBuilder {
                     .param().required(true).name("originalDatedServiceJourneyId").type(RestParamType.path).description("OriginalDatedServiceJourney to lookup").dataType("string").endParam()
                     .responseMessage(dsjResponseArray)
 
+                .get("/privatecode/{privateCode}/{date}").produces("text/json").to("direct:lookup.privatecode.date")
+                    .param().required(true).name("privateCode").type(RestParamType.path).description("PrivateCode to lookup").dataType("string").endParam()
+                    .param().required(true).name("date").type(RestParamType.path).description("Date - format YYYY-MM-DD").dataType("string").endParam()
+                    .responseMessage(dsjResponseArray)
+
                 .post("/reverse-query").type(DatedServiceJourneyParam[].class).consumes("text/json").produces("text/json")
                     .param().name("body").type(RestParamType.body).description("The DatedServiceJourneys to look up").endParam()
                     .responseMessage(dsjResponseArray)
@@ -112,6 +117,7 @@ public class MappingRoute extends RestRouteBuilder {
             .get("/{datedServiceJourneyId}").produces("text/json").to("direct:lookup.single.datedservicejourney")
             .get("/dated/{datedServiceJourneyId}").produces("text/json").to("direct:lookup.single.datedservicejourney")
             .get("/original/{originalDatedServiceJourneyId}").produces("text/json").to("direct:lookup.original.datedservicejourney")
+            .get("/privatecode/{privateCode}/{date}").produces("text/json").to("direct:lookup.privatecode.date")
             .post("/reverse-query").type(DatedServiceJourneyParam[].class).consumes("text/json").produces("text/json")
                 .to("direct:lookup.multiple.datedservicejourneys")
         ;
@@ -120,6 +126,13 @@ public class MappingRoute extends RestRouteBuilder {
                 .bean(repository, "findServiceJourneyByDatedServiceJourney(${header.datedServiceJourneyId})")
                 .to("direct:createResponse")
                 .routeId("namtar.single.datedServiceJourney")
+        ;
+
+
+        from("direct:lookup.privatecode.date")
+                .bean(repository, "findServiceJourneyByPrivateCodeDepartureDate(${header.privateCode}, ${header.date})")
+                .to("direct:createResponse")
+                .routeId("namtar.privatecode.date")
         ;
 
         from("direct:lookup.original.datedservicejourney")

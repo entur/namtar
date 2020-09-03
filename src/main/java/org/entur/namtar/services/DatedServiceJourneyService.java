@@ -35,6 +35,7 @@ import java.util.List;
 
 import static org.entur.namtar.metrics.SearchType.DATED_SERVICE_JOURNEY;
 import static org.entur.namtar.metrics.SearchType.ORIGINAL_DATED_SERVICE_JOURNEY;
+import static org.entur.namtar.metrics.SearchType.PRIVATE_CODE_DEPARTURE_DATE;
 import static org.entur.namtar.metrics.SearchType.SERVICE_JOURNEY_ID_DATE;
 
 @Service
@@ -84,7 +85,7 @@ public class DatedServiceJourneyService {
         }
 
         // Check to see if departure with same privateCode already exists...
-        DatedServiceJourney datedServiceJourney = storageService.findByPrivateCodeDepartureDate(serviceJourney.getPrivateCode(), serviceJourney.getDepartureDate());
+        DatedServiceJourney datedServiceJourney = findServiceJourneyByPrivateCodeDepartureDate(serviceJourney.getPrivateCode(), serviceJourney.getDepartureDate());
         long t3 = System.currentTimeMillis();
 
         if (((t2-t1) > 10) && (t3-t2 > 10)) {
@@ -127,6 +128,11 @@ public class DatedServiceJourneyService {
         }
         metricsService.markNewDSJ(createdNewOriginalDatedServiceJourney);
         return storageDatedServiceJourney;
+    }
+
+    public DatedServiceJourney findServiceJourneyByPrivateCodeDepartureDate(String privateCode, String departureDate) {
+        metricsService.markLookup(PRIVATE_CODE_DEPARTURE_DATE);
+        return storageService.findByPrivateCodeDepartureDate(privateCode, departureDate);
     }
 
     public DatedServiceJourney findServiceJourneyByDatedServiceJourney(String datedServiceJourneyId) {

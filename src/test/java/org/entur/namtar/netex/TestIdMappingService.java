@@ -336,4 +336,30 @@ public class TestIdMappingService {
         assertTrue(serviceJourneys.contains(datedServiceJourney_2));
     }
 
+
+    @Test
+    public void testLookupPrivateCodeDate() {
+
+        String privateCode = "812";
+        String lineRef = "NSB:Line:L1";
+        String departureDate = "2018-01-01";
+        String departureTime = "12:00";
+
+        String serviceJourneyId = "NSB:ServiceJourney:" + getRandomId() + ""+ service.getStorageService().findNextCreationNumber();
+        String serviceJourneyId_2 = "NSB:ServiceJourney-UNIQUE:"+service.getStorageService().findNextCreationNumber();
+
+        DatedServiceJourney serviceJourney = new DatedServiceJourney(serviceJourneyId, 0, privateCode, lineRef, departureDate, departureTime);
+        service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(serviceJourney, publicationTimestamp, sourceFileName));
+
+        // Add ServiceJourney that matches, but with different serviceJourneyId
+        DatedServiceJourney serviceJourney2 = new DatedServiceJourney(serviceJourneyId_2, 0, privateCode, lineRef, departureDate, departureTime);
+        service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(serviceJourney2, publicationTimestamp, sourceFileName));
+
+        DatedServiceJourney matches = service.findServiceJourneyByPrivateCodeDepartureDate(privateCode, departureDate);
+
+        // Expexted result is the latest DSJ, with the latest ServiceJourneyId
+        assertFalse(matches.getDatedServiceJourneyId().equals(serviceJourneyId_2));
+
+    }
+
 }
