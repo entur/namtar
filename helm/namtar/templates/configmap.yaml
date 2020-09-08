@@ -39,3 +39,5 @@ data:
     spring.jpa.generate-ddl=false
     spring.jpa.hibernate.ddl-auto=none
 
+    namtar.import.disabled=false
+

@@ -15,6 +15,7 @@
 
 package org.entur.namtar.routes.data;
 
+import org.apache.camel.LoggingLevel;
 import org.entur.namtar.netex.NetexLoader;
 import org.entur.namtar.routes.RestRouteBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,9 @@ public class BlobStoreRoute extends RestRouteBuilder {
     @Value("${namtar.blobstore.polling.update.frequency}")
     private String updateFrequency;
 
+    @Value("${namtar.import.disabled:false}")
+    boolean importDisabled;
+
     public BlobStoreRoute(@Autowired NetexLoader netexLoader) {
         this.netexLoader = netexLoader;
     }
@@ -41,6 +45,9 @@ public class BlobStoreRoute extends RestRouteBuilder {
         singletonFrom("timer://namtar.blobstore.polling?fixedRate=true&period=" + updateFrequency,
                 "namtar.blobstore.singleton.polling")
                 .choice()
+                .when(p -> importDisabled)
+                    .log(LoggingLevel.WARN, "Import disabled - doing nothing")
+                .endChoice()
                 .when(p -> isLeader(p.getFromRouteId()))
                     .log("Is leader - polling for new files")
                     .to("direct:getAllBlobs")
