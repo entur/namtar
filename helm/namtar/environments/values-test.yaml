@@ -1,7 +1,7 @@
 replicas: 2
 
 sql:
-  instance: entur-ror-test:europe-west1:namtar-db-2=tcp:5432
+  instance: entur-ror-test:europe-west1:namtar-db-1=tcp:5432
 
 configMap:
   projectId: radon-1287
