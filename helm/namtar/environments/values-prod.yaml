@@ -1,7 +1,7 @@
 replicas: 2
 
 sql:
-  instance: neon-1287:europe-west1:namtar-db-1=tcp:5432
+  instance: entur-ror-prod:europe-west1:namtar-db-1=tcp:5432
 
 configMap:
   projectId: neon-1287
