@@ -4,8 +4,8 @@ sql:
   instance: entur-ror-prod:europe-west1:namtar-db-1=tcp:5432
 
 configMap:
-  projectId: neon-1287
-  gcsBucketName: marduk-exchange-production
+  projectId: entur-ror-prod
+  gcsBucketName: ror-marduk-exchange-production
   kafkaBrokers: bootstrap.prod-ext.kafka.entur.io:9095
   registryUrl: http://schema-registry.prod-ext.kafka.entur.io:8001
   kafkaEnabled: true
