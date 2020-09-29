@@ -2,8 +2,8 @@ sql:
   instance: entur-ror-dev:europe-west1:namtar-db-1=tcp:5432
 
 configMap:
-  projectId: carbon-1287
-  gcsBucketName: marduk-exchange
+  projectId: entur-ror-dev
+  gcsBucketName: ror-marduk-exchange-dev
   kafkaBrokers: bootstrap.test-ext.kafka.entur.io:9095
   registryUrl: http://schema-registry.test-ext.kafka.entur.io:8001
   kafkaEnabled: true
