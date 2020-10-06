@@ -4,8 +4,8 @@ sql:
   instance: entur-ror-test:europe-west1:namtar-db-1=tcp:5432
 
 configMap:
-  projectId: radon-1287
-  gcsBucketName: marduk-exchange-stage
+  projectId: entur-ror-test
+  gcsBucketName: ror-marduk-exchange-test
   kafkaBrokers: bootstrap.test-ext.kafka.entur.io:9095
   registryUrl: http://schema-registry.test-ext.kafka.entur.io:8001
   kafkaEnabled: true
