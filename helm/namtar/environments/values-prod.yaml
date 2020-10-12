@@ -5,7 +5,7 @@ sql:
 
 configMap:
   projectId: neon-1287
-  gcsBucketName: marduk-exchange-production
+  gcsBucketName: ror-marduk-exchange-production
   kafkaBrokers: bootstrap.prod-ext.kafka.entur.io:9095
   registryUrl: http://schema-registry.prod-ext.kafka.entur.io:8001
   kafkaEnabled: true
