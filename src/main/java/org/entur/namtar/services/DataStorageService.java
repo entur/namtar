@@ -43,11 +43,14 @@ public class DataStorageService {
             .expireAfterAccess(1, TimeUnit.DAYS)
             .build();
 
+    private final boolean cacheEnabled;
+
     private int searchCount;
 
-    public DataStorageService(StorageRepository repository) {
+    public DataStorageService(StorageRepository repository, boolean cacheEnabled) {
         logger.info("Initializing DataStorageService");
         this.repository = repository;
+        this.cacheEnabled = cacheEnabled;
         logger.info("Initializing DataStorageService - done");
     }
 
@@ -58,7 +61,7 @@ public class DataStorageService {
     }
 
     private DatedServiceJourney addToCache(DatedServiceJourney datedServiceJourney) {
-        if (datedServiceJourney != null) {
+        if (cacheEnabled && datedServiceJourney != null) {
             String[] cacheKeys = createCacheKeys(datedServiceJourney);
             for (String cacheKey : cacheKeys) {
                 cache.put(cacheKey, datedServiceJourney);

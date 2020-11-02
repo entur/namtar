@@ -95,14 +95,20 @@ public class DatedServiceJourneyService {
 
         boolean createdNewOriginalDatedServiceJourney = false;
 
+        final String generateDatedServiceJourneyId = generateDatedServiceJourneyId(creationNumber);
+
         if (serviceJourney.getDatedServiceJourneyId() == null || serviceJourney.getDatedServiceJourneyId().isEmpty()) {
-            serviceJourney.setDatedServiceJourneyId(generateDatedServiceJourneyId(creationNumber));
+            // DSJ is not already set - generate a new one
+            serviceJourney.setDatedServiceJourneyId(generateDatedServiceJourneyId);
         }
 
         String originalDatedServiceJourney;
         if (datedServiceJourney != null) {
             // ...exists - set original Id
             originalDatedServiceJourney = datedServiceJourney.getOriginalDatedServiceJourneyId();
+
+            // Force override of DSJ - this journey already exists, so the DSJ needs to be generated.
+            serviceJourney.setDatedServiceJourneyId(generateDatedServiceJourneyId);
         } else {
             // ...does not exist - use current as original Id
             originalDatedServiceJourney = serviceJourney.getDatedServiceJourneyId();

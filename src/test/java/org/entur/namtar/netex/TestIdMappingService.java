@@ -80,28 +80,47 @@ public class TestIdMappingService {
     @Test
     public void testUpdateExistingServiceJourneyWithProvidedDatedServiceJourneyId() {
 
-        String privateCode = "812";
+        String privateCode = "809";
         String lineRef = "NSB:Line:L1";
-        String departureDate = "2018-01-01";
+        String departureDate = "2018-01-10";
         String departureTime = "12:00";
 
-        String datedServiceJourney = "NSB:DatedServiceJourney:123123-123123-123123";
+        String providedDatedServiceJourneyId = "NSB:DatedServiceJourney:123123-123123-123123";
 
-        String serviceJourneyId = "NSB:ServiceJourney:" + getRandomId() + ""+ service.getStorageService().findNextCreationNumber();
-        String serviceJourneyId_2 = "NSB:ServiceJourney-UNIQUE:"+service.getStorageService().findNextCreationNumber();
+        String serviceJourneyId = "NSB:ServiceJourney:" + getRandomId() + "-"+ service.getStorageService().findNextCreationNumber();
+        String serviceJourneyId_2 = "NSB:ServiceJourney:" + getRandomId() + "-"+ service.getStorageService().findNextCreationNumber();
 
-        DatedServiceJourney serviceJourney = new DatedServiceJourney(datedServiceJourney, serviceJourneyId, 0, privateCode, lineRef, departureDate, departureTime);
-        service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(serviceJourney, publicationTimestamp, sourceFileName));
+        DatedServiceJourney serviceJourney = new DatedServiceJourney(providedDatedServiceJourneyId, serviceJourneyId, 0, privateCode, lineRef, departureDate, departureTime);
+        DatedServiceJourney serviceJourney2 = new DatedServiceJourney(providedDatedServiceJourneyId, serviceJourneyId_2, 0, privateCode, lineRef, departureDate, departureTime);
+
+        final DatedServiceJourney createdServiceJourney = service.createDatedServiceJourney(
+            serviceJourney,
+            publicationTimestamp,
+            sourceFileName
+        );
+        service.getStorageService().addDatedServiceJourney(createdServiceJourney);
 
         // Add ServiceJourney that matches, but with different serviceJourneyId
-        DatedServiceJourney serviceJourney2 = new DatedServiceJourney(datedServiceJourney, serviceJourneyId_2, 0, privateCode, lineRef, departureDate, departureTime);
-        service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(serviceJourney2, publicationTimestamp, sourceFileName));
+        final DatedServiceJourney createdServiceJourney_2 = service.createDatedServiceJourney(
+            serviceJourney2,
+            publicationTimestamp,
+            sourceFileName
+        );
+        service.getStorageService().addDatedServiceJourney(createdServiceJourney_2);
+
+        // Ensure that second update gets a new DSJ generated
+        final DatedServiceJourney datedServiceJourneyById = service.getStorageService().findByDatedServiceJourneyId(providedDatedServiceJourneyId);
+        assertTrue(createdServiceJourney.equals(datedServiceJourneyById));
 
         DatedServiceJourney matches = service.findDatedServiceJourney(serviceJourneyId, "latest", departureDate);
         DatedServiceJourney matches_2 = service.findDatedServiceJourney(serviceJourneyId_2, "latest", departureDate);
 
+        assertTrue("First inserted should have provided DSJ", matches.getDatedServiceJourneyId().equals(providedDatedServiceJourneyId));
+        assertTrue("First inserted should have same DSJ as oDSJ", matches.getOriginalDatedServiceJourneyId().equals(matches.getDatedServiceJourneyId()));
+        assertFalse("Second inserted should NOT have same DSJ as oDSJ", matches_2.getOriginalDatedServiceJourneyId().equals(matches_2.getDatedServiceJourneyId()));
         assertFalse(matches.equals(matches_2));
-        assertTrue(matches.getDatedServiceJourneyId().equals(matches_2.getDatedServiceJourneyId()));
+        assertFalse(matches.getDatedServiceJourneyId().equals(matches_2.getDatedServiceJourneyId()));
+        assertTrue(matches.getOriginalDatedServiceJourneyId().equals(matches_2.getOriginalDatedServiceJourneyId()));
 
         assertEquals("Should have gotten the same Original id.", matches.getOriginalDatedServiceJourneyId(), matches_2.getOriginalDatedServiceJourneyId());
     }
@@ -194,10 +213,10 @@ public class TestIdMappingService {
         assertEquals(datedServiceJourneyId, matches.getOriginalDatedServiceJourneyId());
 
         assertEquals(serviceJourneyId_2, matches_2.getServiceJourneyId());
-        assertEquals(datedServiceJourneyId, matches_2.getDatedServiceJourneyId());
+        assertNotSame(datedServiceJourneyId, matches_2.getDatedServiceJourneyId());
         assertEquals(datedServiceJourneyId, matches_2.getOriginalDatedServiceJourneyId());
 
-        assertEquals(serviceJourneyId_2, serviceJourneyByDatedServiceJourney.getServiceJourneyId());
+        assertEquals(serviceJourneyId, serviceJourneyByDatedServiceJourney.getServiceJourneyId());
         assertEquals(datedServiceJourneyId, serviceJourneyByDatedServiceJourney.getDatedServiceJourneyId());
         assertEquals(datedServiceJourneyId, serviceJourneyByDatedServiceJourney.getOriginalDatedServiceJourneyId());
     }
@@ -235,8 +254,8 @@ public class TestIdMappingService {
         // Verify that first DSJ does not have the provided DSJ-id
         assertNotSame(datedServiceJourneyId, matches.getOriginalDatedServiceJourneyId());
 
-        // Verify that second DSJ has the provided DSJ-id
-        assertEquals(datedServiceJourneyId, matches_2.getDatedServiceJourneyId());
+        // Verify that second DSJ does not have the provided DSJ-id
+        assertNotSame(datedServiceJourneyId, matches_2.getDatedServiceJourneyId());
 
         // Verify that the second DSJ has the same oDSJ as first
         assertEquals(matches.getOriginalDatedServiceJourneyId(), matches_2.getOriginalDatedServiceJourneyId());
@@ -267,19 +286,28 @@ public class TestIdMappingService {
 
         final String datedServiceJourneyId = "NSB:DatedServiceJourney:111-222-333";
 
-        service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(new DatedServiceJourney(datedServiceJourneyId, serviceJourneyId, 0,  "812", "NSB:Line:L1", "2018-01-01", "12:00"), publicationTimestamp, sourceFileName));
-        service.getStorageService().addDatedServiceJourney(service.createDatedServiceJourney(new DatedServiceJourney(datedServiceJourneyId, serviceJourneyId, 0,  "812", "NSB:Line:L1", "2018-01-02", "12:00"), publicationTimestamp, sourceFileName));
+        final DatedServiceJourney datedServiceJourney = service.createDatedServiceJourney(new DatedServiceJourney(
+            datedServiceJourneyId,
+            serviceJourneyId,
+            0,
+            "812",
+            "NSB:Line:L1",
+            "2018-01-01",
+            "12:00"
+        ), publicationTimestamp, sourceFileName);
 
-        DatedServiceJourney expectedOldMatch = service.findDatedServiceJourney(serviceJourneyId, "latest", "2018-01-02");
+        service.getStorageService().addDatedServiceJourney(datedServiceJourney);
+
+        DatedServiceJourney expectedOldMatch = service.findDatedServiceJourney(serviceJourneyId, "latest", "2018-01-01");
 
         assertEquals(datedServiceJourneyId, expectedOldMatch.getDatedServiceJourneyId());
         assertEquals(datedServiceJourneyId, expectedOldMatch.getOriginalDatedServiceJourneyId());
 
-        DatedServiceJourney serviceJourney = service.findServiceJourneyByDatedServiceJourney(expectedOldMatch.getDatedServiceJourneyId());
+        DatedServiceJourney serviceJourney = service.findServiceJourneyByDatedServiceJourney(datedServiceJourneyId);
 
         assertNotNull(serviceJourney);
         assertEquals(serviceJourneyId, serviceJourney.getServiceJourneyId());
-        assertEquals("2018-01-02", serviceJourney.getDepartureDate());
+        assertEquals("2018-01-01", serviceJourney.getDepartureDate());
     }
 
 

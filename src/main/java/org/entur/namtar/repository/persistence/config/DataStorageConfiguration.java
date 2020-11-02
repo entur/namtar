@@ -23,6 +23,7 @@ import org.entur.namtar.services.DataStorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -33,8 +34,12 @@ public class DataStorageConfiguration {
 
     @Bean
     public DataStorageService createDatabaseStorageService(@Autowired DatedServiceJourneyRepository datedServiceJourneyRepository,
-                                                           @Autowired SourceFileRepository sourceFileRepository) {
+                                                           @Autowired SourceFileRepository sourceFileRepository,
+                                                           @Value("${app.namtar.cache.enabled:true}") boolean cacheEnabled) {
         logger.info("Initializing DataStorageService with DatabaseRepositoryImpl");
-        return new DataStorageService(new DatabaseRepositoryImpl(datedServiceJourneyRepository, sourceFileRepository));
+        if (!cacheEnabled) {
+            logger.warn(" !!! CACHE DISABLED !!!");
+        }
+        return new DataStorageService(new DatabaseRepositoryImpl(datedServiceJourneyRepository, sourceFileRepository), cacheEnabled);
     }
 }
