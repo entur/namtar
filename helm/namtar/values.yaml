@@ -19,6 +19,8 @@ secretMount:
    secretName: ror-namtar-sa-key
    readOnly: true
 
+tmpDirectory:
+  path: /home/appuser/tmp
 
 configMapMount:
    name: namtar-config
