@@ -2,10 +2,10 @@ FROM openjdk:11-jre
 
 RUN addgroup appuser && adduser --disabled-password appuser --ingroup appuser
 
-WORKDIR /home/appuser
-
 RUN chown -R appuser:appuser /home/appuser
 USER appuser
+
+WORKDIR /home/appuser
 
 RUN mkdir tmp
 
