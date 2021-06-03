@@ -94,10 +94,15 @@ public class DatedServiceJourneyService {
         long creationNumber = nextId++;
 
         boolean createdNewOriginalDatedServiceJourney = false;
+        boolean datedServiceJourneyIdIsProvided = false;
 
         final String generateDatedServiceJourneyId = generateDatedServiceJourneyId(creationNumber);
 
-        if (serviceJourney.getDatedServiceJourneyId() == null || serviceJourney.getDatedServiceJourneyId().isEmpty()) {
+        if (serviceJourney.getDatedServiceJourneyId() != null &&
+            !serviceJourney.getDatedServiceJourneyId().isEmpty()) {
+            // DSJ is provided in the NeTEx-data
+            datedServiceJourneyIdIsProvided = true;
+        } else {
             // DSJ is not already set - generate a new one
             serviceJourney.setDatedServiceJourneyId(generateDatedServiceJourneyId);
         }
@@ -107,8 +112,15 @@ public class DatedServiceJourneyService {
             // ...exists - set original Id
             originalDatedServiceJourney = datedServiceJourney.getOriginalDatedServiceJourneyId();
 
-            // Force override of DSJ - this journey already exists, so the DSJ needs to be generated.
-            serviceJourney.setDatedServiceJourneyId(generateDatedServiceJourneyId);
+            if (datedServiceJourneyIdIsProvided &&
+                findServiceJourneyByDatedServiceJourney(serviceJourney.getDatedServiceJourneyId()) != null) {
+
+                /*
+                 * If the DSJ is provided, and has already been imported, we need to use the generated DSJ
+                 */
+
+                serviceJourney.setDatedServiceJourneyId(generateDatedServiceJourneyId);
+            }
         } else {
             // ...does not exist - use current as original Id
             originalDatedServiceJourney = serviceJourney.getDatedServiceJourneyId();
