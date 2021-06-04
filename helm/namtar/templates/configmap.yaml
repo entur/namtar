@@ -1,6 +1,23 @@
 apiVersion: v1
 data:
   application.properties: |-
+    blobstore.gcs.project.id={{.Values.configMap.projectId}}
+    blobstore.gcs.container.name={{.Values.configMap.gcsBucketName}}
+    blobstore.gcs.subfolder=outbound/dated
+    blobstore.gcs.credential.path={{ .Values.secretMount.mountPath }}
+
+    rutebanken.kubernetes.namespace={{ .Release.Namespace }}
+    rutebanken.kubernetes.enabled=true
+
+    namtar.incoming.port={{ .Values.service.http.internalPort }}
+    namtar.generated.id.prefix=ENT:DatedServiceJourney:
+    namtar.tempfile.directory={{ .Values.tmpDirectory.path }}
+
+    namtar.blobstore.polling.cron.expression=0 0/5 * ? * * *
+
+    namtar.kafka.enabled={{ .Values.configMap.kafkaEnabled }}
+    namtar.kafka.topic.name={{ .Values.configMap.topicName }}
+
     namtar.import.disabled=true
 kind: ConfigMap
 metadata:
