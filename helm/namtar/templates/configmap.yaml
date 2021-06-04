@@ -21,5 +21,5 @@ data:
     namtar.import.disabled=true
 kind: ConfigMap
 metadata:
-  name: {{ template "app.name" . }}-config
   namespace: {{ .Release.Namespace }}
+  name: {{ template "app.name" . }}-config
