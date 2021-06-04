@@ -19,9 +19,6 @@ data:
 
       namtar.blobstore.polling.cron.expression=0 0/5 * ? * * *
 
-      namtar.kafka.enabled={{.Values.configMap.kafkaEnabled}}
-      namtar.kafka.topic.name={{.Values.configMap.topicName}}
-
       spring.profiles.active=gcs-blobstore
       spring.main.sources=org.entur.namtar
       spring.datasource.platform=postgres
@@ -35,3 +32,6 @@ data:
       spring.jpa.hibernate.ddl-auto=none
 
       namtar.import.disabled=false
+
+      namtar.kafka.enabled={{ .Values.configMap.kafkaEnabled }}
+      namtar.kafka.topic.name={{ .Values.configMap.topicName }}
