@@ -16,7 +16,7 @@ data:
       rutebanken.kubernetes.enabled=true
 
       namtar.incoming.port={{ .Values.service.http.internalPort }}
-      namtar.generated.id.prefix=ENT:DatedServiceJourney:
+
       namtar.tempfile.directory={{ .Values.tmpDirectory.path }}
 
       namtar.blobstore.polling.cron.expression=0 0/5 * ? * * *
