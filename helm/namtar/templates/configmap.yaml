@@ -5,18 +5,6 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
     application.properties: |-
-      spring.profiles.active=gcs-blobstore
-      spring.main.sources=org.entur.namtar
-      spring.datasource.platform=postgres
-      spring.database.driverClassName=org.postgresql.Driver
-      spring.datasource.url=jdbc:postgresql://localhost:5432/namtar
-      spring.datasource.tomcat.max-active=30
-      spring.datasource.username=namtar
-      spring.jpa.database=POSTGRESQL
-      spring.jpa.show-sql=false
-      spring.jpa.generate-ddl=false
-      spring.jpa.hibernate.ddl-auto=none
-
       blobstore.gcs.project.id={{.Values.configMap.projectId}}
       blobstore.gcs.container.name={{.Values.configMap.gcsBucketName}}
       blobstore.gcs.subfolder=outbound/dated
