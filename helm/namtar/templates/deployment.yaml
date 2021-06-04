@@ -44,7 +44,7 @@ spec:
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
         - name: {{ .Chart.Name }}
-          image: {{ .Values.image.identifier }}
+          image: eu.gcr.io/entur-system-1287/namtar:master-v338-8988b259
           imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           env:
             - name: JAVA_OPTIONS
@@ -130,4 +130,3 @@ spec:
           configMap:
             name: {{ .Values.configMapMount.name }}
             defaultMode: 420
-
