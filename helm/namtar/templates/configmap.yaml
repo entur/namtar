@@ -21,8 +21,6 @@ data:
 
       namtar.kafka.enabled={{.Values.configMap.kafkaEnabled}}
       namtar.kafka.topic.name={{.Values.configMap.topicName}}
-      namtar.kafka.brokers={{.Values.configMap.kafkaBrokers}}
-      namtar.kafka.schema.registry.url={{.Values.configMap.registryUrl}}
 
       spring.profiles.active=gcs-blobstore
       spring.main.sources=org.entur.namtar
