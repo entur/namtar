@@ -1,27 +1,43 @@
 apiVersion: v1
+data:
+  application.properties: |-
+    blobstore.gcs.project.id={{.Values.configMap.projectId}}
+    blobstore.gcs.container.name={{.Values.configMap.gcsBucketName}}
+    blobstore.gcs.subfolder=outbound/dated
+    blobstore.gcs.credential.path={{ .Values.secretMount.mountPath }}
+
+    rutebanken.kubernetes.namespace={{ .Release.Namespace }}
+    rutebanken.kubernetes.enabled=true
+
+    namtar.incoming.port={{ .Values.service.http.internalPort }}
+    namtar.generated.id.prefix=ENT:DatedServiceJourney:
+    namtar.tempfile.directory={{ .Values.tmpDirectory.path }}
+
+    namtar.blobstore.polling.cron.expression=0 0/5 * ? * * *
+
+    namtar.kafka.enabled={{ .Values.configMap.kafkaEnabled }}
+    namtar.kafka.topic.name={{ .Values.configMap.topicName }}
+    {{- if eq .Values.configMap.kafkaEnabled true }}
+    namtar.kafka.brokers={{.Values.configMap.kafkaBrokers}}
+    namtar.kafka.schema.registry.url={{.Values.configMap.registryUrl}}
+    {{- end }}
+
+    spring.profiles.active=gcs-blobstore
+    spring.main.sources=org.entur.namtar
+    spring.datasource.platform=postgres
+    spring.database.driverClassName=org.postgresql.Driver
+    spring.datasource.url=jdbc:postgresql://localhost:5432/namtar
+    spring.datasource.tomcat.max-active=30
+    spring.datasource.username=namtar
+    spring.jpa.database=POSTGRESQL
+    spring.jpa.show-sql=false
+    spring.jpa.generate-ddl=false
+    spring.jpa.hibernate.ddl-auto=none
+
+    namtar.import.disabled=true
 kind: ConfigMap
 metadata:
   name: {{ template "app.name" . }}-config
   namespace: {{ .Release.Namespace }}
-data:
-    application.properties: |-
-      blobstore.gcs.project.id={{.Values.configMap.projectId}}
-      blobstore.gcs.container.name={{.Values.configMap.gcsBucketName}}
-      blobstore.gcs.subfolder=outbound/dated
-      blobstore.gcs.credential.path={{ .Values.secretMount.mountPath }}
-
-      rutebanken.kubernetes.namespace={{ .Release.Namespace }}
-      rutebanken.kubernetes.enabled=true
-
-      namtar.incoming.port={{ .Values.service.http.internalPort }}
-      namtar.generated.id.prefix=ENT:DatedServiceJourney:
-      namtar.tempfile.directory={{ .Values.tmpDirectory.path }}
-
-      namtar.blobstore.polling.cron.expression=0 0/5 * ? * * *
-
-
-
-      namtar.import.disabled=false
-
-      namtar.kafka.enabled={{ .Values.configMap.kafkaEnabled }}
-      namtar.kafka.topic.name={{ .Values.configMap.topicName }}
+  labels:
+  {{- include "common.labels" . | indent 4 }}
