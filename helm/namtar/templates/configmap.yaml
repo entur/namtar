@@ -23,5 +23,3 @@ kind: ConfigMap
 metadata:
   name: {{ template "app.name" . }}-config
   namespace: {{ .Release.Namespace }}
-  labels:
-  {{- include "common.labels" . | indent 4 }}
