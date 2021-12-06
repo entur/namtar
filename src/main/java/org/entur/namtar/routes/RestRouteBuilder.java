@@ -39,6 +39,7 @@ public class RestRouteBuilder extends RouteBuilder {
     public void configure() throws Exception {
         restConfiguration("jetty")
                 .port(incomingPort)
+                .enableCORS(true)
                 .apiContextPath("api/api-doc/swagger.json")
                     .apiProperty("api.title", "DatedServiceJourneys").apiProperty("api.version", "0.1")
                     // and enable CORS
