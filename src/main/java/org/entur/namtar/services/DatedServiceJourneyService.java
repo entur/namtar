@@ -107,6 +107,19 @@ public class DatedServiceJourneyService {
             serviceJourney.setDatedServiceJourneyId(generateDatedServiceJourneyId);
         }
 
+        if (datedServiceJourneyIdIsProvided && datedServiceJourney == null) {
+            // DSJ not found by privateCode/serviceJourney+date
+            // Lookup DSJ directly
+            datedServiceJourney = findServiceJourneyByDatedServiceJourney(serviceJourney.getDatedServiceJourneyId());
+            if (datedServiceJourney != null) {
+                // DSJ is found - check if it already exists for another date
+                if (! datedServiceJourney.getDepartureDate().equals(serviceJourney.getDepartureDate())) {
+                    logger.warn("Ignoring DatedServiceJourney [{}] as it already exists for another departureDate [{}]", serviceJourney.getDatedServiceJourneyId(), datedServiceJourney.getDepartureDate());
+                    return null;
+                }
+            }
+        }
+
         String originalDatedServiceJourney;
         if (datedServiceJourney != null) {
             // ...exists - set original Id
