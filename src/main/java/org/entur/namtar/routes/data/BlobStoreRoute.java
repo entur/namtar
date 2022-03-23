@@ -18,6 +18,7 @@ package org.entur.namtar.routes.data;
 import org.apache.camel.LoggingLevel;
 import org.entur.namtar.netex.NetexLoader;
 import org.entur.namtar.routes.RestRouteBuilder;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -39,11 +40,13 @@ public class BlobStoreRoute extends RestRouteBuilder {
 
     @Override
     public void configure() {
+        getContext().setUseBreadcrumb(true);
 
         log.info("Polling for updates with frequency: [{}]", updateFrequency);
 
         singletonFrom("timer://namtar.blobstore.polling?fixedRate=true&period=" + updateFrequency,
                 "namtar.blobstore.singleton.polling")
+                .process(p -> MDC.put("camel.breadcrumbId", p.getIn().getHeader("breadcrumbId", String.class)))
                 .choice()
                 .when(p -> importDisabled)
                     .log(LoggingLevel.WARN, "Import disabled - doing nothing")
@@ -56,6 +59,7 @@ public class BlobStoreRoute extends RestRouteBuilder {
                 .otherwise()
                     .log("Is NOT leader - doing nothing")
                 .end()
+                .process(p -> MDC.remove("camel.breadcrumbId"))
         ;
 
         // TODO: If successful, delete/move file from bucket
@@ -71,9 +75,11 @@ public class BlobStoreRoute extends RestRouteBuilder {
         ;
 
         from("direct:loadBlobs")
+                .process(p -> MDC.put("camel.breadcrumbId", p.getIn().getHeader("breadcrumbId", String.class)))
                 .to("log:" + getClass().getName() + logParams)
                 .bean(netexLoader, "loadNetexFromBlobStore")
                 .to("log:" + getClass().getName() + logParams)
+                .process(p -> MDC.remove("camel.breadcrumbId"))
                 .routeId("blobstore-load")
         ;
     }
