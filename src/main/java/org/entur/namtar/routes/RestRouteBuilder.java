@@ -37,6 +37,8 @@ public class RestRouteBuilder extends RouteBuilder {
 
     @Override
     public void configure() throws Exception {
+        getContext().setUseBreadcrumb(true);
+
         restConfiguration("jetty")
                 .port(incomingPort)
                 .enableCORS(true)
