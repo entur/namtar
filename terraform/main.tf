@@ -63,3 +63,47 @@ resource "kubernetes_secret" "ror-app-secrets" {
   "namtar-db-password"    = var.ror-namtar-db-password
   }
 }
+
+resource "google_sql_database_instance" "db_instance" {
+  name = "namtar-db-pg13"
+  database_version = "POSTGRES_13"
+  project = var.gcp_resources_project
+  region = var.ror-namtar-db-region
+
+  settings {
+    location_preference {
+      zone = var.ror-namtar-db-zone
+    }
+    tier = var.ror-namtar-db-tier
+    user_labels = var.labels
+    availability_type = var.ror-namtar-db-availability
+    backup_configuration {
+      enabled = true
+      // 01:00 UTC
+      start_time = "01:00"
+    }
+    maintenance_window {
+      // Sunday
+      day = 7
+      // 02:00 UTC
+      hour = 2
+    }
+    ip_configuration {
+      require_ssl = true
+    }
+  }
+
+}
+
+resource "google_sql_database" "db" {
+  name = "namtar"
+  project = var.gcp_resources_project
+  instance = google_sql_database_instance.db_instance.name
+}
+
+resource "google_sql_user" "db-user" {
+  name = var.ror-namtar-db-username
+  project = var.gcp_resources_project
+  instance = google_sql_database_instance.db_instance.name
+  password = var.ror-namtar-db-password
+}
