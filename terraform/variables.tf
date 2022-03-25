@@ -59,6 +59,7 @@ variable "ror-namtar-db-password" {
 
 variable "ror-namtar-db-username" {
   description = "Namtar database user"
+  default = "namtar"
 }
 
 
