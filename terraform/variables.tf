@@ -53,6 +53,10 @@ variable "ror-namtar-kafka-user-password" {
   description = "Namtar kafka user password"
 }
 
+variable "ror-namtar-db-instance-name" {
+  default = "namtar-db-pg13"
+}
+
 variable "ror-namtar-db-password" {
   description = "Namtar database password"
 }
@@ -61,7 +65,6 @@ variable "ror-namtar-db-username" {
   description = "Namtar database user"
   default = "namtar"
 }
-
 
 variable "ror-namtar-db-region" {
   description = "GCP region"
