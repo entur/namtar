@@ -75,7 +75,7 @@ variable "ror-namtar-db-zone" {
 
 variable "ror-namtar-db-tier" {
   description = "Database instance tier"
-  default = "db-g1-small"
+  default = "db-custom-1-3840"
 }
 
 variable "ror-namtar-db-availability" {
