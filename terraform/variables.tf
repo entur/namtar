@@ -3,10 +3,6 @@ variable "gcp_project" {
     description = "The GCP project id"
 }
 
-variable "gcp_resources_project" {
-    description = "The GCP project id"
-}
-
 variable "kube_namespace" {
   description = "The Kubernetes namespace"
 }
@@ -28,7 +24,7 @@ variable "load_config_file" {
 }
 
 variable "storage_bucket_name" {
-  description = "GCP bucket name"
+  description = "GCP buket name"
 }
 
 variable "service_account_bucket_role" {
@@ -55,31 +51,6 @@ variable "ror-namtar-kafka-user-password" {
 
 variable "ror-namtar-db-password" {
   description = "Namtar database password"
-}
-
-variable "ror-namtar-db-username" {
-  description = "Namtar database user"
-}
-
-
-variable "ror-namtar-db-region" {
-  description = "GCP region"
-  default = "europe-west1"
-}
-
-variable "ror-namtar-db-zone" {
-  description = "GCP zone letter"
-  default = "europe-west1-b"
-}
-
-variable "ror-namtar-db-tier" {
-  description = "Database instance tier"
-  default = "db-custom-1-3840"
-}
-
-variable "ror-namtar-db-availability" {
-  description = "Database availability"
-  default = "ZONAL"
 }
 
 
