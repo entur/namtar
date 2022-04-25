@@ -65,7 +65,7 @@ resource "kubernetes_secret" "ror-app-secrets" {
 }
 
 resource "google_sql_database_instance" "db_instance" {
-  name = var.ror-namtar-db-instance-name
+  name = "namtar-db-pg13"
   database_version = "POSTGRES_13"
   project = var.gcp_resources_project
   region = var.ror-namtar-db-region
