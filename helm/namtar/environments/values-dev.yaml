@@ -8,7 +8,7 @@ configMap:
   registryUrl: http://schema-registry.test-ext.kafka.entur.io:8001
   kafkaEnabled: true
   topicName: dated-service-journeys-dev
-  importDisabled: true
+  importDisabled: false
 
 ingress:
   enabled: true
