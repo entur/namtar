@@ -18,7 +18,6 @@ package org.entur.namtar.routes;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.hazelcast.policy.HazelcastRoutePolicy;
 import org.apache.camel.model.RouteDefinition;
-import org.apache.camel.spi.RouteContext;
 import org.apache.camel.spi.RoutePolicy;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -39,7 +38,8 @@ public class RestRouteBuilder extends RouteBuilder {
     public void configure() throws Exception {
         getContext().setUseBreadcrumb(true);
 
-        restConfiguration("jetty")
+        restConfiguration()
+                .component("jetty")
                 .port(incomingPort)
                 .enableCORS(true)
                 .apiContextPath("api/api-doc/swagger.json")
@@ -62,8 +62,8 @@ public class RestRouteBuilder extends RouteBuilder {
     }
 
     protected boolean isLeader(String routeId) {
-        RouteContext routeContext = getContext().getRoute(routeId).getRouteContext();
-        List<RoutePolicy> routePolicyList = routeContext.getRoutePolicyList();
+//        RouteContext routeContext = getContext().getRoute(routeId).getRouteContext();
+        List<RoutePolicy> routePolicyList = getContext().getRoute(routeId).getRoutePolicyList();
         if (routePolicyList != null) {
             for (RoutePolicy routePolicy : routePolicyList) {
                 if (routePolicy instanceof HazelcastRoutePolicy) {

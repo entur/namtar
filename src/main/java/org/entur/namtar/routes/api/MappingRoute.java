@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import org.apache.camel.Exchange;
-import org.apache.camel.model.rest.RestOperationResponseMsgDefinition;
+import org.apache.camel.model.rest.ResponseMessageDefinition;
 import org.apache.camel.model.rest.RestParamType;
 import org.entur.namtar.model.DatedServiceJourney;
 import org.entur.namtar.routes.RestRouteBuilder;
@@ -63,15 +63,15 @@ public class MappingRoute extends RestRouteBuilder {
 
          */
 
-        RestOperationResponseMsgDefinition notFoundResponse = new RestOperationResponseMsgDefinition();
+        ResponseMessageDefinition notFoundResponse = new ResponseMessageDefinition();
         notFoundResponse.setMessage("Not found");
         notFoundResponse.code(404);
 
-        RestOperationResponseMsgDefinition dsjResponse = new RestOperationResponseMsgDefinition();
+        ResponseMessageDefinition dsjResponse = new ResponseMessageDefinition();
         dsjResponse.responseModel(DatedServiceJourney.class);
         dsjResponse.code(200);
 
-        RestOperationResponseMsgDefinition dsjResponseArray = new RestOperationResponseMsgDefinition();
+        ResponseMessageDefinition dsjResponseArray = new ResponseMessageDefinition();
         dsjResponseArray.responseModel(DatedServiceJourney[].class);
         dsjResponseArray.code(200);
 
