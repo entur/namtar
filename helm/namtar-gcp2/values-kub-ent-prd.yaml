@@ -1,0 +1,17 @@
+replicas: 2
+
+sql:
+  instance: ent-namtar-prd:europe-west1:namtar-db-1=tcp:5432
+
+configMap:
+  projectId: entur-ror-prod
+  gcsBucketName: ror-marduk-exchange-production
+  kafkaBrokers: bootstrap.prod-ext.kafka.entur.io:9095
+  registryUrl: http://schema-registry.prod-ext.kafka.entur.io:8001
+  kafkaEnabled: true
+  topicName: dated-service-journeys-production
+  importDisabled: false
+
+ingress:
+  enabled: true
+  domainName: .entur.io
