@@ -15,7 +15,9 @@
 
 package org.entur.namtar.repository.blobstore.config;
 
+import com.google.cloud.http.HttpTransportOptions;
 import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
 import org.rutebanken.helper.gcp.BlobStoreHelper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -26,14 +28,25 @@ import org.springframework.context.annotation.Profile;
 @Profile("gcs-blobstore")
 public class GcsStorageConfig {
 
-    @Value("${blobstore.gcs.credential.path}")
+    @Value("${blobstore.gcs.credential.path:#{null}}")
     private String credentialPath;
 
     @Value("${blobstore.gcs.project.id}")
     private String projectId;
 
+    private static final int CONNECT_AND_READ_TIMEOUT = 60000;
+
     @Bean
     public Storage storage() {
+        if (credentialPath == null || credentialPath.isEmpty()) {
+            HttpTransportOptions transportOptions = StorageOptions.getDefaultHttpTransportOptions();
+            transportOptions = transportOptions.toBuilder().setConnectTimeout(CONNECT_AND_READ_TIMEOUT).setReadTimeout(CONNECT_AND_READ_TIMEOUT).build();
+
+            return StorageOptions.newBuilder()
+                    .setProjectId(projectId)
+                    .setTransportOptions(transportOptions)
+                    .build().getService();
+        }
         return BlobStoreHelper.getStorage(credentialPath, projectId);
     }
 
