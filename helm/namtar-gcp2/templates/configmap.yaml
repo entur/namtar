@@ -4,7 +4,7 @@ metadata:
   name: {{ template "app.name" . }}-config
   namespace: {{ .Release.Namespace }}
   labels:
-  {{- include "common.labels" . | indent 4 }}
+    {{- include "common.labels" . | indent 4 }}
 data:
     application.properties: |-
       blobstore.gcs.project.id={{.Values.configMap.projectId}}
@@ -26,7 +26,11 @@ data:
       namtar.kafka.brokers={{.Values.configMap.kafkaBrokers}}
       namtar.kafka.schema.registry.url={{.Values.configMap.registryUrl}}
       {{- end }}
-
+      
+      # Schema registry basic auth
+      camel.component.kafka.additional-properties.basic.auth.credentials.source=USER_INFO
+      camel.component.kafka.additional-properties.basic.auth.user.info=${NAMTAR_KAFKA_SASL_USERNAME}:${NAMTAR_KAFKA_SASL_PASSWORD}
+                        
       spring.profiles.active=gcs-blobstore
       spring.main.sources=org.entur.namtar
       spring.datasource.platform=postgres
