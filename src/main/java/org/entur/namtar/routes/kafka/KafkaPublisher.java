@@ -16,7 +16,6 @@
 
 package org.entur.namtar.routes.kafka;
 
-import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig;
 import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import org.apache.camel.component.kafka.KafkaConfiguration;
 import org.apache.kafka.clients.CommonClientConfigs;
@@ -80,8 +79,8 @@ public class KafkaPublisher {
         properties.put("schema.registry.url",schemaRegistryUrl);
 
         // Schema registry authentication
-        properties.put(SchemaRegistryClientConfig.BASIC_AUTH_CREDENTIALS_SOURCE, "USER_INFO");
-        properties.put(SchemaRegistryClientConfig.USER_INFO_CONFIG, saslUsername.trim()+":"+saslPassword.trim());
+        properties.put("basic.auth.credentials.source", "USER_INFO");
+        properties.put("basic.auth.user.info", saslUsername.trim()+":"+saslPassword.trim());
 
 // Security
         properties.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, securityProtocol);
