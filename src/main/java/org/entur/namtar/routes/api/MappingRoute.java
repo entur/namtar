@@ -20,11 +20,13 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 import org.apache.camel.Exchange;
+import org.apache.camel.Processor;
 import org.apache.camel.model.rest.ResponseMessageDefinition;
 import org.apache.camel.model.rest.RestParamType;
 import org.entur.namtar.model.DatedServiceJourney;
 import org.entur.namtar.routes.RestRouteBuilder;
 import org.entur.namtar.services.DatedServiceJourneyService;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
@@ -39,6 +41,7 @@ public class MappingRoute extends RestRouteBuilder {
 
     @Autowired
     private final DatedServiceJourneyService repository;
+    public static final String ET_CLIENT_NAME_HEADER = "Et-Client-Name";
 
     public MappingRoute(@Autowired DatedServiceJourneyService repository) {
         this.repository = repository;
@@ -123,47 +126,62 @@ public class MappingRoute extends RestRouteBuilder {
                 .to("direct:lookup.multiple.datedservicejourneys")
         ;
 
+
+        Processor setMdc = exchange -> MDC.put(ET_CLIENT_NAME_HEADER, exchange.getIn().getHeader(ET_CLIENT_NAME_HEADER, String.class));
+        Processor removeMdc = exchange -> MDC.remove(ET_CLIENT_NAME_HEADER);
+
         from("direct:lookup.single.datedservicejourney")
+                .process(setMdc)
                 .bean(repository, "findServiceJourneyByDatedServiceJourney(${header.datedServiceJourneyId})")
                 .to("direct:createResponse")
+                .process(removeMdc)
                 .routeId("namtar.single.datedServiceJourney")
         ;
 
-
         from("direct:lookup.privatecode.date")
+                .process(setMdc)
                 .bean(repository, "findServiceJourneyByPrivateCodeDepartureDate(${header.privateCode}, ${header.date})")
                 .to("direct:createResponse")
+                .process(removeMdc)
                 .routeId("namtar.privatecode.date")
         ;
 
         from("direct:lookup.original.datedservicejourney")
+                .process(setMdc)
                 .bean(repository, "findServiceJourneysByOriginalDatedServiceJourney(${header.originalDatedServiceJourneyId})")
                 .to("direct:createResponse")
+                .process(removeMdc)
                 .routeId("namtar.original.datedServiceJourney")
         ;
 
         from("direct:lookup.multiple.datedservicejourneys")
+                .process(setMdc)
                 .process((Exchange p) -> {
                     p.getOut().setBody(mapper.readValue(p.getIn().getBody(InputStream.class), DatedServiceJourneyParam[].class));
                 })
                 .bean(repository, "findServiceJourneysByDatedServiceJourneys(${body})")
                 .to("direct:createResponse")
+                .process(removeMdc)
                 .routeId("namtar.multiple.datedServiceJourneys")
         ;
 
         from("direct:lookup.single.servicejourney.version.date")
+                .process(setMdc)
                 .bean(repository, "findDatedServiceJourney(${header.serviceJourneyId}, ${header.version}, ${header.date})")
                 .to("direct:createResponse")
+                .process(removeMdc)
                 .routeId("namtar.single.serviceJourney")
         ;
 
 
         from("direct:lookup.multiple.servicejourneys.version.date")
+                .process(setMdc)
                 .process((Exchange p) -> {
                     p.getOut().setBody(mapper.readValue(p.getIn().getBody(InputStream.class), ServiceJourneyParam[].class));
                 })
                 .bean(repository, "findDatedServiceJourneys(${body})")
                 .to("direct:createResponse")
+                .process(removeMdc)
                 .routeId("namtar.multiple.serviceJourneys")
         ;
 

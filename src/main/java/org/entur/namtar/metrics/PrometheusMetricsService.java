@@ -19,11 +19,14 @@ import io.micrometer.core.instrument.ImmutableTag;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.prometheus.PrometheusConfig;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.entur.namtar.routes.api.MappingRoute.ET_CLIENT_NAME_HEADER;
 
 @Component
 public class PrometheusMetricsService extends PrometheusMeterRegistry {
@@ -62,6 +65,9 @@ public class PrometheusMetricsService extends PrometheusMeterRegistry {
     public void markLookup(SearchType searchType) {
         List<Tag> tags = new ArrayList<>();
         tags.add(new ImmutableTag("searchType", searchType.name()));
+        if (MDC.get(ET_CLIENT_NAME_HEADER) != null) {
+            tags.add(new ImmutableTag(ET_CLIENT_NAME_HEADER, MDC.get(ET_CLIENT_NAME_HEADER)));
+        }
         counter(DATA_SEARCH_COUNTER_NAME, tags).increment();
     }
 }

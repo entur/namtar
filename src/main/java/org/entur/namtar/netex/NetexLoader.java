@@ -31,6 +31,7 @@ import org.rutebanken.netex.model.Route;
 import org.rutebanken.netex.model.ServiceJourney;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -47,6 +48,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import static org.entur.namtar.routes.api.MappingRoute.ET_CLIENT_NAME_HEADER;
 
 @Service
 public class NetexLoader {
@@ -87,6 +90,7 @@ public class NetexLoader {
             isLoadingData = true;
             log.info("Loading netex-files");
             try {
+                MDC.put(ET_CLIENT_NAME_HEADER, "namtar-internal");
                 int counter = 0;
                 long t1 = System.currentTimeMillis();
                 while (blobIterator.hasNext()) {
@@ -118,6 +122,7 @@ public class NetexLoader {
                 log.info("Loaded {} netex-files in {} ms", counter, ( System.currentTimeMillis()-t1 ));
             } finally {
                 isLoadingData = false;
+                MDC.remove(ET_CLIENT_NAME_HEADER);
             }
         } else {
             log.info("Already loading data - ignoring until finished");
