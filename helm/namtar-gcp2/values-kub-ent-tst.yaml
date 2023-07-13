@@ -5,7 +5,7 @@ sql:
 
 configMap:
   projectId: entur-ror-test
-  gcsBucketName: ror-marduk-exchange-test
+  gcsBucketName: marduk-exchange-test
   kafkaBrokers: bootstrap.test-ext.kafka.entur.io:9095
   registryUrl: http://schema-registry.test-ext.kafka.entur.io:8001
   kafkaEnabled: true
