@@ -2,7 +2,7 @@ sql:
   instance: ent-namtar-dev:europe-west1:namtar-db-1=tcp:5432
 
 configMap:
-  projectId: entur-ror-dev
+  projectId: ent-marduk-dev
   gcsBucketName: marduk-exchange-dev
   kafkaBrokers: entur-kafka-test-ext-entur-test.aivencloud.com:11877
   registryUrl: https://entur-kafka-test-ext-entur-test.aivencloud.com:11867
