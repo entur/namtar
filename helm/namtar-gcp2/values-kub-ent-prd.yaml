@@ -6,8 +6,8 @@ sql:
 configMap:
   projectId: ent-marduk-prd
   gcsBucketName: marduk-exchange-production
-  kafkaBrokers: bootstrap.prod-ext.kafka.entur.io:9095
-  registryUrl: http://schema-registry.prod-ext.kafka.entur.io:8001
+  kafkaBrokers: entur-kafka-prod-ext-entur-prod.aivencloud.com:14019
+  registryUrl: https://entur-kafka-prod-ext-entur-prod.aivencloud.com:14009
   kafkaEnabled: true
   topicName: dated-service-journeys-production
   importDisabled: false

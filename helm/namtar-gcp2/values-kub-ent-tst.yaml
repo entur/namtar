@@ -6,8 +6,8 @@ sql:
 configMap:
   projectId: ent-marduk-tst
   gcsBucketName: marduk-exchange-test
-  kafkaBrokers: bootstrap.test-ext.kafka.entur.io:9095
-  registryUrl: http://schema-registry.test-ext.kafka.entur.io:8001
+  kafkaBrokers: entur-kafka-test-ext-entur-test.aivencloud.com:11877
+  registryUrl: https://entur-kafka-test-ext-entur-test.aivencloud.com:11867
   kafkaEnabled: true
   topicName: dated-service-journeys-staging
   importDisabled: false
