@@ -173,8 +173,14 @@ public class DatedServiceJourneyService {
     }
 
     public DatedServiceJourney findServiceJourneyByDatedServiceJourney(String datedServiceJourneyId) {
-        metricsService.markLookup(DATED_SERVICE_JOURNEY, datedServiceJourneyId.substring(0, 3));
-        return storageService.findByDatedServiceJourneyId(datedServiceJourneyId);
+
+        DatedServiceJourney datedServiceJourney = storageService.findByDatedServiceJourneyId(datedServiceJourneyId);
+        String codespace = null;
+        if (datedServiceJourney != null) {
+            codespace = datedServiceJourney.getServiceJourneyId().substring(0, 3);
+        }
+        metricsService.markLookup(DATED_SERVICE_JOURNEY, codespace);
+        return datedServiceJourney;
     }
 
 
