@@ -162,8 +162,14 @@ public class DatedServiceJourneyService {
     }
 
     public DatedServiceJourney findServiceJourneyByPrivateCodeDepartureDate(String privateCode, String departureDate) {
-        metricsService.markLookup(PRIVATE_CODE_DEPARTURE_DATE, null);
-        return storageService.findByPrivateCodeDepartureDate(privateCode, departureDate);
+        DatedServiceJourney byPrivateCodeDepartureDate = storageService.findByPrivateCodeDepartureDate(privateCode, departureDate);
+        String codespace = null;
+        if (byPrivateCodeDepartureDate != null) {
+            codespace = byPrivateCodeDepartureDate.getServiceJourneyId().substring(0, 3);
+        }
+        metricsService.markLookup(PRIVATE_CODE_DEPARTURE_DATE, codespace);
+
+        return byPrivateCodeDepartureDate;
     }
 
     public DatedServiceJourney findServiceJourneyByDatedServiceJourney(String datedServiceJourneyId) {
@@ -173,8 +179,16 @@ public class DatedServiceJourneyService {
 
 
     public Collection<DatedServiceJourney> findServiceJourneysByOriginalDatedServiceJourney(String datedServiceJourneyId) {
-        metricsService.markLookup(ORIGINAL_DATED_SERVICE_JOURNEY, null);
-        return storageService.findByOriginalDatedServiceJourneyId(datedServiceJourneyId);
+
+        Collection<DatedServiceJourney> byOriginalDatedServiceJourneyId = storageService.findByOriginalDatedServiceJourneyId(datedServiceJourneyId);
+        String codespace = null;
+        if (byOriginalDatedServiceJourneyId != null && !byOriginalDatedServiceJourneyId.isEmpty()) {
+            codespace = byOriginalDatedServiceJourneyId.iterator().next().getServiceJourneyId().substring(0, 3);
+        }
+        metricsService.markLookup(ORIGINAL_DATED_SERVICE_JOURNEY, codespace);
+
+
+        return byOriginalDatedServiceJourneyId;
     }
 
     public List<DatedServiceJourney> findServiceJourneysByDatedServiceJourneys(DatedServiceJourneyParam... datedServiceJourneyParams) {
