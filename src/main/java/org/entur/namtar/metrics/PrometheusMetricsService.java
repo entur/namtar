@@ -68,8 +68,13 @@ public class PrometheusMetricsService extends PrometheusMeterRegistry {
         if (codespace != null) {
             tags.add(new ImmutableTag("codespace", codespace));
         }
-        if (MDC.get(ET_CLIENT_NAME_HEADER) != null) {
-            tags.add(new ImmutableTag(ET_CLIENT_NAME_HEADER, MDC.get(ET_CLIENT_NAME_HEADER)));
+        String headerValue = MDC.get(ET_CLIENT_NAME_HEADER);
+        if (headerValue != null) {
+            if (headerValue.equals("namtar-internal")) {
+                return;
+            }
+
+            tags.add(new ImmutableTag(ET_CLIENT_NAME_HEADER, headerValue));
         }
         counter(DATA_SEARCH_COUNTER_NAME, tags).increment();
     }
