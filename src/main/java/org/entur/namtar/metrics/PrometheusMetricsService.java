@@ -62,9 +62,12 @@ public class PrometheusMetricsService extends PrometheusMeterRegistry {
 //Do nothing
     }
 
-    public void markLookup(SearchType searchType) {
+    public void markLookup(SearchType searchType, String codespace) {
         List<Tag> tags = new ArrayList<>();
         tags.add(new ImmutableTag("searchType", searchType.name()));
+        if (codespace != null) {
+            tags.add(new ImmutableTag("codespace", codespace));
+        }
         if (MDC.get(ET_CLIENT_NAME_HEADER) != null) {
             tags.add(new ImmutableTag(ET_CLIENT_NAME_HEADER, MDC.get(ET_CLIENT_NAME_HEADER)));
         }

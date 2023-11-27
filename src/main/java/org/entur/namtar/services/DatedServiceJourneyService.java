@@ -162,18 +162,18 @@ public class DatedServiceJourneyService {
     }
 
     public DatedServiceJourney findServiceJourneyByPrivateCodeDepartureDate(String privateCode, String departureDate) {
-        metricsService.markLookup(PRIVATE_CODE_DEPARTURE_DATE);
+        metricsService.markLookup(PRIVATE_CODE_DEPARTURE_DATE, null);
         return storageService.findByPrivateCodeDepartureDate(privateCode, departureDate);
     }
 
     public DatedServiceJourney findServiceJourneyByDatedServiceJourney(String datedServiceJourneyId) {
-        metricsService.markLookup(DATED_SERVICE_JOURNEY);
+        metricsService.markLookup(DATED_SERVICE_JOURNEY, datedServiceJourneyId.substring(0, 3));
         return storageService.findByDatedServiceJourneyId(datedServiceJourneyId);
     }
 
 
     public Collection<DatedServiceJourney> findServiceJourneysByOriginalDatedServiceJourney(String datedServiceJourneyId) {
-        metricsService.markLookup(ORIGINAL_DATED_SERVICE_JOURNEY);
+        metricsService.markLookup(ORIGINAL_DATED_SERVICE_JOURNEY, null);
         return storageService.findByOriginalDatedServiceJourneyId(datedServiceJourneyId);
     }
 
@@ -190,7 +190,7 @@ public class DatedServiceJourneyService {
     }
 
     public DatedServiceJourney findDatedServiceJourney(String serviceJourneyId, String version, String departureDate) {
-        metricsService.markLookup(SERVICE_JOURNEY_ID_DATE);
+        metricsService.markLookup(SERVICE_JOURNEY_ID_DATE, serviceJourneyId.substring(0, 3));
 
         //TODO: Handle versions
 
