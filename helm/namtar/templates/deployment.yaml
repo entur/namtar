@@ -58,7 +58,9 @@ spec:
               value: Europe/Oslo
           envFrom:
             - secretRef:
-                name: ror-namtar-secrets
+                name: kafka
+            - secretRef:
+                name: namtar-psql-credentials
           resources:
             limits:
               cpu: {{ .Values.resources.cpuLimit }}
