@@ -32,15 +32,19 @@ spec:
           command:
                 - /cloud_sql_proxy
                 - -instances={{ .Values.sql.instance }}
-                - -credential_file=/etc/namtar/credentials.json
                 - -log_debug_stdout
           resources:
             requests:
               cpu: 50m
               memory: 40Mi
-          volumeMounts:
-            - mountPath: /etc/namtar
-              name: {{ .Values.secretMount.name }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
         - name: {{ .Chart.Name }}
@@ -52,26 +56,9 @@ spec:
                   -Dfile.encoding=UTF-8
             - name: TZ
               value: Europe/Oslo
-            - name: KAFKA_SSL_CREDENTIALS
-              valueFrom:
-                secretKeyRef:
-                  key: kafka-ssl-credentials
-                  name: ror-namtar-secrets
-            - name: NAMTAR_KAFKA_SASL_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  key: kafka-user-name
-                  name: ror-namtar-secrets
-            - name: NAMTAR_KAFKA_SASL_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: kafka-user-password
-                  name: ror-namtar-secrets
-            - name: SPRING_DATASOURCE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: namtar-db-password
-                  name: ror-namtar-secrets
+          envFrom:
+            - secretRef:
+                name: ror-namtar-secrets
           resources:
             limits:
               cpu: {{ .Values.resources.cpuLimit }}
@@ -79,11 +66,15 @@ spec:
             requests:
               cpu: {{ .Values.resources.cpuRequest }}
               memory: {{ .Values.resources.memRequest }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
           volumeMounts:
-            - name: {{ .Values.secretMount.name }}
-              mountPath: {{ .Values.secretMount.mountPath }}
-              subPath: {{ .Values.secretMount.subPath }}
-              readOnly: {{ .Values.secretMount.readOnly }}
             - mountPath: /etc/application-config
               name: application-config
               readOnly: true
@@ -116,16 +107,13 @@ spec:
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
-      securityContext: {}
-      {{- if .Values.rbac.enabled }}
-      serviceAccount: namtar-service-account
-      serviceAccountName: namtar-service-account
-      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+      serviceAccountName: application
       terminationGracePeriodSeconds: 31
       volumes:
-        - name: {{ .Values.secretMount.name }}
-          secret:
-            secretName: {{ .Values.secretMount.secretName }}
         - name: application-config
           configMap:
             name: {{ .Values.configMapMount.name }}
