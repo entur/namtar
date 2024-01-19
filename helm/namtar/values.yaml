@@ -1,23 +1,15 @@
 replicas: 2
 
-
 rollingUpdate:
   maxSurge: 1
   maxUnavailable: 1
 
 resources:
-  cpuLimit: 7500m
   memLimit: 6000Mi
   cpuRequest: 500m
   memRequest: 2000Mi
   xmx: 4500m
 
-secretMount:
-   name: namtar-key
-   mountPath: /etc/namtar/credentials.json
-   subPath: credentials.json
-   secretName: ror-namtar-sa-key
-   readOnly: true
 
 tmpDirectory:
   path: /home/appuser/tmp
@@ -26,12 +18,18 @@ configMapMount:
    name: namtar-config
 
 image:
-  identifier: ${artifact.metadata.image}
+  identifier: <+artifacts.primary.image>
   imagePullPolicy: Always
 
 service:
   http:
     externalPort: 80
     internalPort: 8080
-rbac:
-  enabled: false
+
+secrets:
+  kafka:
+    - KAFKA_SSL_CREDENTIALS
+    - NAMTAR_KAFKA_SASL_USERNAME
+    - NAMTAR_KAFKA_SASL_PASSWORD
+  namtar-psql-credentials:
+    - SPRING_DATASOURCE_PASSWORD

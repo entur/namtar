@@ -11,7 +11,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   rules:
-  - host: timetable-v1-dated-service-journeys{{ .Values.ingress.domainName }}
+  - host: timetable-v1-dated-service-journeys-gcp2{{ .Values.ingress.domainName }}
     http:
       paths:
         - pathType: ImplementationSpecific
