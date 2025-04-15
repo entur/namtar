@@ -10,7 +10,7 @@ configMap:
   registryUrl: https://entur-kafka-prod-ext-entur-prod.aivencloud.com:14009
   kafkaEnabled: true
   topicName: dated-service-journeys-production
-  importDisabled: true
+  importDisabled: false
 
 ingress:
   enabled: true
