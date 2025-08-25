@@ -1,4 +1,4 @@
-FROM openjdk:11-jre
+FROM  eclipse-temurin:11-jre
 
 RUN addgroup appuser && adduser --disabled-password appuser --ingroup appuser
 
