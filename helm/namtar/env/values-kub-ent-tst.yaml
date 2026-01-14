@@ -10,7 +10,7 @@ configMap:
   registryUrl: https://entur-kafka-test-ext-entur-test.aivencloud.com:11867
   kafkaEnabled: true
   topicName: dated-service-journeys-staging
-  importDisabled: true
+  importDisabled: false
 
 ingress:
   enabled: true
