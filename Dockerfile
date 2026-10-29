@@ -1,13 +1,14 @@
-FROM  eclipse-temurin:11-jre
+FROM bellsoft/liberica-openjdk-debian:25.0.5.0.3-5
 
-# The default user "ubuntu" must be removed, otherwise it supercedes the user "appuser" created
-# in this Dockerfile
-RUN userdel -r ubuntu
+RUN addgroup appuser && adduser --disabled-password appuser --ingroup appuser
+USER appuser
 
 WORKDIR /home/appuser
-COPY target/namtar-*-SNAPSHOT.jar namtar.jar
-RUN addgroup appuser && adduser --disabled-password appuser --ingroup appuser
-RUN mkdir -p /home/appuser/tmp && chown -R appuser:appuser /home/appuser
+
+RUN chown -R appuser:appuser /home/appuser
 USER appuser
+
+ADD target/namtar-*-SNAPSHOT.jar namtar.jar
+
 EXPOSE 8080
-CMD  [ "java", "-jar", "namtar.jar"]
+CMD java $JAVA_OPTIONS -jar /namtar.jar
