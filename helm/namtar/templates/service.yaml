@@ -11,7 +11,7 @@ spec:
       port: {{ .Values.service.http.externalPort }}
       protocol: TCP
       targetPort: {{ .Values.service.http.internalPort }}
-    - name: hazelcast
+    - name: hazelcast-service-port
       port: 5701
       protocol: TCP
       targetPort: 5701
