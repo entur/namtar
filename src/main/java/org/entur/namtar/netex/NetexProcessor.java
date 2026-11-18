@@ -214,25 +214,22 @@ class NetexProcessor {
                     final String id = dsj.getId();
                     final ServiceAlterationEnumeration serviceAlteration = dsj.getServiceAlteration();
 
+                    // Since netex-java-model 1.0.16 a DatedServiceJourney has at most one JourneyRef,
+                    // references to replaced journeys are held by ReplacedJourneys instead.
+                    final JAXBElement<? extends JourneyRefStructure> serviceJourneyRef = dsj.getJourneyRef();
 
-                    if (dsj.getJourneyRef() != null) {
+                    if (serviceJourneyRef != null) {
 
                         final OperatingDay operatingDay = operatingDayByOperatingDayId.get(dsj.getOperatingDayRef().getRef());
 
                         final LocalDateTime date = operatingDay.getCalendarDate();//.format(dateFormatter);
 
-                        final List<JAXBElement<? extends JourneyRefStructure>> serviceJourneyRefs = dsj.getJourneyRef();
-                        for (JAXBElement<? extends JourneyRefStructure> serviceJourneyRef : serviceJourneyRefs) {
-                            final JourneyRefStructure serviceJourneyRefValue = serviceJourneyRef.getValue();
+                        final String serviceJourneyId = serviceJourneyRef.getValue().getRef();
 
-                            final String serviceJourneyId = serviceJourneyRefValue.getRef();
+                        serviceJourneyDateToDatedServiceJourney.put(getKey(date, serviceJourneyId), id);
 
-                            serviceJourneyDateToDatedServiceJourney.put(getKey(date, serviceJourneyId), id);
-
-                            final Set<DatedServiceJourney> datedServiceJourneys = datedServiceJourneysByServiceJourney.getOrDefault(serviceJourneyId, new HashSet<>());
-                            datedServiceJourneys.add(dsj);
-                            datedServiceJourneysByServiceJourney.put(serviceJourneyId, datedServiceJourneys);
-                        }
+                        final Set<DatedServiceJourney> datedServiceJourneys = datedServiceJourneysByServiceJourney.computeIfAbsent(serviceJourneyId, k -> new HashSet<>());
+                        datedServiceJourneys.add(dsj);
                     }
 
                 }
