@@ -53,7 +53,7 @@ spec:
           env:
             - name: JDK_JAVA_OPTIONS
               value: -server -Xmx{{ .Values.resources.xmx }} -Dspring.config.additional-location=/etc/application-config/application.properties
-                  -Dfile.encoding=UTF-8
+                  -Dfile.encoding=UTF-8 -XX:-UseBASE64Intrinsics
             - name: TZ
               value: Europe/Oslo
           envFrom:
